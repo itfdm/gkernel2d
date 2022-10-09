@@ -1,3 +1,4 @@
+# -------- C++ --------
 # Prerequisites
 *.d
 
@@ -13,6 +14,7 @@
 
 # Compiled Dynamic libraries
 *.so
+*.so.*
 *.dylib
 *.dll
 
@@ -30,3 +32,26 @@
 *.exe
 *.out
 *.app
+
+# -------- CMake --------
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+build/*
+
+# -------- Python --------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# -------- IDE --------
+.vscode/*
+.vs/*
+out/*
+CMakeSettings.json
