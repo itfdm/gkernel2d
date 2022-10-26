@@ -1,4 +1,4 @@
-#include "gkernel/structures/circuit.h"
+#include "gkernel/circuit.h"
 #include "test.h"
 
 void test_point_insert()

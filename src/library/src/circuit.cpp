@@ -1,4 +1,4 @@
-#include "gkernel/structures/circuit.h"
+#include "gkernel/circuit.h"
 
 using namespace gkernel;
 

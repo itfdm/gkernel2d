@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "gkernel/structures/circuit.h"
+#include "gkernel/circuit.h"
 #include "file_parser/parser.h"
 #include "matplotlibcpp.h"
 

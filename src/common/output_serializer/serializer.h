@@ -3,8 +3,8 @@
 
 #include <fstream>
 
-#include "gkernel/structures/circuit.h"
-#include "gkernel/structures/helpers.h"
+#include "gkernel/circuit.h"
+#include "gkernel/helpers.h"
 
 /**
  * Класс, предназначенный для перевода данных из внутреннего представления в текстовый формат.

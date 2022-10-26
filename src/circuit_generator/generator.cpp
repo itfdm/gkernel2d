@@ -2,7 +2,7 @@
 #include <set>
 #include <cmath>
 
-#include "gkernel/structures/circuit.h"
+#include "gkernel/circuit.h"
 #include "output_serializer/serializer.h"
 
 bool circuitIdentification(const gkernel::Circuit& circuit) {

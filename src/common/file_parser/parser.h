@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "gkernel/structures/circuit.h"
+#include "gkernel/circuit.h"
 
 /**
  * @brief Класс, для разбора входных данных и их перевода во внутреннее представление.

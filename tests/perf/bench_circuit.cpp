@@ -1,5 +1,5 @@
 #include "benchmark/benchmark.h"
-#include "gkernel/structures/circuit.h"
+#include "gkernel/circuit.h"
 
 // https://github.com/google/benchmark
 
