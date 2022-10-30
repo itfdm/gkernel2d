@@ -5,7 +5,11 @@
 
 namespace gkernel {
 
+<<<<<<< HEAD
 using data_type = float;
+=======
+using data_type = uint64_t;
+>>>>>>> Added basic structures and interfaces
 using label_data_type = uint64_t;
 using label_type = uint8_t;
 
@@ -42,6 +46,7 @@ struct Segment {
         return !(*this == other);
     }
 
+<<<<<<< HEAD
     bool operator<(const Segment& c1) const {
         if (this->begin_point().x() < c1.begin_point().x())
             return true;
@@ -60,6 +65,8 @@ struct Segment {
         } else return false;
     }
 
+=======
+>>>>>>> Added basic structures and interfaces
     Point begin_point() const { return _begin_point; }
     Point end_point() const { return _end_point; }
 
