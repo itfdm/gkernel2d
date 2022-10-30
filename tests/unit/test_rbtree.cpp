@@ -1,5 +1,5 @@
-#include "gkernel/rbtree.h"
-#include "test.h"
+#include "gkernel/rbtree.hpp"
+#include "test.hpp"
 
 using int_tree = gkernel::RBTree<int>;
 

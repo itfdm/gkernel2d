@@ -1,5 +1,5 @@
 #include "gkernel/circuit.h"
-#include "test.h"
+#include "test.hpp"
 
 void test_point_insert()
 {

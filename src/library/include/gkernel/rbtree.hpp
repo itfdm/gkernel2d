@@ -1,5 +1,5 @@
-#ifndef __GKERNEL_H_RBTREE
-#define __GKERNEL_H_RBTREE
+#ifndef __GKERNEL_HPP_RBTREE
+#define __GKERNEL_HPP_RBTREE
 
 #include <set>
 #include <iterator>
@@ -88,4 +88,4 @@ private:
 };
 
 }  // namespace gkernel
-#endif /* __GKERNEL_H_RBTREE */
+#endif /* __GKERNEL_HPP_RBTREE */
