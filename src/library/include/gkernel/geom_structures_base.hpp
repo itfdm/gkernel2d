@@ -6,10 +6,14 @@
 namespace gkernel {
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 using data_type = float;
 =======
 using data_type = uint64_t;
 >>>>>>> Added basic structures and interfaces
+=======
+using data_type = float;
+>>>>>>> Added sweeping straight
 using label_data_type = uint64_t;
 using label_type = uint8_t;
 
@@ -47,6 +51,9 @@ struct Segment {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Added sweeping straight
     bool operator<(const Segment& c1) const {
         if (this->begin_point().x() < c1.begin_point().x())
             return true;
@@ -65,8 +72,11 @@ struct Segment {
         } else return false;
     }
 
+<<<<<<< HEAD
 =======
 >>>>>>> Added basic structures and interfaces
+=======
+>>>>>>> Added sweeping straight
     Point begin_point() const { return _begin_point; }
     Point end_point() const { return _end_point; }
 
