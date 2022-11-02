@@ -1,6 +1,9 @@
 # main library
+# add_library(gkernel
+#     src/temp.cpp)
+
 add_library(gkernel
-    src/temp.cpp)
+    src/sweeping_straight.cpp)
 
 add_library(GKERNEL::gkernel ALIAS gkernel)
 
