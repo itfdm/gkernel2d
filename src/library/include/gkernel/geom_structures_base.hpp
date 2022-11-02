@@ -5,7 +5,7 @@
 
 namespace gkernel {
 
-using data_type = uint64_t;
+using data_type = float;
 using label_data_type = uint64_t;
 using label_type = uint8_t;
 
@@ -40,6 +40,24 @@ struct Segment {
     }
     bool operator!=(const Segment& other) const {
         return !(*this == other);
+    }
+
+    bool operator<(const Segment& c1) const {
+        if (this->begin_point().x() < c1.begin_point().x())
+            return true;
+        else if (this->begin_point().x() == c1.begin_point().x()) {
+                if (this->begin_point().y() < c1.begin_point().y()) {
+                    return true;
+                } else if (this->begin_point().y() == c1.begin_point().y()) {
+                    if (this->end_point().x() < c1.end_point().x()) {
+                        return true;
+                    } else if (this->end_point().x() == c1.end_point().x()) {
+                            if (this->end_point().y() < c1.end_point().y()) {
+                                return true;
+                            } else return false;
+                    } else return false;
+            } else return false;
+        } else return false;
     }
 
     Point begin_point() const { return _begin_point; }
