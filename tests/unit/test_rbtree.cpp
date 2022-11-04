@@ -26,8 +26,8 @@ void test_prev_next() {
     REQUIRE(tree.find_next(6).first == 9);
     REQUIRE(tree.size() == 5);
 
-    REQUIRE(tree.find_next(555).second == int_tree::inf_state::is_positive);
-    REQUIRE(tree.find_prev(-100).second == int_tree::inf_state::is_negative);
+    REQUIRE(tree.find_next(555).second == int_tree::state::inf_positive);
+    REQUIRE(tree.find_prev(-100).second == int_tree::state::inf_negative);
     REQUIRE(tree.size() == 5);
 }
 

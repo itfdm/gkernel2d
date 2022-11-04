@@ -11,10 +11,10 @@ namespace gkernel {
 template<typename T, class Comparator = std::less<T>>
 class RBTree {
 public:
-    enum class inf_state {
-        is_negative = -1,
-        is_number = 0,
-        is_positive = 1
+    enum class state {
+        inf_negative = -1,
+        exists = 0,
+        inf_positive = 1
     };
 
     RBTree() : _internal_tree(std::less<T>{}) { }
@@ -44,14 +44,14 @@ public:
         return _internal_tree.size();
     }
 
-    std::pair<T, inf_state> find_next(const T& item) {
+    std::pair<T, state> find_next(const T& item) {
         T result;
-        inf_state flag = inf_state::is_number;
+        state flag = state::exists;
 
         auto item_iter = _internal_tree.upper_bound(item);
 
         if (item_iter == _internal_tree.end()) {
-            flag = inf_state::is_positive;
+            flag = state::inf_positive;
         } else {
             result = *item_iter;
         }
@@ -59,14 +59,14 @@ public:
         return std::make_pair(result, flag);
     }
 
-    std::pair<T, inf_state> find_prev(const T& item) {
+    std::pair<T, state> find_prev(const T& item) {
         T result;
-        inf_state flag = inf_state::is_number;
+        state flag = state::exists;
 
         auto item_iter = _internal_tree.lower_bound(item);
 
         if (item_iter == _internal_tree.begin()) {
-            flag = inf_state::is_negative;
+            flag = state::inf_negative;
         } else {
             result = *std::prev(item_iter);
         }
