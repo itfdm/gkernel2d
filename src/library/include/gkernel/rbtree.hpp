@@ -48,17 +48,12 @@ public:
         T result;
         inf_state flag = inf_state::is_number;
 
-        auto item_iter = _internal_tree.insert(item);
-        auto next_item_iter = std::next(item_iter.first);
+        auto item_iter = _internal_tree.upper_bound(item);
 
-        if (next_item_iter == _internal_tree.end()) {
+        if (item_iter == _internal_tree.end()) {
             flag = inf_state::is_positive;
         } else {
-            result = *next_item_iter;
-        }
-
-        if (item_iter.second) {
-            _internal_tree.erase(item_iter.first);
+            result = *item_iter;
         }
 
         return std::make_pair(result, flag);
@@ -68,16 +63,12 @@ public:
         T result;
         inf_state flag = inf_state::is_number;
 
-        auto item_iter = _internal_tree.insert(item);
+        auto item_iter = _internal_tree.lower_bound(item);
 
-        if (item_iter.first == _internal_tree.begin()) {
+        if (item_iter == _internal_tree.begin()) {
             flag = inf_state::is_negative;
         } else {
-            result = *std::prev(item_iter.first);
-        }
-
-        if (item_iter.second) {
-            _internal_tree.erase(item_iter.first);
+            result = *std::prev(item_iter);
         }
 
         return std::make_pair(result, flag);
