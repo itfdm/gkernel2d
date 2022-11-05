@@ -1,7 +1,37 @@
 #include "gkernel/rbtree.hpp"
 #include "test.hpp"
 
+struct TestPoint {
+    TestPoint() : x{}, y{} { }
+    TestPoint(int x, int y) : x(x), y(y) { }
+    bool operator==(const TestPoint& other) {
+        return this->x == other.x && this->y == other.y;
+    }
+
+    int x;
+    int y;
+};
+
+struct TestComparator {
+    bool operator()(const TestPoint& lhs, const TestPoint& rhs) const {
+        if (lhs.x != rhs.x) return lhs.x < rhs.x;
+        return lhs.y < rhs.y;
+    }
+};
+
 using int_tree = gkernel::RBTree<int>;
+using tree_with_comp = gkernel::RBTree<TestPoint, TestComparator>;
+
+void test_comparator() {
+    tree_with_comp tree{TestComparator{}};
+    tree.insert({{1, 1}, {3, 7}, {55, 55}});
+    REQUIRE(tree.size() == 3);
+    REQUIRE((tree.find_prev(TestPoint(3, 5)).first == TestPoint(1, 1)));
+    REQUIRE((tree.find_next(TestPoint(3, 5)).first == TestPoint(3, 7)));
+
+    REQUIRE((tree.find_prev(TestPoint(1, 1)).second == tree_with_comp::state::inf_negative));
+    REQUIRE((tree.find_next(TestPoint(55, 55)).second == tree_with_comp::state::inf_positive));
+}
 
 void test_insert()
 {
@@ -56,4 +86,8 @@ TEST_CASE("Test prev/next") {
 
 TEST_CASE("Test erase") {
     test_erase();
+}
+
+TEST_CASE("Test comparator") {
+    test_comparator();
 }
