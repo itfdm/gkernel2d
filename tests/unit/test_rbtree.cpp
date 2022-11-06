@@ -83,8 +83,7 @@ void test_erase()
     REQUIRE(tree.size() == 3);
 }
 
-TEST_CASE("Test item insertion")
-{
+TEST_CASE("Test item insertion") {
     test_insert();
 }
 
