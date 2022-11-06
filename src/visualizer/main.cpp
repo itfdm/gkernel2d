@@ -1,9 +1,10 @@
 #define WITHOUT_NUMPY 1
 
 #include <vector>
+#include <fstream>
 
-#include "gkernel/circuit.h"
-#include "file_parser/parser.h"
+#include "gkernel/objects.hpp"
+#include "gkernel/containers.hpp"
 #include "matplotlibcpp.h"
 
 namespace plt = matplotlibcpp;
@@ -16,13 +17,23 @@ constexpr double arrow_zorder = 3.;
 constexpr char* facecolor = "red";
 constexpr char* edgecolor = "black";
 
-std::pair<axis_vector, axis_vector> split_coords(
-    const gkernel::Circuit& circuit) {
+// parse std::vector of gkernel::Point from file in format: x1, y1, x2, y2, ...
+std::vector<gkernel::Point> parse_points(const std::string& filename) {
+    std::ifstream file(filename);
+    std::vector<gkernel::Point> points;
+    gkernel::data_type x, y;
+    while (file >> x >> y) {
+        points.emplace_back(gkernel::Point(x, y));
+    }
+    return points;
+}
+
+std::pair<axis_vector, axis_vector> split_coords(const std::vector<gkernel::Point>& segments) {
     std::vector<gkernel::data_type> x;
     std::vector<gkernel::data_type> y;
-    for (std::size_t idx = 0; idx < circuit.size(); ++idx) {
-        x.push_back(circuit[idx].x);
-        y.push_back(circuit[idx].y);
+    for (std::size_t idx = 0; idx < segments.size(); ++idx) {
+        x.push_back(segments[idx].x());
+        y.push_back(segments[idx].y());
     }
     return std::make_pair(x, y);
 }
@@ -32,23 +43,15 @@ int main(int argc, char* argv[]) {
         throw std::runtime_error("Wrong number of arguments");
     }
 
-    auto circuits = FileParser::parse(argv[1]);
+    auto segments = parse_points(argv[1]);
 
-    plt::figure_size(gkernel::resolution_width, gkernel::resolution_height);
+    plt::figure_size(1024, 768);
     plt::title("Plot");
 
-    for (auto& circuit : circuits) {
-        auto split_circuit = split_coords(circuit);
+    auto split_segments = split_coords(segments);
 
-        double x_begin = static_cast<double>(split_circuit.first[0]);
-        double y_begin = static_cast<double>(split_circuit.second[0]);
-        double dx = static_cast<double>(split_circuit.first[1]) - x_begin;
-        double dy = static_cast<double>(split_circuit.second[1]) - y_begin;
-
-        plt::arrow(x_begin, y_begin, dx / 2, dy / 2, facecolor, edgecolor,
-                   arrow_head_length, arrow_head_width, arrow_zorder);
-        plt::plot(split_circuit.first, split_circuit.second);
-        plt::text(x_begin, y_begin, std::to_string(circuit.getID()));
+    for (std::size_t idx = 0; idx < segments.size(); idx += 2) {
+        plt::plot(std::vector<double>({split_segments.first[idx], split_segments.first[idx + 1] + 0.01}), std::vector<double>({split_segments.second[idx], split_segments.second[idx + 1] + 0.01}));
     }
 
     plt::show();

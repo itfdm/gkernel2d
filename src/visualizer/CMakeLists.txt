@@ -3,7 +3,7 @@ add_executable(visualizer
 
 find_package(PythonLibs REQUIRED)
 
-target_include_directories(visualizer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHON_INCLUDE_DIRS})
+target_include_directories(visualizer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHON_INCLUDE_DIRS})
 
 target_compile_options(visualizer
     PRIVATE
@@ -17,4 +17,4 @@ target_compile_definitions(visualizer PRIVATE
 
 # Workaround for macOS
 # target_link_libraries(visualizer PRIVATE GKERNEL::gkernel GKERNEL::file_parser ${PYTHON_LIBRARIES}/../Python3)
-target_link_libraries(visualizer PRIVATE GKERNEL::gkernel GKERNEL::file_parser ${PYTHON_LIBRARIES})
+target_link_libraries(visualizer PRIVATE GKERNEL::gkernel ${PYTHON_LIBRARIES})
