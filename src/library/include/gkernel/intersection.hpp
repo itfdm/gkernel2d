@@ -8,14 +8,16 @@
 #include <functional>
 #include <set>
 
-namespace gkernel {
+namespace gkernel
+{
     using segment_id = uint64_t;
     // using segments_intersection = std::tuple<Segment, segment_id, segment_id>;
     // Callable returns bool value indicating whether to continue searching for intersection points
-    using Callback = std::function<bool(const Segment&, const Segment&, const Segment&)>;
-    using Labeler = std::function<void(SegmentsSet&)>;
+    using Callback = std::function<bool(const Segment &, const Segment &, const Segment &)>;
+    using Labeler = std::function<void(SegmentsSet &)>;
 
-    enum intersection_type {
+    enum intersection_type
+    {
         none,
         point,
         segment,
@@ -23,12 +25,13 @@ namespace gkernel {
     };
 
     // if intersection_type is none, Segment has ub value
-    std::tuple<Segment, intersection_type> intersectSegments(const Segment& first, const Segment& second);
+    std::tuple<Segment, intersection_type> intersectSegments(const Segment &first, const Segment &second);
 
-    void intersectSetSegments(const std::vector<SegmentsSet>& segments, Callback&& notify, Labeler&& labeler);
+    void intersectSetSegments(const std::vector<SegmentsSet> &segments, Callback &&notify, Labeler &&labeler);
 
     // TODO: temp function
-    std::set<gkernel::Segment> solve(std::vector<gkernel::Segment>& a);
+    std::set<gkernel::Segment> solve(std::vector<gkernel::Segment> &a);
+    gkernel::Segment pointintersection(const gkernel::Segment &a, const gkernel::Segment &b);
 
 } // namespace gkernel
 #endif // __GKERNEL_HPP_INTERSECTION
