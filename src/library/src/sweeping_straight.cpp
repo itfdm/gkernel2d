@@ -1,5 +1,6 @@
 #include "gkernel/event.hpp"
 
+namespace gkernel {
 using RBtree=gkernel::RBTree<gkernel::Segment>;
 
 gkernel::Segment pointintersection(const gkernel::Segment &a, const gkernel::Segment &b){
@@ -49,13 +50,13 @@ std::set<gkernel::Segment> solve(std::vector<gkernel::Segment> &a) {
         if(e[i].tp == 1) {
             auto nxt=s.find_next(a[id]);
             auto prv=s.find_prev(nxt.first);
-            if(nxt.second == RBtree::inf_state::is_number)
+            if(nxt.second == RBtree::state::exists)
                 if(intersect(nxt.first, a[id]))
                     intersection.insert(pointintersection(nxt.first, a[id]));
                 else if(intersect_parallel(nxt.first, a[id])){
                     intersection.insert(pointintersection(nxt.first, a[id]));
                 }
-            if(prv.second == RBtree::inf_state::is_number && intersect(prv.first, a[id]))
+            if(prv.second == RBtree::state::exists && intersect(prv.first, a[id]))
                 if (intersect(prv.first, a[id]))
                     intersection.insert(pointintersection(prv.first, a[id]));
                 else if(intersect_parallel(prv.first, a[id]))
@@ -65,7 +66,7 @@ std::set<gkernel::Segment> solve(std::vector<gkernel::Segment> &a) {
         } else {
             auto nxt=s.find_next(where[id]);
             auto prv=s.find_prev(nxt.first);
-            if(nxt.second == RBtree::inf_state::is_number && prv.second == RBtree::inf_state::is_number)
+            if(nxt.second == RBtree::state::exists && prv.second == RBtree::state::exists)
                 if(intersect(nxt.first, prv.first))
                     intersection.insert(pointintersection(nxt.first, prv.first));
                 else intersection.insert(pointintersection(nxt.first, prv.first));
@@ -74,3 +75,5 @@ std::set<gkernel::Segment> solve(std::vector<gkernel::Segment> &a) {
     }
     return intersection;
 }
+
+} // namespace gkernel
