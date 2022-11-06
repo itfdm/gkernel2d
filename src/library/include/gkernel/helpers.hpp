@@ -1,3 +1,6 @@
+#ifndef __GKERNEL_HPP_HELPERS
+#define __GKERNEL_HPP_HELPERS
+
 #include <vector>
 #include <algorithm>
 #include <limits>
@@ -51,3 +54,4 @@ protected:
 };
 
 } // namespace gkernel
+#endif /* __GKERNEL_HPP_HELPERS */

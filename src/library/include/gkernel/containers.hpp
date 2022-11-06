@@ -1,3 +1,6 @@
+#ifndef __GKERNEL_HPP_CONTAINERS
+#define __GKERNEL_HPP_CONTAINERS
+
 #include "objects.hpp"
 
 namespace gkernel {
@@ -118,7 +121,7 @@ public:
         }
     }
 
-    label_data_type get_label_value(label_type label, size_t segment_idx) const override {/*TODO*/};
+    label_data_type get_label_value(label_type label, size_t segment_idx) const override { return 0; /*TODO*/};
     void set_labels_types(const std::vector<label_type>& label_types) override {/*TODO*/};
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override {/*TODO*/};
     void set_label_value(label_type label, size_t segment_idx, label_data_type label_value) override {/*TODO*/};
@@ -149,3 +152,4 @@ using SegmentsLayer = const SegmentsSet;
 using CircuitsLayer = const CircuitsSet;
 
 } // namespace gkernel
+#endif /* __GKERNEL_HPP_CONTAINERS */

@@ -1,3 +1,5 @@
+#ifndef __GKERNEL_HPP_OBJECTS
+#define __GKERNEL_HPP_OBJECTS
 #include "helpers.hpp"
 
 namespace gkernel {
@@ -39,3 +41,4 @@ private:
 };
 
 } // namespace gkernel
+#endif // __GKERNEL_HPP_OBJECTS

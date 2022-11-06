@@ -1,5 +1,6 @@
-#include "test.h"
-#include "gkernel/converter.hpp"
+#include "test.hpp"
+#include "gkernel/objects.hpp"
+#include "gkernel/containers.hpp"
 
 using namespace gkernel;
 
@@ -15,7 +16,7 @@ std::vector<Segment> GenerateSegments(size_t size) {
     segments.reserve(size);
 
     for (size_t i = 0; i < size; ++i) {
-        size_t offset = 4 * i;
+        data_type offset = static_cast<data_type>(4 * i);
 
         Point p1(offset,     offset + 1);
         Point p2(offset + 2, offset + 3);
