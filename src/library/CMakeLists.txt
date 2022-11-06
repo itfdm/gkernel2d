@@ -1,6 +1,6 @@
 # main library
 add_library(gkernel
-    src/circuit.cpp)
+    src/containers.cpp)
 
 add_library(GKERNEL::gkernel ALIAS gkernel)
 
