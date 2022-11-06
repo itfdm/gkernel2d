@@ -3,7 +3,8 @@
 #     src/temp.cpp)
 
 add_library(gkernel
-    src/sweeping_straight.cpp)
+    src/sweeping_straight.cpp
+    src/containers.cpp)
 
 add_library(GKERNEL::gkernel ALIAS gkernel)
 
