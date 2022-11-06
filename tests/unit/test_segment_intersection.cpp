@@ -12,6 +12,10 @@ void test_no_intersection()
     gkernel::Segment s1(point_a1, point_b1);
     gkernel::Segment s2(point_a2, point_b2);
     gkernel::Segment res = gkernel::pointintersection(s1, s2);
+    gkernel::Point result_point;
+
+    REQUIRE_EQ(result_point, res.begin_point());
+    REQUIRE_EQ(result_point, res.end_point());
 }
 
 void test_inner_intersection()

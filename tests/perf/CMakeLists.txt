@@ -1,6 +1,7 @@
 function(gkernel_add_bench target_name)
     add_executable(${target_name} ${target_name}.cpp)
-    target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
+    target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/library/include)
 
     target_compile_options(${target_name}
         PRIVATE
@@ -12,7 +13,7 @@ function(gkernel_add_bench target_name)
     target_compile_definitions(${target_name} PRIVATE
         $<$<CONFIG:DEBUG>:GKERNEL_DEBUG>)
 
-    target_link_libraries(${target_name} PRIVATE GKERNEL::gkernel GKERNEL::file_parser benchmark::benchmark)
+    target_link_libraries(${target_name} PRIVATE GKERNEL::gkernel benchmark::benchmark)
 endfunction()
 
 include(FetchContent)
