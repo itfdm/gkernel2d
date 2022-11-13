@@ -33,6 +33,9 @@ public:
     const Segment& get_segment(size_t idx) const {
         return _segments.at(idx);
     }
+    const Segment& operator[](size_t idx) const {
+        return _segments[idx];
+    }
     size_t size() const {
         return _segments.size();
     }

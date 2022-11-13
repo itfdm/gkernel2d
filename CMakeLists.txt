@@ -64,10 +64,6 @@ endif()
 
 add_subdirectory(src/library)
 
-if (GKERNEL_VISUALIZER OR GKERNEL_GENERATOR)
-    add_subdirectory(src/common)
-endif()
-
 if (GKERNEL_GENERATOR)
     add_subdirectory(src/circuit_generator)
 endif()
