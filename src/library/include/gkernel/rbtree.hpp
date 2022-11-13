@@ -44,6 +44,10 @@ public:
         return _internal_tree.size();
     }
 
+    bool contains(const T& item) const {
+        auto iter= _internal_tree.find(item); 
+        return iter != _internal_tree.end();
+    } 
     std::pair<T, state> find_next(const T& item) {
         T result;
         state flag = state::exists;

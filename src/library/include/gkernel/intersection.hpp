@@ -7,8 +7,11 @@
 #include <tuple>
 #include <functional>
 #include <set>
+#include "rbtree.hpp"
+
 
 namespace gkernel {
+    using RBtree = gkernel::RBTree<gkernel::Segment, std::function<bool(const Segment& c1, const Segment& c2)>>;
     using segment_id = uint64_t;
     // using segments_intersection = std::tuple<Segment, segment_id, segment_id>;
     // Callable returns bool value indicating whether to continue searching for intersection points
@@ -28,7 +31,7 @@ namespace gkernel {
     void intersectSetSegments(const std::vector<SegmentsSet>& segments, Callback&& notify, Labeler&& labeler);
 
     // TODO: temp function
-    std::set<gkernel::Segment> solve(std::vector<gkernel::Segment>& a);
+    RBtree solve(SegmentsSet& a);
 
 } // namespace gkernel
 #endif // __GKERNEL_HPP_INTERSECTION
