@@ -171,7 +171,6 @@ void test_solve_2()
     segvec.emplace_back(gkernel::Point(3, 9), gkernel::Point(9, 3));
     segvec.emplace_back(gkernel::Point(2, 5), gkernel::Point(6, 6));
     segvec.emplace_back(gkernel::Point(6, 10), gkernel::Point(14, 2));
-    segvec.emplace_back(gkernel::Point(6, 9), gkernel::Point(9, 10));
     segvec.emplace_back(gkernel::Point(6.5, 2), gkernel::Point(8, 4));
     segvec.emplace_back(gkernel::Point(6.5, 2), gkernel::Point(9, 3));
     segvec.emplace_back(gkernel::Point(2, 5), gkernel::Point(3, 9));
@@ -188,7 +187,6 @@ void test_solve_2()
     segvec.emplace_back(gkernel::Point(21, 8), gkernel::Point(22, 7));
     segvec.emplace_back(gkernel::Point(2, 5), gkernel::Point(4, 3));
     segvec.emplace_back(gkernel::Point(4, 3), gkernel::Point(6.5, 2));
-    segvec.emplace_back(gkernel::Point(2, 5), gkernel::Point(4, 3));
 
     std::set<gkernel::Segment> expected;
     expected.emplace(gkernel::Point(2, 2), gkernel::Point(2, 2));
@@ -284,6 +282,7 @@ void test_solve_4()
     segvec.emplace_back(gkernel::Point(10, 5), gkernel::Point(16, 8));
     segvec.emplace_back(gkernel::Point(10, 0), gkernel::Point(14, 4));
     segvec.emplace_back(gkernel::Point(14, 12), gkernel::Point(14, 2));
+    segvec.emplace_back(gkernel::Point(14, 12), gkernel::Point(22, 6));
     segvec.emplace_back(gkernel::Point(16, 8), gkernel::Point(20, 0));
     segvec.emplace_back(gkernel::Point(14, 2), gkernel::Point(22, 6));
     segvec.emplace_back(gkernel::Point(22, 6), gkernel::Point(24, 10));
@@ -292,7 +291,6 @@ void test_solve_4()
     segvec.emplace_back(gkernel::Point(24, 10), gkernel::Point(24, 0));
     segvec.emplace_back(gkernel::Point(24, 10), gkernel::Point(26, 6));
     segvec.emplace_back(gkernel::Point(24, 0), gkernel::Point(26, 2));
-    segvec.emplace_back(gkernel::Point(24, 0), gkernel::Point(28, 8));
     segvec.emplace_back(gkernel::Point(26, 2), gkernel::Point(28, 8));
 
     std::set<gkernel::Segment> expected;
@@ -347,6 +345,8 @@ void test_solve_5()
     segvec.emplace_back(gkernel::Point(13, 7), gkernel::Point(16, 7));
     segvec.emplace_back(gkernel::Point(13, 7), gkernel::Point(13, 5));
     segvec.emplace_back(gkernel::Point(13, 5), gkernel::Point(15, 5));
+    segvec.emplace_back(gkernel::Point(2, 6), gkernel::Point(6, 2));
+    segvec.emplace_back(gkernel::Point(2, 2), gkernel::Point(6, 6));
 
     std::set<gkernel::Segment> expected;
     expected.emplace(gkernel::Point(1, 6), gkernel::Point(1, 6));
@@ -511,12 +511,8 @@ void test_solve_8()
     expected.emplace(gkernel::Point(6, 2), gkernel::Point(6, 2));
     expected.emplace(gkernel::Point(6, 1), gkernel::Point(6, 1));
     expected.emplace(gkernel::Point(8, 5), gkernel::Point(8, 5));
-    expected.emplace(gkernel::Point(8, 2), gkernel::Point(8, 2));
-    expected.emplace(gkernel::Point(10, 7), gkernel::Point(10, 7));
     expected.emplace(gkernel::Point(10, 5), gkernel::Point(10, 5));
-    expected.emplace(gkernel::Point(10, 2), gkernel::Point(10, 2));
     expected.emplace(gkernel::Point(11, 7), gkernel::Point(11, 7));
-    expected.emplace(gkernel::Point(11, 6), gkernel::Point(11, 6));
     expected.emplace(gkernel::Point(11, 2), gkernel::Point(11, 2));
     segvec.emplace_back(gkernel::Point(1, 1), gkernel::Point(6, 6));
     segvec.emplace_back(gkernel::Point(1, 1), gkernel::Point(6, 1));
