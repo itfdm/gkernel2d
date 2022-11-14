@@ -66,6 +66,7 @@ RBtree solve(gkernel::SegmentsSet &a) {
          if (res != 0) return Y(c1, x) < Y(c2, x);
          return c1.id < c2.id;
     };
+
     auto inter_comparator = [&x, &a](const Segment& c1, const Segment& c2) -> bool {
         if (c1.begin_point().x() < c2.begin_point().x()) {
             return true;
@@ -98,16 +99,21 @@ RBtree solve(gkernel::SegmentsSet &a) {
             auto nxt = s.find_next((*e.begin()).seg);
             auto prv = s.find_prev((*e.begin()).seg);
             auto ie = (*e.begin()).seg;
+            bool flag1 = false;
+            bool flag2 = false;
             if (nxt.second == RBtree::state::exists)
                 if (intersect(nxt.first, (*e.begin()).seg)) {
                     Segment buf = pointintersection(nxt.first, (*e.begin()).seg);
                     if (!intersection.contains(buf)) {
                         intersection.insert(buf);
-                        s.erase(nxt.first);
-                        if (buf.end_point().x() != nxt.first.end_point().x() && buf.end_point().y() != nxt.first.end_point().y())
-                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { nxt.first.end_point().x(), nxt.first.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, count++));
-                        if (buf.end_point().x() != (*e.begin()).seg.end_point().x() && buf.end_point().y() != (*e.begin()).seg.end_point().y())
-                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { (*e.begin()).seg.end_point().x(), (*e.begin()).seg.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, count++));
+
+                        if (buf.end_point().x() != nxt.first.end_point().x() && buf.end_point().y() != nxt.first.end_point().y()) {
+                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { nxt.first.end_point().x(), nxt.first.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, ++count));
+                        }
+                        if (buf.end_point().x() != (*e.begin()).seg.end_point().x() && buf.end_point().y() != (*e.begin()).seg.end_point().y()) {
+                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { (*e.begin()).seg.end_point().x(), (*e.begin()).seg.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, ++count));
+                        }
+                        flag1 = true;
                     }
                 }
                 
@@ -117,34 +123,53 @@ RBtree solve(gkernel::SegmentsSet &a) {
                     Segment buf = pointintersection(prv.first, (*e.begin()).seg);
                     if (!intersection.contains(buf)) {
                         intersection.insert(buf);
-                        s.erase(prv.first);
-                        if (buf.end_point().x() != prv.first.end_point().x() && buf.end_point().y() != prv.first.end_point().y())
-                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { prv.first.end_point().x(), prv.first.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, count++));
-                        if (buf.end_point().x() != (*e.begin()).seg.end_point().x() && buf.end_point().y() != (*e.begin()).seg.end_point().y())
-                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { (*e.begin()).seg.end_point().x(), (*e.begin()).seg.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, count++));
+
+                        if (buf.end_point().x() != prv.first.end_point().x() && buf.end_point().y() != prv.first.end_point().y()){
+                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { prv.first.end_point().x(), prv.first.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, ++count));
                         }
+                            
+                        if (buf.end_point().x() != (*e.begin()).seg.end_point().x() && buf.end_point().y() != (*e.begin()).seg.end_point().y()) {
+                            e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { (*e.begin()).seg.end_point().x(), (*e.begin()).seg.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, ++count));
+                        }
+                        flag2 = true;
+                    }
                 }
             }
+            //if (flag1) {
+            //    s.erase(nxt.first);
+            //}
+            //if (flag2) {
+            //    s.erase(prv.first);
+            //}
             s.insert((*e.begin()).seg);
             e.erase(e.begin());
         } else {
             auto nxt = s.find_next((*e.begin()).seg);
             auto prv = s.find_prev((*e.begin()).seg);
+            auto ie = (*e.begin()).seg;
+            bool flag3 = false;
             if (nxt.second == RBtree::state::exists && prv.second == RBtree::state::exists) {
                 if (intersect(nxt.first, prv.first))
                 {
                     Segment buf = pointintersection(nxt.first, prv.first);
                     if (!intersection.contains(buf)) {
                         intersection.insert(buf);
-                        s.erase(nxt.first);
-                        s.erase(prv.first);
-                        if (buf.end_point().x() != prv.first.end_point().x() && buf.end_point().y() != prv.first.end_point().y())
+                        
+                        if (buf.end_point().x() != prv.first.end_point().x() && buf.end_point().y() != prv.first.end_point().y()) {
                             e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { prv.first.end_point().x(), prv.first.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, count++));
-                        if (buf.end_point().x() != nxt.first.end_point().x() && buf.end_point().y() != nxt.first.end_point().y())
+                        }
+                        if (buf.end_point().x() != nxt.first.end_point().x() && buf.end_point().y() != nxt.first.end_point().y()) {
                             e.insert(event(Segment({ buf.begin_point().x(), buf.begin_point().y() }, { nxt.first.end_point().x(), nxt.first.end_point().y() }), buf.begin_point().x(), buf.begin_point().y(), 1, count++));
+                        }
+                        flag3 = true;
                     }
-               }
+
+                }
             }
+            //if (flag3) {
+            //    s.erase(nxt.first);
+            //    s.erase(prv.first);
+            //}
             s.erase((*e.begin()).seg);
             e.erase(e.begin());
         }
