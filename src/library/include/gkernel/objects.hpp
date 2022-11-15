@@ -24,7 +24,7 @@ private:
 
 struct Segment {
     Segment() : _begin_point(), _end_point() {};
-    Segment(const Point& begin_point, const Point& end_point) : _begin_point(begin_point), _end_point(end_point) {}
+    Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {}
 
     bool operator==(const Segment& other) const {
         return this->_begin_point == other._begin_point && this->_end_point == other._end_point;
@@ -33,8 +33,8 @@ struct Segment {
         return !(*this == other);
     }
 
-    const Point& begin_point() const { return _begin_point; }
-    const Point& end_point() const { return _end_point; }
+    const Point& start() const { return _begin_point; }
+    const Point& end() const { return _end_point; }
 
 private:
     Point _begin_point, _end_point;

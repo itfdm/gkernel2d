@@ -1,4 +1,5 @@
 #include "gkernel/serializer.hpp"
+#include <iostream>
 
 using namespace gkernel;
 
@@ -14,7 +15,7 @@ void OutputSerializer::serializeSegmentsSet(const SegmentsSet& segments_set, con
 
     for (std::size_t idx = 0; idx < segments_set.size(); ++idx) {
         const auto& segment = segments_set[idx];
-        file << segment.begin_point().x() << " " << segment.begin_point().y() << " " << segment.end_point().x() << " " << segment.end_point().y();
+        file << segment.start().x() << " " << segment.start().y() << " " << segment.end().x() << " " << segment.end().y();
         if (idx != segments_set.size() - 1) {
             file << " ";
         }
@@ -34,7 +35,7 @@ void OutputSerializer::serializeVectorOfSegmentsSet(const std::vector<SegmentsSe
     for (const auto& segments_set : vector_of_segments_set) {
         for (std::size_t idx = 0; idx < segments_set.size(); ++idx) {
             const auto& segment = segments_set[idx];
-            file << segment.begin_point().x() << " " << segment.begin_point().y() << " " << segment.end_point().x() << " " << segment.end_point().y();
+            file << segment.start().x() << " " << segment.start().y() << " " << segment.end().x() << " " << segment.end().y();
             if (idx != segments_set.size() - 1) {
                 file << " ";
             }

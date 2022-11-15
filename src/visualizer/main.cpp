@@ -19,10 +19,10 @@ std::pair<axis_vector, axis_vector> split_coords(const gkernel::SegmentsSet& seg
     std::vector<gkernel::data_type> x;
     std::vector<gkernel::data_type> y;
     for (std::size_t idx = 0; idx < segments_set.size(); ++idx) {
-        x.push_back(segments_set[idx].begin_point().x());
-        y.push_back(segments_set[idx].begin_point().y());
-        x.push_back(segments_set[idx].end_point().x());
-        y.push_back(segments_set[idx].end_point().y());
+        x.push_back(segments_set[idx].start().x());
+        y.push_back(segments_set[idx].start().y());
+        x.push_back(segments_set[idx].end().x());
+        y.push_back(segments_set[idx].end().y());
     }
     return std::make_pair(x, y);
 }

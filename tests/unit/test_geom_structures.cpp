@@ -33,23 +33,23 @@ void PointTest() {
 }
 
 void SegmentTest() {
-    Point begin_point(1, 2);
-    Point end_point(3, 4);
-    Segment s(begin_point, end_point);
+    Point start(1, 2);
+    Point end(3, 4);
+    Segment s(start, end);
 
-    REQUIRE_EQ(s.begin_point(), begin_point);
-    REQUIRE_EQ(s.end_point(), end_point);
+    REQUIRE_EQ(s.start(), start);
+    REQUIRE_EQ(s.end(), end);
 }
 
 void SegmentsSetAddingElementsTest() {
     std::vector<Segment> segments = GenerateSegments(2);
     SegmentsSet segments_set(segments);
 
-    REQUIRE_EQ(segments_set.get_segment(0).begin_point(), Point(0, 1));
-    REQUIRE_EQ(segments_set.get_segment(1).end_point(), Point(6, 7));
+    REQUIRE_EQ(segments_set.get_segment(0).start(), Point(0, 1));
+    REQUIRE_EQ(segments_set.get_segment(1).end(), Point(6, 7));
 
     segments_set.emplace_back(GenerateSegments(1).front());
-    REQUIRE_EQ(segments_set.get_segment(2).end_point(), Point(2, 3));
+    REQUIRE_EQ(segments_set.get_segment(2).end(), Point(2, 3));
 }
 
 void SegmentsSetlabels() {

@@ -74,7 +74,7 @@ public:
 
     void emplace_back(const Segment& segment) override {
         if (_validation && !_segments.empty()) {
-            if (_segments.back().end_point() != segment.begin_point()) {
+            if (_segments.back().end() != segment.start()) {
                 throw std::runtime_error("Validation failed. Invalid emplaced segment.");
             }
         }
@@ -84,7 +84,7 @@ public:
 private:
     void validate() const override {
         for (size_t i = 0; i < _segments.size() - 1; ++i) {
-            if (_segments[i].end_point() != _segments[i + 1].begin_point()) {
+            if (_segments[i].end() != _segments[i + 1].start()) {
                 throw std::runtime_error("Validation failed. Segment set is not a chain.");
             }
         }
@@ -104,7 +104,7 @@ public:
 private:
     void validate() const override {
         for (size_t i = 0; i < _segments.size(); ++i) {
-            if (_segments[i].end_point() != _segments[(i + 1) % _segments.size()].begin_point()) {
+            if (_segments[i].end() != _segments[(i + 1) % _segments.size()].start()) {
                 throw std::runtime_error("Validation failed. Segment set is not a circuit.");
             }
         }
