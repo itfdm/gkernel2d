@@ -1,7 +1,10 @@
 #include "benchmark/benchmark.h"
 #include "gkernel/objects.hpp"
 #include "gkernel/intersection.hpp"
+#include <iostream>
 #include <vector>
+#include <numeric>
+#include <math.h>
 #include <set>
 
 // https://github.com/google/benchmark
@@ -27,10 +30,10 @@ uint32_t xorshift128()
     return state.a = t ^ s ^ (s >> 19);
 }
 
-std::vector<gkernel::Segment> generateRandomSegments(size_t count)
+std::vector<gkernel::Segment> generateRandomSegments(size_t count, int w_width, int w_height)
 {
-    int window_width = 1000;
-    int window_height = 100;
+    int window_width = w_width;
+    int window_height = w_height;
 
     std::vector<gkernel::Segment> segments;
     for (size_t i = 0; i < count; ++i)
@@ -43,13 +46,62 @@ std::vector<gkernel::Segment> generateRandomSegments(size_t count)
 
 static void BM_segment_set_intersection(benchmark::State &state)
 {
+    std::set<gkernel::Segment> result;
+    int window_width = 1000;
+    int window_height = 50;
+
+    double long_side = std::max(window_width, window_height);
+    double mean_rel_length = 0;
+    double rel_length = 0;
+    size_t bet_0_25 = 0, bet_25_50 = 0, bet_50_80 = 0, bet_80_100 = 0;
+    std::vector<double> rel_length_vec;
+
+    std::vector<gkernel::Segment> segments = generateRandomSegments(state.range(0), window_width, window_height);
     for (auto _ : state)
     {
-        state.PauseTiming();
-        std::vector<gkernel::Segment> segments = generateRandomSegments(state.range(0));
-        state.ResumeTiming();
-        benchmark::DoNotOptimize(gkernel::solve(segments));
+        benchmark::DoNotOptimize(result = std::move(gkernel::solve(segments)));
     }
+
+    // average relative segments length
+    for (auto seg : segments)
+    {
+        rel_length = std::sqrt(std::pow(seg.begin_point().x() - seg.end_point().x(), 2) + std::pow(seg.begin_point().y() - seg.end_point().y(), 2)) / (double)long_side;
+        if (rel_length > 1)
+            rel_length = 1;
+        rel_length_vec.push_back(rel_length);
+    }
+    double sum = 0;
+    mean_rel_length = std::accumulate(rel_length_vec.begin(), rel_length_vec.end(), sum) / (double)segments.size();
+    for (double x : rel_length_vec)
+    {
+        if (x <= 0.25)
+        {
+            bet_0_25++;
+            continue;
+        }
+        if (x <= 0.5)
+        {
+            bet_25_50++;
+            continue;
+        }
+        if (x <= 0.8)
+        {
+            bet_50_80++;
+            continue;
+        }
+        if (x <= 1)
+        {
+            bet_80_100++;
+            continue;
+        }
+    }
+
+    state.counters["intersections"] = result.size();
+    state.counters["mean_rel_length"] = mean_rel_length;
+    state.counters["length 0-25%"] = bet_0_25;
+    state.counters["length 25-50%"] = bet_25_50;
+    state.counters["length 50-80%"] = bet_50_80;
+    state.counters["length 80-100%"] = bet_80_100;
 }
 BENCHMARK(BM_segment_set_intersection)
     ->Unit(benchmark::kMillisecond)
@@ -57,6 +109,13 @@ BENCHMARK(BM_segment_set_intersection)
     ->Args({1000})
     ->Args({3000})
     ->Args({5000})
-    ->Args({10000});
+    ->Args({10000})
+    ->Args({100000})
+    ->Args({250000})
+    ->Args({500000})
+    ->Args({750000})
+    ->Args({1000000})
+    ->Args({2000000})
+    ->Args({10000000});
 
 BENCHMARK_MAIN();
