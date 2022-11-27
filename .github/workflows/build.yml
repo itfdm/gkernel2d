@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: [windows-2019]
+    runs-on: [${{ matrix.os }}]
     strategy:
       matrix:
         os: [linux-latest, windows-latest]
@@ -27,11 +27,11 @@ jobs:
           cmake -DCCTIC_UNIT_TESTING=ON ..
           cmake --build . --config ${{ matrix.build_type }} -j
       - name: Pack (Linux)
-        if: matrix.os == linux-latest
+        if: matrix.os == 'linux-latest'
         run: |
           tar -czvf gkernel-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz build/bin_${{ matrix.build_type }}
       - name: Pack (Windows)
-        if: matrix.os == windows-latest
+        if: matrix.os == 'windows-latest'
         run: |
           Compress-Archive -Path build\bin_${{ matrix.build_type }} -DestinationPath gkernel-${{ matrix.os }}-${{ matrix.build_type }}.zip
       - name: Save package
