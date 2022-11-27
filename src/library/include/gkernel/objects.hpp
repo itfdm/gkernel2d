@@ -1,6 +1,8 @@
 #ifndef __GKERNEL_HPP_OBJECTS
 #define __GKERNEL_HPP_OBJECTS
 #include "helpers.hpp"
+#include <cmath>
+#include <iostream>
 
 namespace gkernel {
 
@@ -23,8 +25,12 @@ private:
 };
 
 struct Segment {
-    Segment() : _begin_point(), _end_point() {};
-    Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {}
+    Segment() : _begin_point(), _end_point() {
+        id = get_id();
+    }
+    Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {
+        id = get_id();
+    }
 
     bool operator==(const Segment& other) const {
         return this->_begin_point == other._begin_point && this->_end_point == other._end_point;
@@ -36,6 +42,11 @@ struct Segment {
     const Point& start() const { return _begin_point; }
     const Point& end() const { return _end_point; }
 
+    std::size_t get_id() {
+        static std::size_t idx = 0;
+        return idx++;
+    }
+    std::size_t id;
 private:
     Point _begin_point, _end_point;
 };

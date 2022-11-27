@@ -12,7 +12,7 @@ function(gkernel_add_bench target_name)
     target_compile_definitions(${target_name} PRIVATE
         $<$<CONFIG:DEBUG>:GKERNEL_DEBUG>)
 
-    target_link_libraries(${target_name} PRIVATE GKERNEL::gkernel GKERNEL::file_parser benchmark::benchmark)
+    target_link_libraries(${target_name} PRIVATE GKERNEL::gkernel benchmark::benchmark)
 endfunction()
 
 include(FetchContent)

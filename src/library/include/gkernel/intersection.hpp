@@ -12,7 +12,6 @@ namespace gkernel {
     // using segments_intersection = std::tuple<Segment, segment_id, segment_id>;
     // Callable returns bool value indicating whether to continue searching for intersection points
     using Callback = std::function<bool(const Segment&, const Segment&, const Segment&)>;
-    using Labeler = std::function<void(SegmentsSet&)>;
 
     enum intersection_type {
         none,
@@ -22,9 +21,11 @@ namespace gkernel {
     };
 
     // if intersection_type is none, Segment has ub value
-    std::tuple<Segment, intersection_type> intersectSegments(const Segment& first, const Segment& second);
+    // Segment intersectSegments(const Segment& first, const Segment& second);
+    Segment intersectSegments(const Segment& first, const Segment& second);
 
-    void intersectSetSegments(const SegmentsSet& segments, Callback&& notify, Labeler&& labeler);
+    void intersectSetSegmentsBruteForce(const SegmentsSet& segments, Callback&& notify);
+    void intersectSetSegments(const SegmentsSet& segments, Callback&& notify);
 
 } // namespace gkernel
 #endif // __GKERNEL_HPP_INTERSECTION

@@ -2,7 +2,8 @@
 add_library(gkernel
     src/containers.cpp
     src/parser.cpp
-    src/serializer.cpp)
+    src/serializer.cpp
+    src/intersection.cpp)
 
 add_library(GKERNEL::gkernel ALIAS gkernel)
 
