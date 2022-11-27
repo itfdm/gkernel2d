@@ -1,0 +1,41 @@
+name: Build packages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    runs-on: [windows-2019]
+    strategy:
+      matrix:
+        os: [linux-latest, windows-latest]
+        build_type: [debug, release]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build ${{ matrix.os }}-${{ matrix.build_type }}
+        run: |
+          mkdir build
+          cd build
+          cmake -DCCTIC_UNIT_TESTING=ON ..
+          cmake --build . --config ${{ matrix.build_type }} -j
+      - name: Pack (Linux)
+        if: matrix.os == linux-latest
+        run: |
+          tar -czvf gkernel-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz build/bin_${{ matrix.build_type }}
+      - name: Pack (Windows)
+        if: matrix.os == windows-latest
+        run: |
+          Compress-Archive -Path build\bin_${{ matrix.build_type }} -DestinationPath gkernel-${{ matrix.os }}-${{ matrix.build_type }}.zip
+      - name: Save package
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: gkernel-${{ matrix.os }}-${{ matrix.build_type }}
+          path: gkernel-${{ matrix.os }}-${{ matrix.build_type }}.*
