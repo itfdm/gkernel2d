@@ -25,7 +25,7 @@ namespace gkernel {
     Segment intersectSegments(const Segment& first, const Segment& second);
 
     void intersectSetSegmentsBruteForce(const SegmentsSet& segments, Callback&& notify);
-    void intersectSetSegments(const SegmentsSet& segments, Callback&& notify);
+    void intersectSetSegments(SegmentsSet& segments, Callback&& notify);
 
 } // namespace gkernel
 #endif // __GKERNEL_HPP_INTERSECTION

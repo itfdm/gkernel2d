@@ -17,35 +17,77 @@ struct xorshift128_state
     uint32_t a, b, c, d;
 };
 
-uint32_t xorshift128()
+class xorshift128
 {
-    /* Algorithm "xor128" from p. 5 of Marsaglia, "Xorshift RNGs" */
-    static xorshift128_state state{1, 2, 3, 4};
+    xorshift128_state state{1, 2, 3, 4};
+public:
+    uint32_t random() {
+        uint32_t t = state.d;
+        uint32_t const s = state.a;
+        state.d = state.c;
+        state.c = state.b;
+        state.b = s;
 
-    uint32_t t = state.d;
-    uint32_t const s = state.a;
-    state.d = state.c;
-    state.c = state.b;
-    state.b = s;
-
-    t ^= t << 11;
-    t ^= t >> 8;
-    return state.a = t ^ s ^ (s >> 19);
-}
+        t ^= t << 11;
+        t ^= t >> 8;
+        return state.a = t ^ s ^ (s >> 19);
+    }
+};
 
 std::vector<gkernel::Segment> generateRandomSegments(size_t count, int w_width, int w_height)
 {
     int window_width = w_width;
     int window_height = w_height;
+    xorshift128 random;
 
     std::vector<gkernel::Segment> segments;
     for (size_t i = 0; i < count; ++i)
     {
-        segments.emplace_back(gkernel::Point(xorshift128() % window_width, xorshift128() % window_height),
-                              gkernel::Point(xorshift128() % window_width, xorshift128() % window_height));
+        segments.emplace_back(gkernel::Point(random.random() % window_width, random.random() % window_height),
+                              gkernel::Point(random.random() % window_width, random.random() % window_height));
     }
     return segments;
 }
+
+// generate segments with length
+std::vector<gkernel::Segment> generateRandomSegments(size_t count, int w_width, int w_height, int length)
+{
+    int window_width = w_width;
+    int window_height = w_height;
+
+    xorshift128 random;
+
+    std::vector<gkernel::Segment> segments;
+    for (size_t i = 0; i < count; ++i)
+    {
+        int x1 = random.random() % window_width;
+        int y1 = random.random() % window_height;
+        int x2 = x1 + random.random() % length;
+        int y2 = y1 + random.random() % length;
+        segments.emplace_back(gkernel::Point(x1, y1), gkernel::Point(x2, y2));
+    }
+    return segments;
+}
+
+class SegmentsComparator {
+public:
+    bool operator()(const gkernel::Segment& lhs, const gkernel::Segment& rhs) const {
+        if (lhs.start() != rhs.start()) {
+            if (lhs.start().x() != rhs.start().x()) {
+                return lhs.start().x() < rhs.start().x();
+            } else {
+                return lhs.start().y() < rhs.start().y();
+            }
+        } else {
+            if (lhs.end().x() != rhs.end().x()) {
+                return lhs.end().x() < rhs.end().x();
+            } else {
+                return lhs.end().y() < rhs.end().y();
+            }
+        }
+        return false;
+    }
+};
 
 static void BM_segment_set_intersection(benchmark::State &state)
 {
@@ -61,27 +103,23 @@ static void BM_segment_set_intersection(benchmark::State &state)
     std::vector<double> rel_length_vec;
 
     std::vector<gkernel::Segment> segments = generateRandomSegments(state.range(0), window_width, window_height);
+    gkernel::SegmentsSet segments_set(segments);
+    // print segments in format "segvec.emplace_back({gkernel::Point(segment.start().x(), segment.start().y()), gkernel::Point(segment.end().x(), segment.end().y())});"
+    // std::cout << segments.size() << std::endl;
+    // for (auto& segment : segments)
+    // {
+    //     std::cout << "segvec.emplace_back({gkernel::Point(" << segment.start().x() << ", " << segment.start().y() << "), gkernel::Point(" << segment.end().x() << ", " << segment.end().y() << ")});" << std::endl;
+    // }
+
     for (auto _ : state)
     {
         state.PauseTiming();
         result.clear();
         state.ResumeTiming();
-        gkernel::intersectSetSegmentsBruteForce(segments, [&result](const gkernel::Segment& first, const gkernel::Segment& second, const gkernel::Segment& intersection) {
-            result.push_back(intersection);
+        gkernel::intersectSetSegments(segments_set, [&result](const gkernel::Segment& first, const gkernel::Segment& second, const gkernel::Segment& intersection) {
+            // result.push_back(intersection);
             return true;
         });
-        std::sort(result.begin(), result.end(), [](const gkernel::Segment& a, const gkernel::Segment& b) {
-            if (a.start().x() != b.start().x()) {
-                return a.start().x() < b.start().x();
-            } else {
-                return a.start().y() < b.start().y();
-            }
-        });
-        auto last = std::unique(result.begin(), result.end(), [](const gkernel::Segment& a, const gkernel::Segment& b) {
-            bool result = std::abs(a.start().x() - b.start().x()) < 1e-6 && std::abs(a.start().y() - b.start().y()) < 1e-6;
-            return result;
-        });
-        result.erase(last, result.end());
         // std::cout << "result size: " << result.size() << std::endl;
         // benchmark::DoNotOptimize(result = std::move(gkernel::solve(segments)));
     }
@@ -129,17 +167,17 @@ static void BM_segment_set_intersection(benchmark::State &state)
 }
 BENCHMARK(BM_segment_set_intersection)
     ->Unit(benchmark::kMillisecond)
-    ->Args({100})
-    ->Args({1000})
-    ->Args({3000})
-    ->Args({5000})
-    ->Args({10000})
-    ->Args({100000})
-    ->Args({250000})
-    ->Args({500000})
-    ->Args({750000})
-    ->Args({1000000})
-    ->Args({2000000})
-    ->Args({10000000});
+    // ->Args({100});
+    // ->Args({1000})
+    ->Args({3000});
+    // ->Args({5000})
+    // ->Args({10000})
+    // ->Args({100000})
+    // ->Args({250000})
+    // ->Args({500000})
+    // ->Args({750000})
+    // ->Args({1000000})
+    // ->Args({2000000})
+    // ->Args({10000000});
 
 BENCHMARK_MAIN();

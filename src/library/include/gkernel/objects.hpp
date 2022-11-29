@@ -46,6 +46,10 @@ struct Segment {
         static std::size_t idx = 0;
         return idx++;
     }
+    std::size_t hash() const {
+        return std::hash<data_type>()(_begin_point.x()) ^ std::hash<data_type>()(_begin_point.y()) ^
+            std::hash<data_type>()(_end_point.x()) ^ std::hash<data_type>()(_end_point.y());
+    }
     std::size_t id;
 private:
     Point _begin_point, _end_point;

@@ -9,6 +9,14 @@
 
 using namespace gkernel;
 
+template <typename T>
+class SegmentHasher {
+public:
+    std::size_t operator()(const T& segment) const {
+        return segment.hash();
+    }
+};
+
 void run_intersect_segments_test(gkernel::SegmentsSet& segvec, std::vector<gkernel::Segment>& expected) {
     std::sort(expected.begin(), expected.end(), [](const gkernel::Segment& a, const gkernel::Segment& b) {
         if (a.start().x() != b.start().x()) {
@@ -18,13 +26,24 @@ void run_intersect_segments_test(gkernel::SegmentsSet& segvec, std::vector<gkern
         }
     });
 
+    // std::unordered_set<gkernel::Segment, SegmentHasher<gkernel::Segment>> points;
     std::vector<gkernel::Segment> points;
     intersectSetSegments(segvec, [&points](const Segment& first, const Segment& second, const Segment& intersection) {
         points.push_back(intersection);
         return true;
+        // auto result = points.insert(intersection);
+        // return result.second;
     });
 
     std::sort(points.begin(), points.end(), [](const gkernel::Segment& a, const gkernel::Segment& b) {
+        if (a.start().x() != b.start().x()) {
+            return a.start().x() < b.start().x();
+        } else {
+            return a.start().y() < b.start().y();
+        }
+    });
+
+    std::sort(expected.begin(), expected.end(), [](const gkernel::Segment& a, const gkernel::Segment& b) {
         if (a.start().x() != b.start().x()) {
             return a.start().x() < b.start().x();
         } else {
@@ -38,6 +57,13 @@ void run_intersect_segments_test(gkernel::SegmentsSet& segvec, std::vector<gkern
     });
 
     points.erase(last, points.end());
+    std::cout << "result size: " << points.size() << std::endl;
+    // print points in format x, y
+    for (auto& point : points)
+    {
+        std::cout << point.start().x() << ", " << point.start().y() << std::endl;
+    }
+
     REQUIRE_EQ(std::equal(points.begin(), points.end(), expected.begin(), expected.end(), [](const gkernel::Segment& a, const gkernel::Segment& b) {
         return std::abs(a.start().x() - b.start().x()) < 1e-6 && std::abs(a.start().y() - b.start().y()) < 1e-6;
     }), true);
@@ -458,6 +484,24 @@ void Test8()
 
 }
 
+void Test9() {
+    gkernel::SegmentsSet segvec;
+    segvec.emplace_back({gkernel::Point(4, 3), gkernel::Point(8, 8)});
+    segvec.emplace_back({gkernel::Point(0, 1), gkernel::Point(2, 8)});
+    segvec.emplace_back({gkernel::Point(2, 1), gkernel::Point(5, 5)});
+    segvec.emplace_back({gkernel::Point(4, 0), gkernel::Point(8, 6)});
+    segvec.emplace_back({gkernel::Point(3, 3), gkernel::Point(4, 4)});
+    segvec.emplace_back({gkernel::Point(3, 3), gkernel::Point(8, 5)});
+    segvec.emplace_back({gkernel::Point(1, 4), gkernel::Point(5, 10)});
+    segvec.emplace_back({gkernel::Point(1, 2), gkernel::Point(6, 8)});
+    segvec.emplace_back({gkernel::Point(1, 4), gkernel::Point(2, 10)});
+    segvec.emplace_back({gkernel::Point(3, 1), gkernel::Point(7, 2)});
+    segvec.emplace_back({gkernel::Point(0, 3), gkernel::Point(1, 6)});
+    segvec.emplace_back({gkernel::Point(0, 3), gkernel::Point(2, 6)});
+    std::vector<gkernel::Segment> expected;
+    run_intersect_segments_test(segvec, expected);
+}
+
 
 TEST_CASE("Test intersection 1") {
     Test1();
@@ -489,4 +533,8 @@ TEST_CASE("Test intersection 3") {
 
 // TEST_CASE("Test intersection 8") {
 //     Test8();
+// }
+
+// TEST_CASE("Test intersection 9") {
+//     Test9();
 // }
