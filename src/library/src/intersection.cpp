@@ -3,11 +3,12 @@
 
 namespace gkernel {
 
-constexpr double EPS = 1E-7;
+constexpr double EPS = 1E-9;
 
 enum event_status {
-    start = 2,
-    intersection = 1,
+    start = 3,
+    intersection_right = 2,
+    intersection_left = 1,
     end = 0
 };
 
@@ -78,10 +79,10 @@ Segment intersectSegments(const Segment& a, const Segment& b) {
     }
 }
 
-// double get_y(const gkernel::Segment& segment, double x) {
-//     double alpha = (segment.end().x() - x - 2 * EPS) / (segment.end().x() - segment.start().x());
-//     return alpha * segment.start().y() + (1 - alpha) * segment.end().y();
-// }
+inline double get_y(const gkernel::Segment& segment, double x) {
+    double alpha = (segment.end().x() - x - 2 * EPS) / (segment.end().x() - segment.start().x());
+    return alpha * segment.start().y() + (1 - alpha) * segment.end().y();
+}
 
 void intersectSetSegmentsBruteForce(const SegmentsSet& segments, Callback&& notify) {
     for (size_t i = 0; i < segments.size(); ++i) {
@@ -93,11 +94,11 @@ void intersectSetSegmentsBruteForce(const SegmentsSet& segments, Callback&& noti
     }
 }
 
-inline double get_y(const gkernel::Segment& segment, double x) {
-    double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
-    double m = segment.start().y() - k * segment.start().x();
-    return k * x + m;
-}
+// inline double get_y(const gkernel::Segment& segment, double x) {
+//     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
+//     double m = segment.start().y() - k * segment.start().x();
+//     return k * x + m;
+// }
 
 void intersectSetSegments(SegmentsSet& segments, Callback&& notify) {
     if (segments.size() == 0) {
@@ -116,8 +117,10 @@ void intersectSetSegments(SegmentsSet& segments, Callback&& notify) {
         if ((first.first == second.first || first.first == second.second) && (first.second == second.first || first.second == second.second)) {
             return false;
         }
-        return reinterpret_cast<intptr_t>(first.first) < reinterpret_cast<intptr_t>(second.first) ||
-               (reinterpret_cast<intptr_t>(first.first) == reinterpret_cast<intptr_t>(second.first) && reinterpret_cast<intptr_t>(first.second) < reinterpret_cast<intptr_t>(second.second));
+        if (first.first != second.first) {
+            return reinterpret_cast<uintptr_t>(first.first) < reinterpret_cast<uintptr_t>(second.first);
+        }
+        return reinterpret_cast<uintptr_t>(first.second) < reinterpret_cast<uintptr_t>(second.second);
     };
     std::set<std::pair<Segment*, Segment*>, decltype(compare_segments_pairs)> checked_pairs(compare_segments_pairs);
 
@@ -130,72 +133,69 @@ void intersectSetSegments(SegmentsSet& segments, Callback&& notify) {
 		events.insert({segment, std::max(segment.start().x(), segment.end().x()), event_status::end});
 	}
 
-    std::vector<Segment*> segments_vector;
-    segments_vector.reserve(events.size());
+    std::vector<Segment*> temp_segments;
+    temp_segments.reserve(segments.size());
 
     while (events.size() > 0) {
         auto event = *events.begin();
-        if (event.x != x) {
-            while (active_segments.size()) {
-                auto it = active_segments.begin();
-                segments_vector.push_back(*it);
-                active_segments.erase(it);
+        // TODO: check neighbors only for start and intersection events?
+        temp_segments.clear();
+        if (event.status == event_status::intersection_right) {
+            auto event_it = events.begin();
+            while (event_it != events.end() && event_it->x == event.x && event_it->status == event_status::intersection_right) {
+                temp_segments.push_back(event_it->seg);
+                active_segments.erase(event_it->seg);
+                ++event_it;
             }
             x = event.x;
-            for (auto& elem : segments_vector) {
-                active_segments.insert(elem);
+            for (auto& segment : temp_segments) {
+                active_segments.insert(segment);
             }
-            segments_vector.clear();
+        } else {
+            x = event.x;
         }
 
-        if (event.status == event_status::start) {
-            auto insert_result = active_segments.insert(event.seg);
-        }
-        auto prev_segment = active_segments.find_prev(event.seg);
-        if (prev_segment.second == tree_type::state::exists) {
-            if (intersect(*event.seg, *prev_segment.first)) {
-                auto intersection = intersectSegments(*event.seg, *prev_segment.first);
-                bool result = notify(*event.seg, *prev_segment.first, intersection);
-                // events.insert({*event.seg, intersection.start().x() - EPS, true});
-                // events.insert({prev_segment.first, intersection.start().x() - EPS, true});
-                if (checked_pairs.insert(std::make_pair(event.seg, prev_segment.first)).second) {
-                    events.insert({*event.seg, intersection.start().x() - 2 * EPS, event_status::intersection});
-                    events.insert({*prev_segment.first, intersection.start().x() - 2 * EPS, event_status::intersection});
-                    events.insert({*event.seg, intersection.start().x() + 2 * EPS, event_status::intersection});
-                    events.insert({*prev_segment.first, intersection.start().x() + 2 * EPS, event_status::intersection});
+        auto insert_result = active_segments.insert(event.seg);
+
+        auto prev_segment = insert_result.first;
+        if (prev_segment != active_segments.begin()) {
+            --prev_segment;
+            if (intersect(*event.seg, **prev_segment)) {
+                auto intersection = intersectSegments(*event.seg, **prev_segment);
+                bool result = notify(*event.seg, **prev_segment, intersection);
+                if (checked_pairs.insert(std::make_pair(event.seg, *prev_segment)).second) {
+                    events.insert({*event.seg, intersection.start().x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({**prev_segment, intersection.start().x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({*event.seg, intersection.start().x() + 2 * EPS, event_status::intersection_right});
+                    events.insert({**prev_segment, intersection.start().x() + 2 * EPS, event_status::intersection_right});
                 }
             }
         }
-        auto next_segment = active_segments.find_next(event.seg);
-        if (next_segment.second == tree_type::state::exists) {
-            if (intersect(*event.seg, *next_segment.first)) {
-                auto intersection = intersectSegments(*event.seg, *next_segment.first);
-                bool result = notify(*event.seg, *next_segment.first, intersection);
-                if (checked_pairs.insert(std::make_pair(event.seg, next_segment.first)).second) {
-                    events.insert({*event.seg, intersection.start().x() - 2 * EPS, event_status::intersection});
-                    events.insert({*next_segment.first, intersection.start().x() - 2 * EPS, event_status::intersection});
-                    events.insert({*event.seg, intersection.start().x() + 2 * EPS, event_status::intersection});
-                    events.insert({*next_segment.first, intersection.start().x() + 2 * EPS, event_status::intersection});
+        auto next_segment = insert_result.first;
+        ++next_segment;
+        if (next_segment != active_segments.end()) {
+            if (intersect(*event.seg, **next_segment)) {
+                auto intersection = intersectSegments(*event.seg, **next_segment);
+                bool result = notify(*event.seg, **next_segment, intersection);
+                if (checked_pairs.insert(std::make_pair(event.seg, *next_segment)).second) {
+                    events.insert({*event.seg, intersection.start().x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({**next_segment, intersection.start().x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({*event.seg, intersection.start().x() + 2 * EPS, event_status::intersection_right});
+                    events.insert({**next_segment, intersection.start().x() + 2 * EPS, event_status::intersection_right});
                 }
-                // events.insert({*event.seg, intersection.start().x() - EPS, true});
-                // events.insert({next_segment.first, intersection.start().x() - EPS, true});
             }
         }
         if (event.status != event_status::start) {
-            auto prev_segment = active_segments.find_prev(event.seg);
-            auto next_segment = active_segments.find_next(event.seg);
-            if (prev_segment.second == tree_type::state::exists && next_segment.second == tree_type::state::exists) {
-                if (intersect(*prev_segment.first, *next_segment.first)) {
-                    auto intersection = intersectSegments(*prev_segment.first, *next_segment.first);
-                    bool result = notify(*prev_segment.first, *next_segment.first, intersection);
-                    if (checked_pairs.insert(std::make_pair(prev_segment.first, next_segment.first)).second) {
-                        events.insert({*next_segment.first, intersection.start().x() - 2 * EPS, event_status::intersection});
-                        events.insert({*prev_segment.first, intersection.start().x() - 2 * EPS, event_status::intersection});
-                        events.insert({*next_segment.first, intersection.start().x() + 2 * EPS, event_status::intersection});
-                        events.insert({*prev_segment.first, intersection.start().x() + 2 * EPS, event_status::intersection});
+            if (prev_segment != active_segments.begin() && next_segment != active_segments.end()) {
+                if (intersect(**prev_segment, **next_segment)) {
+                    auto intersection = intersectSegments(**prev_segment, **next_segment);
+                    bool result = notify(**prev_segment, **next_segment, intersection);
+                    if (checked_pairs.insert(std::make_pair(*prev_segment, *next_segment)).second) {
+                        events.insert({**next_segment, intersection.start().x() - 2 * EPS, event_status::intersection_left});
+                        events.insert({**prev_segment, intersection.start().x() - 2 * EPS, event_status::intersection_left});
+                        events.insert({**next_segment, intersection.start().x() + 2 * EPS, event_status::intersection_right});
+                        events.insert({**prev_segment, intersection.start().x() + 2 * EPS, event_status::intersection_right});
                     }
-                    // events.insert({next_segment.first, intersection.start().x() - EPS, true});
-                    // events.insert({prev_segment.first, intersection.start().x() - EPS, true});
                 }
             }
             if (event.status == event_status::end) {

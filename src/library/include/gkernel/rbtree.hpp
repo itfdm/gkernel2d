@@ -13,6 +13,7 @@ template<typename T, class Comparator = std::less<T>>
 class RBTree {
 public:
     using iterator = typename std::set<T, Comparator>::iterator;
+    using node_type = typename std::set<T, Comparator>::node_type;
     enum class state {
         inf_negative = -1,
         exists = 0,
@@ -40,6 +41,10 @@ public:
         _internal_tree.insert(items);
     }
 
+    void insert(node_type&& node) {
+        _internal_tree.insert(std::move(node));
+    }
+
     const T& max() {
         return *(--_internal_tree.end());
     }
@@ -62,6 +67,10 @@ public:
 
     auto find(const T& item) const {
         return _internal_tree.find(item);
+    }
+
+    auto extract(const T& item) {
+        return _internal_tree.extract(item);
     }
 
     std::pair<T, state> find_next(const T& item) {
