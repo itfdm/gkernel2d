@@ -8,7 +8,11 @@ namespace gkernel {
 class SegmentsSetCommon : public Labeling {
 protected:
     SegmentsSetCommon() : _segments({}) {}
-    SegmentsSetCommon(const std::vector<Segment>& segments) : _segments(segments.begin(), segments.end()) {}
+    SegmentsSetCommon(const std::vector<Segment>& segments) : _segments(segments.begin(), segments.end()) {
+        for (size_t i = 0; i < _segments.size(); ++i) {
+            _segments[i].id = i;
+        }
+    }
 
 public:
     bool operator==(const SegmentsSetCommon& other) const {
@@ -18,21 +22,18 @@ public:
         return !(*this == other);
     }
 
-    label_data_type get_label_value(label_type label, size_t segment_idx) const override {
-        return _labels_data[get_offset(label) + segment_idx];
+    label_data_type get_label_value(label_type label, const Segment& segment) const override {
+        return _labels_data[get_offset(label) + segment.id];
     }
 
     void set_labels_types(const std::vector<label_type>& label_types) override;
 
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override;
 
-    void set_label_value(label_type label, size_t segment_idx, label_data_type label_value) override {
-        _labels_data[get_offset(label) + segment_idx] = label_value;
+    void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {
+        _labels_data[get_offset(label) + segment.id] = label_value;
     }
 
-    const Segment& get_segment(size_t idx) const {
-        return _segments.at(idx);
-    }
     const Segment& operator[](size_t idx) const {
         return _segments[idx];
     }
@@ -60,6 +61,7 @@ public:
             throw std::runtime_error("Unable to add elements after labels initialization.");
         }
         _segments.emplace_back(segment);
+        _segments.back().id = _segments.size() - 1;
     }
 };
 
@@ -124,10 +126,10 @@ public:
         }
     }
 
-    label_data_type get_label_value(label_type label, size_t segment_idx) const override { return 0; /*TODO*/};
+    label_data_type get_label_value(label_type label, const Segment& segment) const override { return 0; /*TODO*/};
     void set_labels_types(const std::vector<label_type>& label_types) override {/*TODO*/};
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override {/*TODO*/};
-    void set_label_value(label_type label, size_t segment_idx, label_data_type label_value) override {/*TODO*/};
+    void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {/*TODO*/};
 
     Circuit get_circuit(size_t idx) const {
         std::vector<Segment> segments(_segments.begin() + _indices[idx], _segments.begin() + _indices[idx + 1]);

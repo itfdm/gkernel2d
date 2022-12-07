@@ -8,9 +8,12 @@
 
 namespace gkernel {
 
+struct Segment;
+
 using data_type = double;
 using label_data_type = uint64_t;
 using label_type = uint8_t;
+using segment_id = size_t;
 
 constexpr data_type min_data_type_value = std::numeric_limits<data_type>::min();
 constexpr data_type max_data_type_value = std::numeric_limits<data_type>::max();
@@ -26,13 +29,14 @@ public:
     const std::vector<label_type>& get_label_types() const {
         return _label_types;
     }
-    virtual label_data_type get_label_value(label_type label, size_t segment_idx) const = 0;
+
+    virtual label_data_type get_label_value(label_type label, const Segment& segment) const = 0;
 
     virtual void set_labels_types(const std::vector<label_type>& label_types) = 0;
 
     virtual void set_label_values(label_type label, const std::vector<label_data_type>& label_data) = 0;
 
-    virtual void set_label_value(label_type label, size_t segment_idx, label_data_type label_value) = 0;
+    virtual void set_label_value(label_type label, const Segment& segment, label_data_type label_value) = 0;
 
 protected:
     std::vector<label_type> _label_types;
