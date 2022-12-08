@@ -6,9 +6,10 @@ namespace gkernel {
 constexpr double EPS = 1E-9;
 
 enum event_status {
-    start = 3,
-    intersection_right = 2,
-    intersection_left = 1,
+    start = 4,
+    intersection_right = 3,
+    intersection_left = 2,
+    vertical = 1,
     end = 0
 };
 
@@ -26,24 +27,15 @@ struct event {
 	}
 };
 
-inline bool intersect1d(gkernel::data_type l1, gkernel::data_type r1,
-                        gkernel::data_type l2, gkernel::data_type r2) {
-    if (l1 > r1) std::swap(l1, r1);
-    if (l2 > r2) std::swap(l2, r2);
-    return std::max(l1, l2) <= std::min(r1, r2) + EPS;
-}
-
-inline int vec(const gkernel::Point &a, const gkernel::Point &b,
+inline int area(const gkernel::Point &a, const gkernel::Point &b,
                const gkernel::Point &c) {
     gkernel::data_type s = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
     return abs(s) < EPS ? 0 : s > 0 ? 1 : -1;
 }
 
 bool intersect(const gkernel::Segment &a, const gkernel::Segment &b) {
-    return intersect1d(a.start().x(), a.end().x(), b.start().x(), b.end().x()) &&
-           intersect1d(a.start().y(), a.end().y(), b.start().y(), b.end().y()) &&
-           vec(a.start(), a.end(), b.start()) * vec(a.start(), a.end(), b.end()) <= 0 &&
-           vec(b.start(), b.end(), a.start()) * vec(b.start(), b.end(), a.end()) <= 0;
+    return area(a.start(), a.end(), b.start()) * area(a.start(), a.end(), b.end()) <= 0 &&
+           area(b.start(), b.end(), a.start()) * area(b.start(), b.end(), a.end()) <= 0;
 }
 
 // intersect two segments
@@ -61,21 +53,16 @@ Segment intersectSegments(const Segment& a, const Segment& b) {
         data_type x = (data_type)(b1 * c2 - b2 * c1) / (data_type)(a1 * b2 - a2 * b1);
         data_type y = (data_type)(a2 * c1 - a1 * c2) / (data_type)(a1 * b2 - a2 * b1);
         return gkernel::Segment({x, y}, {x, y});
-    } else {
-        if (a.start().x() <= b.start().x() && b.end().x() <= a.end().x()) {
-
-            return gkernel::Segment({b.start().x(), b.start().y()},
-                                    {b.end().x(), b.end().y()});
-        } else if (a.start().x() <= b.start().x() && a.end().x() <= b.end().x()) {
-            return gkernel::Segment({b.start().x(), b.start().y()},
-                                    {a.end().x(), a.end().y()});
-        } else if (b.start().x() <= a.start().x() && a.end().x() <= b.end().x()) {
-            return gkernel::Segment({a.start().x(), a.start().y()},
-                                    {a.end().x(), a.end().y()});
-        } else if (b.start().x() <= a.start().x() && b.end().x() <= a.end().x()) {
-            return gkernel::Segment({a.start().x(), a.start().y()},
-                                    {b.end().x(), b.end().y()});
-        }
+    }
+    else {
+        if (a.start() == b.start())
+            return gkernel::Segment({ a.start().x(), a.start().y() }, { a.start().x(), a.start().y() });
+        else if (a.end() == b.end())
+            return gkernel::Segment({ a.end().x(), a.end().y() }, { a.end().x(), a.end().y() });
+        else if (a.start() == b.end())
+            return gkernel::Segment({ a.start().x(), a.start().y() }, { a.start().x(), a.start().y() });
+        else if (a.end() == b.start())
+            return gkernel::Segment({ a.end().x(), a.end().y() }, { a.end().x(), a.end().y() });
     }
 }
 
@@ -129,8 +116,13 @@ void intersectSetSegments(SegmentsSet& segments, Callback&& notify) {
 
 	for (std::size_t idx = 0; idx < segments.size(); ++idx) {
         Segment& segment = const_cast<Segment&>(segments[idx]);
-		events.insert({segment, std::min(segment.start().x(), segment.end().x()), event_status::start});
-		events.insert({segment, std::max(segment.start().x(), segment.end().x()), event_status::end});
+        if (segment.start().x() != segment.end().x()) {
+            events.insert({ segment, std::min(segment.start().x(), segment.end().x()), event_status::start });
+            events.insert({ segment, std::max(segment.start().x(), segment.end().x()), event_status::end });
+        }
+        else {
+            events.insert({ segment, segment.start().x(), event_status::vertical });
+        }
 	}
 
     std::vector<Segment*> temp_segments;
@@ -153,6 +145,18 @@ void intersectSetSegments(SegmentsSet& segments, Callback&& notify) {
             }
         } else {
             x = event.x;
+        }
+
+        if (event.status == event_status::vertical) {
+            for (auto item : active_segments) {
+                if (intersect(*event.seg, *item)) {
+                    auto intersection = intersectSegments(*event.seg, *item);
+                    bool result = notify(*event.seg, *item, intersection);
+                    checked_pairs.insert(std::make_pair(event.seg, item));
+                }
+            }
+            events.erase(events.begin());
+            continue;
         }
 
         auto insert_result = active_segments.insert(event.seg);

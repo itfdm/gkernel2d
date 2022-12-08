@@ -519,13 +519,13 @@ TEST_CASE("Test intersection 3") {
 //     Test4();
 // }
 
-// TEST_CASE("Test intersection 5") {
-//     Test5();
-// }
+ TEST_CASE("Test intersection 5") {
+     Test5();
+ }
 
-// TEST_CASE("Test intersection 6") {
-//     Test6();
-// }
+ TEST_CASE("Test intersection 6") {
+     Test6();
+ }
 
 // TEST_CASE("Test intersection 7") {
 //     Test7();
