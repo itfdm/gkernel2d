@@ -79,10 +79,10 @@ Segment intersectSegments(const Segment& a, const Segment& b) {
     }
 }
 
-inline double get_y(const gkernel::Segment& segment, double x) {
-    double alpha = (segment.end().x() - x - 2 * EPS) / (segment.end().x() - segment.start().x());
-    return alpha * segment.start().y() + (1 - alpha) * segment.end().y();
-}
+// inline double get_y(const gkernel::Segment& segment, double x) {
+//     double alpha = (segment.end().x() - x - 2 * EPS) / (segment.end().x() - segment.start().x());
+//     return alpha * segment.start().y() + (1 - alpha) * segment.end().y();
+// }
 
 void intersectSetSegmentsBruteForce(const SegmentsSet& segments, Callback&& notify) {
     for (size_t i = 0; i < segments.size(); ++i) {
@@ -94,11 +94,11 @@ void intersectSetSegmentsBruteForce(const SegmentsSet& segments, Callback&& noti
     }
 }
 
-// inline double get_y(const gkernel::Segment& segment, double x) {
-//     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
-//     double m = segment.start().y() - k * segment.start().x();
-//     return k * x + m;
-// }
+inline double get_y(const gkernel::Segment& segment, double x) {
+    double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
+    double m = segment.start().y() - k * segment.start().x();
+    return k * (x + 2 * EPS) + m;
+}
 
 void intersectSetSegments(SegmentsSet& segments, Callback&& notify) {
     if (segments.size() == 0) {
@@ -185,7 +185,7 @@ void intersectSetSegments(SegmentsSet& segments, Callback&& notify) {
                 }
             }
         }
-        if (event.status != event_status::start) {
+        if (event.status == event_status::end) {
             if (prev_segment != active_segments.begin() && next_segment != active_segments.end()) {
                 if (intersect(**prev_segment, **next_segment)) {
                     auto intersection = intersectSegments(**prev_segment, **next_segment);
