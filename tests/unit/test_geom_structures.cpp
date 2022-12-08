@@ -45,11 +45,11 @@ void SegmentsSetAddingElementsTest() {
     std::vector<Segment> segments = GenerateSegments(2);
     SegmentsSet segments_set(segments);
 
-    REQUIRE_EQ(segments_set.get_segment(0).start(), Point(0, 1));
-    REQUIRE_EQ(segments_set.get_segment(1).end(), Point(6, 7));
+    REQUIRE_EQ(segments_set[0].start(), Point(0, 1));
+    REQUIRE_EQ(segments_set[1].end(), Point(6, 7));
 
     segments_set.emplace_back(GenerateSegments(1).front());
-    REQUIRE_EQ(segments_set.get_segment(2).end(), Point(2, 3));
+    REQUIRE_EQ(segments_set[2].end(), Point(2, 3));
 }
 
 void SegmentsSetlabels() {
@@ -71,10 +71,10 @@ void SegmentsSetlabels() {
 
     std::vector<label_data_type> label_values = { 13, 33 };
     segments_set.set_label_values(TestLabels::SECOND_LABEL, label_values);
-    REQUIRE_EQ(segments_set.get_label_value(TestLabels::SECOND_LABEL, 1), 33);
+    REQUIRE_EQ(segments_set.get_label_value(TestLabels::SECOND_LABEL, segments_set[1]), 33);
 
-    segments_set.set_label_value(TestLabels::SECOND_LABEL, 1, 37);
-    REQUIRE_EQ(segments_set.get_label_value(TestLabels::SECOND_LABEL, 1), 37);
+    segments_set.set_label_value(TestLabels::SECOND_LABEL, segments_set[1], 37);
+    REQUIRE_EQ(segments_set.get_label_value(TestLabels::SECOND_LABEL, segments_set[1]), 37);
 }
 
 void VertexChainValidationTest() {
