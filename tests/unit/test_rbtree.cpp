@@ -4,7 +4,7 @@
 struct TestPoint {
     TestPoint() : x{}, y{} { }
     TestPoint(int x, int y) : x(x), y(y) { }
-    bool operator==(const TestPoint& other) {
+    bool operator==(const TestPoint& other) const {
         return this->x == other.x && this->y == other.y;
     }
 
@@ -26,8 +26,8 @@ void test_comparator() {
     tree_with_comp tree{TestComparator{}};
     tree.insert({{1, 1}, {3, 7}, {55, 55}});
     REQUIRE(tree.size() == 3);
-    REQUIRE((tree.find_prev(TestPoint(3, 5)).first == TestPoint(1, 1)));
-    REQUIRE((tree.find_next(TestPoint(3, 5)).first == TestPoint(3, 7)));
+    REQUIRE((*tree.find_prev(TestPoint(3, 5)).first == TestPoint(1, 1)));
+    REQUIRE((*tree.find_next(TestPoint(3, 5)).first == TestPoint(3, 7)));
 
     REQUIRE((tree.find_prev(TestPoint(1, 1)).second == tree_with_comp::state::inf_negative));
     REQUIRE((tree.find_next(TestPoint(55, 55)).second == tree_with_comp::state::inf_positive));
@@ -48,12 +48,12 @@ void test_prev_next() {
     int_tree tree;
     tree.insert({5, 3, 9, 6, 1});
 
-    REQUIRE(tree.find_prev(8).first == 6);
-    REQUIRE(tree.find_prev(9).first == 6);
+    REQUIRE(*tree.find_prev(8).first == 6);
+    REQUIRE(*tree.find_prev(9).first == 6);
     REQUIRE(tree.size() == 5);
 
-    REQUIRE(tree.find_next(7).first == 9);
-    REQUIRE(tree.find_next(6).first == 9);
+    REQUIRE(*tree.find_next(7).first == 9);
+    REQUIRE(*tree.find_next(6).first == 9);
     REQUIRE(tree.size() == 5);
 
     REQUIRE(tree.find_next(555).second == int_tree::state::inf_positive);

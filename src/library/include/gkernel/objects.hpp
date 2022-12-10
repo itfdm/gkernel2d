@@ -8,6 +8,7 @@ namespace gkernel {
 
 class SegmentsSetCommon;
 class SegmentsSet;
+class Intersection;
 
 struct Point {
     Point() : _x(max_data_type_value), _y(max_data_type_value) {};
@@ -39,12 +40,22 @@ struct Segment {
     bool operator==(const Segment& other) const {
         return this->_begin_point == other._begin_point && this->_end_point == other._end_point;
     }
+
     bool operator!=(const Segment& other) const {
         return !(*this == other);
     }
 
     const Point& start() const { return _begin_point; }
+
     const Point& end() const { return _end_point; }
+
+    const Point& min() const {
+        return _begin_point.x() < _end_point.x() ? _begin_point : _end_point;
+    }
+
+    const Point& max() const {
+        return _begin_point.x() > _end_point.x() ? _begin_point : _end_point;
+    }
 
 private:
     Point _begin_point, _end_point;
@@ -52,6 +63,7 @@ private:
 
     friend class SegmentsSetCommon;
     friend class SegmentsSet;
+    friend class Intersection;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Segment& segment) {

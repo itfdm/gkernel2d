@@ -120,8 +120,6 @@ void CircuitsSetTest() {
     REQUIRE_EQ(circuits_set.get_circuit(3) == Circuit(GenerateSegments(3), false), true);
 }
 
-#define DECLARE_TEST(TestName) TEST_CASE(#TestName) { TestName(); }
-
 DECLARE_TEST(PointTest)
 DECLARE_TEST(SegmentTest)
 DECLARE_TEST(SegmentsSetAddingElementsTest)

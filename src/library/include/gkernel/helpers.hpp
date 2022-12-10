@@ -6,6 +6,8 @@
 #include <limits>
 #include <stdexcept>
 
+#define NOMINMAX
+
 namespace gkernel {
 
 struct Segment;
