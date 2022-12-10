@@ -235,3 +235,38 @@ void test_orthogonal(){
 
     check_result(segments_layer, expected);
 }
+
+TEST_CASE("no insertions")
+{
+    test_no_intersections();
+}
+
+TEST_CASE("Test simple")
+{
+    test_simple_intersections();
+}
+
+TEST_CASE("Test end points")
+{
+    test_intersections_in_end_points();
+}
+
+TEST_CASE("Test partial overlapping")
+{
+    test_overlapping();
+}
+
+TEST_CASE("Test full overlapping")
+{
+    test_full_overlapping();
+}
+
+TEST_CASE("Test star")
+{
+    test_star();
+}
+
+TEST_CASE("Test orthogonal")
+{
+    test_orthogonal();
+}
