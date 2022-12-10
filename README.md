@@ -1,5 +1,7 @@
 # Description
-TODO: describe
+gkernel2d is a geometric library containing basic geometry objects, containers, and some algorithms for solving flat geometry problems.\
+The goal is to implement algorithms with computational complexity no worse than O(n * log(n)).
+
 # Usage
 **CMake options**
 ```bash
