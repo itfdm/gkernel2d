@@ -2,7 +2,6 @@
 #define __GKERNEL_HPP_INTERSECTION
 
 #include "containers.hpp"
-#include "segment.h"
 
 #include <vector>
 #include <functional>
