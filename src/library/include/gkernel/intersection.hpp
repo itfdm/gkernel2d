@@ -36,7 +36,8 @@ public:
     static std::vector<IntersectionPoint> intersectSetSegments(const SegmentsSet& segments);
 private:
     enum event_status {
-        start = 3,
+        start = 2,
+        vertical = 1,
         end = 0
     };
 

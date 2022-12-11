@@ -100,7 +100,7 @@ static void BM_segment_set_intersection(benchmark::State &state)
 
     std::vector<gkernel::IntersectionPoint> result;
 
-    auto segments_set = generateRandomSegments(state.range(0), window_width, window_height);
+    auto segments_set = generateRandomSegments(state.range(0), window_width, window_height, 25);
 
     for (auto _ : state) {
         benchmark::DoNotOptimize(result = gkernel::Intersection::intersectSetSegments(segments_set));

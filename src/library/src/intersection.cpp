@@ -70,9 +70,14 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
     tree_type active_segments(compare_segments);
 
     for (std::size_t idx = 0; idx < segments.size(); ++idx) {
-        Segment& segment = const_cast<Segment&>(segments[idx]);
-        events.insert({segment, segment.min().x(), event_status::start});
-        events.insert({segment, segment.max().x(), event_status::end});
+        const Segment& segment = segments[idx];
+        if (segment.min().x() != segment.max().x()) {
+            events.insert({segment, segment.min().x(), event_status::start});
+            events.insert({segment, segment.max().x(), event_status::end});
+        }
+        else {
+            events.insert({segment, segment.min().x(), event_status::vertical});
+        }
     }
 
     std::vector<const Segment*> temp_segments;
@@ -91,6 +96,17 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                 active_segments.insert(elem);
             }
             temp_segments.clear();
+        }
+
+        if (event.status == event_status::vertical) {
+            for (auto item : active_segments) {
+                if (intersect(*event.segment, *item)) {
+                    auto intersection = intersectSegments(*event.segment, *item);
+                    result.emplace_back(intersection, event.segment, item);
+                }
+            }
+            events.erase(events.begin());
+            continue;
         }
 
         tree_type::iterator insert_result;
