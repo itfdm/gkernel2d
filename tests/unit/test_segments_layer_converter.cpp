@@ -4,13 +4,17 @@
 
 using namespace gkernel;
 
-void check_result(const SegmentsLayer& segments_layer, const std::vector<Segment>& expected){
+void check_result(const SegmentsLayer &segments_layer, const std::vector<Segment> &expected)
+{
     REQUIRE_EQ(segments_layer.size(), expected.size());
 
-    for (const auto& seg : expected) {
+    for (const auto &seg : expected)
+    {
         bool segment_finded = false;
-        for (size_t i = 0; i < segments_layer.size(); ++i) {
-            if (segments_layer[i] == seg) {
+        for (size_t i = 0; i < segments_layer.size(); ++i)
+        {
+            if (segments_layer[i] == seg)
+            {
                 segment_finded = true;
                 break;
             }
@@ -19,26 +23,25 @@ void check_result(const SegmentsLayer& segments_layer, const std::vector<Segment
     }
 }
 
-void test_no_intersections(){
-     std::vector<Segment> test_segments = {
+void test_no_intersections()
+{
+    std::vector<Segment> test_segments = {
         {{1, 6}, {3, 6}},
         {{1, 3}, {4, 6}},
         {{1, 1}, {2, 2}},
         {{3, 4}, {6, 2}},
-        {{6, 6}, {6, 3}}
-    };
+        {{6, 6}, {6, 3}}};
     SegmentsSet seg_set(test_segments);
 
     std::vector<std::tuple<Segment, segment_id, segment_id>> intersections;
     SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections);
 
-    std::vector<Segment> expected={
+    std::vector<Segment> expected = {
         {{1, 6}, {3, 6}},
         {{1, 3}, {4, 6}},
         {{1, 1}, {2, 2}},
         {{3, 4}, {6, 2}},
-        {{6, 6}, {6, 3}}
-    };
+        {{6, 6}, {6, 3}}};
 
     check_result(segments_layer, expected);
 }
@@ -48,19 +51,17 @@ void test_simple_intersections()
     std::vector<Segment> test_segments = {
         {{1, 5}, {10, 2}},
         {{2, 2}, {6, 6}},
-        {{4, 6}, {9, 1}}
-    };
+        {{4, 6}, {9, 1}}};
 
     SegmentsSet seg_set(test_segments);
     std::vector<std::tuple<Segment, segment_id, segment_id>> intersections;
-    SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections)={
+    SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections) = {
         {{{4, 4}, {4, 4}}, 0, 2},
         {{{7, 3}, {7, 3}}, 0, 1},
-        {{{5, 5}, {5, 5}}, 1, 2}
-    };
+        {{{5, 5}, {5, 5}}, 1, 2}};
 
-    std::vector<Segment> expected={
-        {{2,2}, {4, 4}},
+    std::vector<Segment> expected = {
+        {{2, 2}, {4, 4}},
         {{4, 4}, {5, 5}},
         {{5, 5}, {6, 6}},
         {{1, 5}, {4, 4}},
@@ -68,8 +69,7 @@ void test_simple_intersections()
         {{7, 3}, {10, 2}},
         {{4, 6}, {5, 5}},
         {{5, 5}, {7, 3}},
-        {{7, 3}, {9, 1}}
-    };
+        {{7, 3}, {9, 1}}};
 
     check_result(segments_layer, expected);
 }
@@ -77,30 +77,28 @@ void test_simple_intersections()
 void test_intersections_in_end_points()
 {
     std::vector<Segment> test_segments = {
-        {{1, 1}, {2, 6}},   // 0
-        {{1, 1}, {7, 3}},   // 1
-        {{2, 6}, {7, 3}},   // 2
-        {{2, 6}, {4, 2}}    // 3
+        {{1, 1}, {2, 6}}, // 0
+        {{1, 1}, {7, 3}}, // 1
+        {{2, 6}, {7, 3}}, // 2
+        {{2, 6}, {4, 2}}  // 3
     };
 
     SegmentsSet seg_set(test_segments);
-    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections={
+    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections = {
         {{{1, 1}, {1, 1}}, 0, 1},
         {{{2, 6}, {2, 6}}, 0, 2},
         {{{2, 6}, {2, 6}}, 0, 3},
         {{{2, 6}, {2, 6}}, 2, 3},
         {{{7, 3}, {7, 3}}, 1, 2},
-        {{{4, 2}, {4, 2}}, 1, 3}
-    };
+        {{{4, 2}, {4, 2}}, 1, 3}};
     SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections);
 
-    std::vector<Segment> expected={
+    std::vector<Segment> expected = {
         {{1, 1}, {2, 6}},
         {{2, 6}, {7, 3}},
         {{2, 6}, {4, 2}},
         {{1, 1}, {4, 2}},
-        {{4, 2}, {7, 3}}
-    };
+        {{4, 2}, {7, 3}}};
 
     check_result(segments_layer, expected);
 }
@@ -108,30 +106,28 @@ void test_intersections_in_end_points()
 void test_overlapping()
 {
     std::vector<Segment> test_segments = {
-        {{1, 1}, {6, 6}},   // 0
-        {{1, 4}, {5, 2}},   // 1
-        {{1, 1}, {4, 4}},   // 2
-        {{5, 5}, {7, 7}}    // 3
+        {{1, 1}, {6, 6}}, // 0
+        {{1, 4}, {5, 2}}, // 1
+        {{1, 1}, {4, 4}}, // 2
+        {{5, 5}, {7, 7}}  // 3
     };
 
     SegmentsSet seg_set(test_segments);
-    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections={
+    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections = {
         {{{3, 3}, {3, 3}}, 0, 1},
         {{{1, 1}, {4, 4}}, 0, 2},
         {{{3, 3}, {3, 3}}, 1, 2},
-        {{{5, 5}, {6, 6}}, 0, 3}
-    };
+        {{{5, 5}, {6, 6}}, 0, 3}};
     SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections);
 
-    std::vector<Segment> expected={
+    std::vector<Segment> expected = {
         {{1, 1}, {3, 3}},
         {{3, 3}, {4, 4}},
         {{4, 4}, {5, 5}},
         {{5, 5}, {6, 6}},
         {{6, 6}, {7, 7}},
         {{1, 4}, {3, 3}},
-        {{3, 3}, {5, 2}}
-    };
+        {{3, 3}, {5, 2}}};
 
     check_result(segments_layer, expected);
 }
@@ -139,17 +135,17 @@ void test_overlapping()
 void test_full_overlapping()
 {
     std::vector<Segment> test_segments = {
-        {{1, 1}, {4, 4}},   // 0
-        {{1, 1}, {7, 1}},   // 1
-        {{4, 4}, {7, 1}},   // 2
+        {{1, 1}, {4, 4}}, // 0
+        {{1, 1}, {7, 1}}, // 1
+        {{4, 4}, {7, 1}}, // 2
 
-        {{1, 1}, {4, 4}},   // 3
-        {{1, 1}, {7, 1}},   // 4
-        {{4, 4}, {7, 1}},   // 5
+        {{1, 1}, {4, 4}}, // 3
+        {{1, 1}, {7, 1}}, // 4
+        {{4, 4}, {7, 1}}, // 5
     };
     SegmentsSet seg_set(test_segments);
-    
-    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections={
+
+    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections = {
         {{{1, 1}, {1, 1}}, 0, 1},
         {{{4, 4}, {4, 4}}, 0, 2},
         {{{7, 1}, {7, 1}}, 1, 2},
@@ -164,65 +160,62 @@ void test_full_overlapping()
 
         {{{1, 1}, {4, 1}}, 0, 3},
         {{{1, 1}, {7, 1}}, 1, 4},
-        {{{4, 4}, {7, 1}}, 2, 5}
-    };
+        {{{4, 4}, {7, 1}}, 2, 5}};
 
     SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections);
 
-    std::vector<Segment> expected={
+    std::vector<Segment> expected = {
         {{1, 1}, {4, 4}},
         {{1, 1}, {7, 1}},
-        {{4, 4}, {7, 1}}
-    };
+        {{4, 4}, {7, 1}}};
 
-    check_result(segments_layer, expected);  
+    check_result(segments_layer, expected);
 }
 
-void test_star(){
+void test_star()
+{
     std::vector<Segment> test_segments = {
-        {{1, 3}, {7, 3}},   // 0
-        {{2, 5}, {6, 1}},   // 1
-        {{2, 1}, {6, 5}},   // 2
+        {{1, 3}, {7, 3}}, // 0
+        {{2, 5}, {6, 1}}, // 1
+        {{2, 1}, {6, 5}}, // 2
     };
 
     SegmentsSet seg_set(test_segments);
-    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections={
+    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections = {
         {{{4, 3}, {4, 3}}, 0, 1},
         {{{4, 3}, {4, 3}}, 0, 2},
-        {{{4, 3}, {4, 3}}, 1, 2}
-    };
+        {{{4, 3}, {4, 3}}, 1, 2}};
     SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections);
 
-    std::vector<Segment> expected={
+    std::vector<Segment> expected = {
         {{1, 3}, {4, 3}},
         {{2, 5}, {4, 3}},
         {{6, 5}, {4, 3}},
         {{7, 3}, {4, 3}},
         {{6, 1}, {4, 3}},
-        {{2, 1}, {4, 3}}
-    };
+        {{2, 1}, {4, 3}}};
 
     check_result(segments_layer, expected);
 }
 
-void test_orthogonal(){
+void test_orthogonal()
+{
     std::vector<Segment> test_segments = {
-        {{1, 2}, {5, 2}},   // 0
-        {{3, 1}, {3, 4}},   // 1
-        {{3, 4}, {6, 4}},   // 2
-        {{5, 2}, {5, 5}},   // 3
+        {{1, 2}, {5, 2}}, // 0
+        {{3, 1}, {3, 4}}, // 1
+        {{3, 4}, {6, 4}}, // 2
+        {{5, 2}, {5, 5}}, // 3
     };
 
     SegmentsSet seg_set(test_segments);
-    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections={
+    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections = {
         {{{3, 2}, {3, 2}}, 0, 1},
         {{{3, 4}, {3, 4}}, 1, 2},
         {{{5, 2}, {5, 2}}, 0, 3},
-        {{{5, 4}, {5, 4}}, 2, 3}
-    };
+        {{{5, 4}, {5, 4}}, 2, 3}};
     SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections);
 
-    std::vector<Segment> expected={
+    std::vector<Segment> expected = {
         {{1, 2}, {3, 2}},
         {{3, 2}, {5, 2}},
         {{3, 4}, {5, 4}},
@@ -230,8 +223,102 @@ void test_orthogonal(){
         {{3, 2}, {3, 1}},
         {{3, 2}, {3, 4}},
         {{5, 2}, {5, 4}},
-        {{5, 4}, {5, 5}}
+        {{5, 4}, {5, 5}}};
+
+    check_result(segments_layer, expected);
+}
+
+void test_hard()
+{
+    std::vector<Segment> test_segments = {
+        {{0, 0}, {4, 4}}, // 0
+        {{4, 4}, {8, 0}}, // 1
+        {{0, 0}, {8, 0}}, // 2
+        {{2, 4}, {4, 2}}, // 3
+        {{2, 4}, {6, 4}}, // 4
+        {{4, 2}, {6, 4}}, // 5
+        {{3, 0}, {3, 5}}, // 6
+        {{3, 5}, {8, 5}}, // 7
+        {{8, 5}, {8, 0}}, // 8
+        {{3, 0}, {8, 0}}, // 9
+        {{4, 1}, {4, 7}}, // 10
+        {{4, 7}, {6, 7}}, // 11
+        {{6, 7}, {6, 1}}, // 12
+        {{4, 1}, {6, 1}}, // 13
     };
+
+    SegmentsSet seg_set(test_segments);
+    std::vector<std::tuple<Segment, segment_id, segment_id>> intersections = {
+        {{{0, 0}, {0, 0}}, 0, 1},
+        {{{3, 3}, {3, 3}}, 0, 3},
+        {{{3, 3}, {3, 3}}, 0, 6},
+        {{{4, 4}, {4, 4}}, 0, 2},
+        {{{4, 4}, {4, 4}}, 0, 4},
+        {{{4, 4}, {4, 4}}, 0, 10},
+        {{{3, 0}, {3, 0}}, 1, 6},
+        {{{3, 0}, {8, 0}}, 1, 9},
+        {{{8, 0}, {8, 0}}, 1, 8},
+        {{{8, 0}, {8, 0}}, 1, 2},
+        {{{4, 4}, {4, 4}}, 2, 10},
+        {{{4, 4}, {4, 4}}, 2, 4},
+        {{{5, 3}, {5, 3}}, 2, 5},
+        {{{6, 2}, {6, 2}}, 2, 11},
+        {{{8, 0}, {8, 0}}, 2, 8},
+        {{{8, 0}, {8, 0}}, 2, 9},
+        {{{2, 4}, {2, 4}}, 3, 4},
+        {{{3, 3}, {3, 3}}, 3, 6},
+        {{{4, 2}, {4, 2}}, 3, 10},
+        {{{4, 2}, {4, 2}}, 3, 5},
+        {{{4, 4}, {4, 4}}, 4, 10},
+        {{{6, 4}, {6, 4}}, 4, 5},
+        {{{6, 4}, {6, 4}}, 4, 12},
+        {{{4, 2}, {4, 2}}, 5, 10},
+        {{{6, 4}, {6, 4}}, 5, 12},
+        {{{3, 0}, {3, 0}}, 6, 9},
+        {{{3, 5}, {3, 5}}, 6, 7},
+        {{{4, 5}, {4, 5}}, 7, 10},
+        {{{6, 5}, {6, 5}}, 7, 12},
+        {{{8, 5}, {8, 5}}, 7, 8},
+        {{{8, 0}, {8, 0}}, 8, 9},
+        {{{4, 1}, {4, 1}}, 10, 13},
+        {{{4, 7}, {4, 7}}, 10, 11},
+        {{{6, 7}, {6, 7}}, 11, 12},
+        {{{6, 1}, {6, 1}}, 12, 13},
+    };
+    SegmentsLayer segments_layer = Converter::convertToSegmentsLayer(seg_set, intersections);
+
+    std::vector<Segment> expected = {
+        {{0, 0}, {3, 3}},
+        {{3, 3}, {4, 4}},
+        {{4, 4}, {5, 3}},
+        {{5, 3}, {6, 2}},
+        {{6, 2}, {8, 0}},
+        {{0, 0}, {3, 0}},
+        {{3, 0}, {8, 0}},
+        {{3, 0}, {3, 3}},
+        {{3, 3}, {3, 4}},
+        {{3, 4}, {3, 5}},
+        {{3, 5}, {4, 5}},
+        {{4, 5}, {6, 5}},
+        {{6, 5}, {8, 5}},
+        {{8, 5}, {8, 0}},
+        {{4, 2}, {3, 3}},
+        {{3, 3}, {2, 4}},
+        {{2, 4}, {3, 4}},
+        {{3, 4}, {4, 4}},
+        {{4, 4}, {6, 4}},
+        {{6, 4}, {5, 3}},
+        {{5, 3}, {4, 2}},
+        {{4, 1}, {4, 2}},
+        {{4, 2}, {4, 4}},
+        {{4, 4}, {4, 5}},
+        {{4, 5}, {4, 7}},
+        {{4, 7}, {6, 7}},
+        {{6, 7}, {6, 5}},
+        {{6, 5}, {6, 4}},
+        {{6, 4}, {6, 2}},
+        {{6, 2}, {6, 1}},
+        {{6, 1}, {4, 1}}};
 
     check_result(segments_layer, expected);
 }
@@ -269,4 +356,9 @@ TEST_CASE("Test star")
 TEST_CASE("Test orthogonal")
 {
     test_orthogonal();
+}
+
+TEST_CASE("Test hard")
+{
+    test_hard();
 }
