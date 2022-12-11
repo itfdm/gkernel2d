@@ -56,7 +56,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
 
     result.reserve(segments.size() * 2);
 
-	std::set<Event> events;
+    std::set<Event> events;
     double x_sweeping_line = 0;
 
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
@@ -69,11 +69,11 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
     using tree_type = RBTree<const Segment*, decltype(compare_segments)>;
     tree_type active_segments(compare_segments);
 
-	for (std::size_t idx = 0; idx < segments.size(); ++idx) {
+    for (std::size_t idx = 0; idx < segments.size(); ++idx) {
         Segment& segment = const_cast<Segment&>(segments[idx]);
-		events.insert({segment, segment.min().x(), event_status::start});
-		events.insert({segment, segment.max().x(), event_status::end});
-	}
+        events.insert({segment, segment.min().x(), event_status::start});
+        events.insert({segment, segment.max().x(), event_status::end});
+    }
 
     std::vector<const Segment*> temp_segments;
     temp_segments.reserve(segments.size());
