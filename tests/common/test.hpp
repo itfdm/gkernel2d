@@ -7,4 +7,6 @@
 
 #include "doctest.hpp"
 
+#define DECLARE_TEST(TestName) TEST_CASE(#TestName) { TestName(); }
+
 #endif // __GKERNEL_HPP_TEST
