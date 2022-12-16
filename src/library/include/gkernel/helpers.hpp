@@ -13,7 +13,7 @@ namespace gkernel {
 struct Segment;
 
 using data_type = double;
-using label_data_type = uint64_t;
+using label_data_type = int64_t;
 using label_type = uint8_t;
 using segment_id = size_t;
 

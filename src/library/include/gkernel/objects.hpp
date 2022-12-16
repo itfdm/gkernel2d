@@ -9,6 +9,7 @@ namespace gkernel {
 class SegmentsSetCommon;
 class SegmentsSet;
 class Intersection;
+class SegmentPair;
 
 struct Point {
     Point() : _x(max_data_type_value), _y(max_data_type_value) {};
@@ -64,6 +65,7 @@ private:
     friend class SegmentsSetCommon;
     friend class SegmentsSet;
     friend class Intersection;
+    friend class SegmentPair;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Segment& segment) {
