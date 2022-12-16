@@ -31,8 +31,8 @@ static SegmentsSet SegmentPair::segmentlabel(const SegmentsSet& Segmentset) {
     double x_sweeping_line = 0;
 
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
-        double y1 = get_sweeping_line_y(*first, x_sweeping_line);
-        double y2 = get_sweeping_line_y(*second, x_sweeping_line);
+        double y1 = get_sweeping_line_y(*first, x_sweeping_line + 0.000000001);
+        double y2 = get_sweeping_line_y(*second, x_sweeping_line + 0.000000001);
         if (y1 - y2 != 0) return y1 < y2;
         return first->id < second->id;
     };
@@ -65,8 +65,9 @@ static SegmentsSet SegmentPair::segmentlabel(const SegmentsSet& Segmentset) {
     while (events.size() > 0) {
         auto event = *events.begin();
         if (event.x != x_sweeping_line) {
-            while (active_segments.size()) {
-                auto it = active_segments.begin();
+            auto count = 0;
+            auto it = active_segments.begin();
+            while (count != active_segments.size()) {          
                 temp_segments.push_back(*it);
                 if (event.status == event_status::start) {
                     auto prev_segment = it;
@@ -91,7 +92,13 @@ static SegmentsSet SegmentPair::segmentlabel(const SegmentsSet& Segmentset) {
                     //result.set_label_value(3, **it, intermediate_result_next);
 
                 }
-                active_segments.erase(it);
+                count++;
+                it++;
+            }
+
+            while (active_segments.size()) {
+                auto iter = active_segments.begin();
+                active_segments.erase(iter);
             }
             x_sweeping_line = event.x;
             for (auto& elem : temp_segments) {
