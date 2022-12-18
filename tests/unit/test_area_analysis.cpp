@@ -166,6 +166,57 @@ void test_phase_1_3()
     }
 }
 
+void test_phase_1_4()
+{
+    std::vector<Segment> input_segments = {
+        {{1, 8}, {2, 8}},
+        {{1, 3}, {1, 8}},
+        {{2, 3}, {1, 3}},
+        {{2, 11}, {12, 11}},
+        {{2, 8}, {2, 11}},
+        {{2, 8}, {8, 8}},
+        {{2, 3}, {2, 8}},
+        {{8, 3}, {2, 3}},
+        {{2, 1}, {2, 3}},
+        {{12, 1}, {2, 1}},
+        {{8, 8}, {8, 3}},
+        {{9, 10}, {11, 10}},
+        {{9, 8}, {9, 10}},
+        {{11, 8}, {9, 8}},
+        {{9, 6}, {12, 6}},
+        {{9, 3}, {9, 6}},
+        {{12, 3}, {9, 3}},
+        {{11, 10}, {11, 8}},
+        {{12, 11}, {12, 6}},
+        {{12, 6}, {15, 6}},
+        {{12, 6}, {12, 3}},
+        {{15, 3}, {12, 3}},
+        {{12, 3}, {12, 1}},
+        {{15, 6}, {15, 3}}};
+
+    SegmentsLayer expected = input_segments;
+
+    expected.set_labels_types({0, 1, 2});
+    expected.set_label_values(0, {1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1});
+    expected.set_label_values(1, {-1, 0, 1, -1, 3, 4, 5, 6, 7, 8, 5, 3, 11, 12, 13, 14, 15, 11, 3, 18, 19, 20, 21, 19});
+    expected.set_label_values(2, {1, 2, -1, 4, 5, 6, 7, 8, 9, -1, 9, 12, 13, 14, 15, 16, 9, 14, 19, 20, 21, 22, 9, 21});
+
+    SegmentsLayer test_layer = input_segments;
+    test_layer.set_labels_types({0, 1, 2});
+    test_layer.set_label_values(0, {1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1});
+
+    auto actual = AreaAnalysis::findSegmentsNeighbours(test_layer);
+
+    REQUIRE_EQ(actual.size(), expected.size());
+
+    for (size_t i = 0; i < expected.size(); i++)
+    {
+        REQUIRE_EQ(actual.get_label_value(0, actual[i]), expected.get_label_value(0, expected[i]));
+        REQUIRE_EQ(actual.get_label_value(1, actual[i]), expected.get_label_value(1, expected[i]));
+        REQUIRE_EQ(actual.get_label_value(2, actual[i]), expected.get_label_value(2, expected[i]));
+    }
+}
+
 void test_1()
 {
     std::vector<Segment> input_seg = {
@@ -293,9 +344,56 @@ void test_3()
     check_result(actual, expected);
 }
 
+void test_4()
+{
+    std::vector<Segment> input_seg = {
+        {{1, 8}, {2, 8}},
+        {{1, 3}, {1, 8}},
+        {{2, 3}, {1, 3}},
+        {{2, 11}, {12, 11}},
+        {{2, 8}, {2, 11}},
+        {{2, 8}, {8, 8}},
+        {{2, 3}, {2, 8}},
+        {{8, 3}, {2, 3}},
+        {{2, 1}, {2, 3}},
+        {{12, 1}, {2, 1}},
+        {{8, 8}, {8, 3}},
+        {{9, 10}, {11, 10}},
+        {{9, 8}, {9, 10}},
+        {{11, 8}, {9, 8}},
+        {{9, 6}, {12, 6}},
+        {{9, 3}, {9, 6}},
+        {{12, 3}, {9, 3}},
+        {{11, 10}, {11, 8}},
+        {{12, 11}, {12, 6}},
+        {{12, 6}, {15, 6}},
+        {{12, 6}, {12, 3}},
+        {{15, 3}, {12, 3}},
+        {{12, 3}, {12, 1}},
+        {{15, 6}, {15, 3}}};
+
+    SegmentsLayer input_phase1 = input_seg;
+    input_phase1.set_labels_types({0, 1, 2});
+    input_phase1.set_label_values(0, {1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1});
+    auto test_layer = AreaAnalysis::findSegmentsNeighbours(input_phase1);
+
+    SegmentsLayer expected = input_seg;
+    expected.set_labels_types({0, 1, 2, 3});
+
+    expected.set_label_values(0, {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0});
+    expected.set_label_values(1, {0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1});
+    expected.set_label_values(2, {0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0});
+    expected.set_label_values(3, {1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1});
+
+    auto actual = AreaAnalysis::markAreas(test_layer);
+    check_result(actual, expected);
+}
+
 DECLARE_TEST(test_phase_1_1);
 DECLARE_TEST(test_phase_1_2);
 DECLARE_TEST(test_phase_1_3);
+DECLARE_TEST(test_phase_1_4);
 DECLARE_TEST(test_1);
 DECLARE_TEST(test_2);
 DECLARE_TEST(test_3);
+DECLARE_TEST(test_4);
