@@ -9,6 +9,7 @@ namespace gkernel {
 class SegmentsSetCommon;
 class SegmentsSet;
 class Intersection;
+class AreaAnalysis;
 
 struct Point {
     Point() : _x(max_data_type_value), _y(max_data_type_value) {};
@@ -57,6 +58,11 @@ struct Segment {
         return _begin_point.x() > _end_point.x() ? _begin_point : _end_point;
     }
 
+    // TODO: remove this
+    segment_id _debug_get_id() const {
+        return id;
+    }
+
 private:
     Point _begin_point, _end_point;
     segment_id id;
@@ -64,6 +70,7 @@ private:
     friend class SegmentsSetCommon;
     friend class SegmentsSet;
     friend class Intersection;
+    friend class AreaAnalysis;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Segment& segment) {
