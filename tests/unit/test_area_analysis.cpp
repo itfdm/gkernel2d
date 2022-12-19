@@ -284,9 +284,9 @@ void test_2()
     SegmentsLayer expected = input_seg;
     expected.set_labels_types({0, 1, 2, 3});
 
-    expected.set_label_values(0, {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0});
+    expected.set_label_values(0, {0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0});
     expected.set_label_values(1, {0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0});
-    expected.set_label_values(2, {1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1});
+    expected.set_label_values(2, {1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1});
     expected.set_label_values(3, {0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0});
 
     auto actual = AreaAnalysis::markAreas(test_layer);
@@ -299,7 +299,7 @@ void test_3()
     std::vector<Segment> input_seg = {
         {{2.5, 6}, {5.5, 6}},
         {{5, 5}, {2.5, 6}},
-        {{4, 3}, {5, 3}},
+        {{4, 3}, {5, 5}},
         {{10, 3}, {4, 3}},
         {{5, 5}, {5.5, 6}},
         {{10, 3}, {5, 5}},
