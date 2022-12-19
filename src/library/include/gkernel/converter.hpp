@@ -16,6 +16,10 @@ public:
 
     static CircuitsSet convertToCircuitsSet(const CircuitsLayer& circuits);
     static SegmentsSet convertToSegmentsSet(const SegmentsLayer& segments);
+
+// private: temp solution for testing
+    static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& orig_segments,
+                                                const std::vector<std::tuple<Segment, segment_id, segment_id>>& intersections);
 };
 
 } // namespace gkernel

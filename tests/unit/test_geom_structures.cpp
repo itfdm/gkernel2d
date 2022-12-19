@@ -1,5 +1,4 @@
 #include "test.hpp"
-#include "gkernel/objects.hpp"
 #include "gkernel/containers.hpp"
 
 using namespace gkernel;
