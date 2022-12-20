@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(_gkernel_ver_major 0)
-set(_gkernel_ver_minor 1)
+set(_gkernel_ver_minor 2)
 
 project(GKERNEL VERSION ${_gkernel_ver_major}.${_gkernel_ver_minor} LANGUAGES CXX)
 
