@@ -36,7 +36,11 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point) {
 
 struct Segment {
     Segment() : _begin_point(), _end_point() {};
-    Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {}
+    Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {
+        if (_begin_point.x() > _end_point.x()) {
+            _is_reversed = true;
+        }
+    }
 
     bool operator==(const Segment& other) const {
         return this->_begin_point == other._begin_point && this->_end_point == other._end_point;
@@ -58,6 +62,10 @@ struct Segment {
         return _begin_point.x() > _end_point.x() ? _begin_point : _end_point;
     }
 
+    bool is_reversed() const {
+        return _is_reversed;
+    }
+
     // TODO: remove this
     segment_id _debug_get_id() const {
         return id;
@@ -66,6 +74,7 @@ struct Segment {
 private:
     Point _begin_point, _end_point;
     segment_id id;
+    bool _is_reversed = false;
 
     friend class SegmentsSetCommon;
     friend class SegmentsSet;
