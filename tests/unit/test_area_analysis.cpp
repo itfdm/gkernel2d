@@ -2,49 +2,61 @@
 #include "gkernel/objects.hpp"
 #include "gkernel/containers.hpp"
 #include "gkernel/area_analyzer.hpp"
+#include <chrono>
 
 using namespace gkernel;
 
-enum test_labels {
+enum test_labels
+{
     circuits_layer_id = 0
 };
 
-void TestAreasSimple() {
+void TestAreasSimple()
+{
     std::vector<Segment> segments = {
         {{0, 0}, {1, 1}},
         {{0, 1}, {1, 2}},
         {{0, 2}, {1, 3}},
-        {{0, 3}, {1, 4}}
-    };
+        {{0, 3}, {1, 4}}};
     SegmentsSet layer(segments);
-    layer.set_labels_types({ test_labels::circuits_layer_id });
-    for (std::size_t idx = 0; idx < layer.size(); ++idx) {
+    layer.set_labels_types({test_labels::circuits_layer_id});
+    for (std::size_t idx = 0; idx < layer.size(); ++idx)
+    {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 0);
     }
 
     SegmentsLayer segments_layer_with_neighbours = AreaAnalysis::findSegmentsNeighbours(layer);
 
-    for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx) {
+    for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx)
+    {
         std::cout << "Segment: " << segments_layer_with_neighbours[idx] << std::endl;
         label_data_type top = segments_layer_with_neighbours.get_label_value(1, segments_layer_with_neighbours[idx]);
         label_data_type bottom = segments_layer_with_neighbours.get_label_value(2, segments_layer_with_neighbours[idx]);
-        if (top >= 0) {
+        if (top >= 0)
+        {
             std::cout << "top: " << segments_layer_with_neighbours[top] << std::endl;
-        } else {
+        }
+        else
+        {
             std::cout << "top neighbour not found" << std::endl;
         }
-        if (bottom >= 0) {
+        if (bottom >= 0)
+        {
             std::cout << "bottom: " << segments_layer_with_neighbours[bottom] << std::endl;
-        } else {
+        }
+        else
+        {
             std::cout << "bottom neighbour not found" << std::endl;
         }
     }
 
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl
+              << std::endl;
 
     SegmentsLayer segments_layer_with_marked_areas = AreaAnalysis::markAreas(segments_layer_with_neighbours);
 
-    for (std::size_t idx = 0; idx < segments_layer_with_marked_areas.size(); ++idx) {
+    for (std::size_t idx = 0; idx < segments_layer_with_marked_areas.size(); ++idx)
+    {
         std::cout << "Segment: " << segments_layer_with_marked_areas[idx] << std::endl;
         std::cout << "Top area, first circuits layer: " << segments_layer_with_marked_areas.get_label_value(0, segments_layer_with_marked_areas[idx]) << std::endl;
         std::cout << "Top area, second circuits layer: " << segments_layer_with_marked_areas.get_label_value(1, segments_layer_with_marked_areas[idx]) << std::endl;
@@ -55,7 +67,8 @@ void TestAreasSimple() {
     std::cout << std::endl;
 }
 
-void TestAreasDefault() {
+void TestAreasDefault()
+{
     std::vector<Segment> segments = {
         {{1, 3}, {3, 5}},
         {{3, 5}, {6, 8}},
@@ -73,38 +86,47 @@ void TestAreasDefault() {
         {{9, 3}, {7, 1}},
         {{7, 1}, {5, 3}},
         {{5, 3}, {3, 5}},
-        {{3, 5}, {1, 7}}
-    };
+        {{3, 5}, {1, 7}}};
     SegmentsSet layer(segments);
-    layer.set_labels_types({ test_labels::circuits_layer_id });
-    for (std::size_t idx = 0; idx < 8; ++idx) {
+    layer.set_labels_types({test_labels::circuits_layer_id});
+    for (std::size_t idx = 0; idx < 8; ++idx)
+    {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 0);
     }
-    for (std::size_t idx = 8; idx < layer.size(); ++idx) {
+    for (std::size_t idx = 8; idx < layer.size(); ++idx)
+    {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 1);
     }
 
     SegmentsLayer segments_layer_with_neighbours = AreaAnalysis::findSegmentsNeighbours(layer);
 
-    for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx) {
+    for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx)
+    {
         std::cout << "Segment: " << segments_layer_with_neighbours[idx] << std::endl;
         label_data_type top = segments_layer_with_neighbours.get_label_value(1, segments_layer_with_neighbours[idx]);
         label_data_type bottom = segments_layer_with_neighbours.get_label_value(2, segments_layer_with_neighbours[idx]);
-        if (top >= 0) {
+        if (top >= 0)
+        {
             std::cout << "top: " << segments_layer_with_neighbours[top] << std::endl;
-        } else {
+        }
+        else
+        {
             std::cout << "top neighbour not found" << std::endl;
         }
-        if (bottom >= 0) {
+        if (bottom >= 0)
+        {
             std::cout << "bottom: " << segments_layer_with_neighbours[bottom] << std::endl;
-        } else {
+        }
+        else
+        {
             std::cout << "bottom neighbour not found" << std::endl;
         }
         std::cout << std::endl;
     }
 }
 
-void TestAreasFirstPhase() {
+void TestAreasFirstPhase()
+{
     std::vector<Segment> input_segments = {
         {{1, 7}, {6, 12}},
         {{3, 5}, {1, 7}},
@@ -122,8 +144,7 @@ void TestAreasFirstPhase() {
         {{10, 8}, {12, 6}},
         {{10, 8}, {11.5, 5.5}},
         {{12, 6}, {11.5, 5.5}},
-        {{11.5, 5.5}, {13, 3}}
-    };
+        {{11.5, 5.5}, {13, 3}}};
 
     SegmentsSet expected = input_segments;
 
@@ -140,14 +161,16 @@ void TestAreasFirstPhase() {
 
     REQUIRE_EQ(actual.size(), expected.size());
 
-    for (std::size_t idx = 0; idx < expected.size(); ++idx) {
+    for (std::size_t idx = 0; idx < expected.size(); ++idx)
+    {
         REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(1, actual[idx]), expected.get_label_value(1, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(2, actual[idx]), expected.get_label_value(2, expected[idx]));
     }
 }
 
-void TestAreasSecondPhase() {
+void TestAreasSecondPhase()
+{
     std::vector<Segment> input_segments = {
         {{1, 7}, {6, 12}},
         {{3, 5}, {1, 7}},
@@ -165,8 +188,7 @@ void TestAreasSecondPhase() {
         {{10, 8}, {12, 6}},
         {{10, 8}, {11.5, 5.5}},
         {{12, 6}, {11.5, 5.5}},
-        {{11.5, 5.5}, {13, 3}}
-    };
+        {{11.5, 5.5}, {13, 3}}};
 
     SegmentsSet expected = input_segments;
     expected.set_labels_types({0, 1, 2, 3});
@@ -186,7 +208,8 @@ void TestAreasSecondPhase() {
 
     REQUIRE_EQ(actual.size(), expected.size());
 
-    for (std::size_t idx = 0; idx < actual.size(); ++idx) {
+    for (std::size_t idx = 0; idx < actual.size(); ++idx)
+    {
         REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(1, actual[idx]), expected.get_label_value(1, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(2, actual[idx]), expected.get_label_value(2, expected[idx]));
@@ -194,7 +217,60 @@ void TestAreasSecondPhase() {
     }
 }
 
+std::vector<gkernel::Segment> generate_layers()
+{
+    gkernel::data_type x = 0;
+    std::vector<gkernel::Segment> segments;
+    segments.emplace_back(gkernel::Point(x, 2), gkernel::Point(2, 4));
+    segments.emplace_back(gkernel::Point(x + 2, 0), gkernel::Point(x, 2));
+    segments.emplace_back(gkernel::Point(x + 2, 2), gkernel::Point(x + 3, 3));
+    segments.emplace_back(gkernel::Point(x + 3, 3), gkernel::Point(x + 4, 2));
+    segments.emplace_back(gkernel::Point(x + 4, 2), gkernel::Point(x + 3, 1));
+    segments.emplace_back(gkernel::Point(x + 3, 1), gkernel::Point(x + 2, 0));
+    x += 2;
+
+    int seg_count = 50000;
+    for (int i = 0; i < seg_count; i++)
+    {
+        segments.emplace_back(gkernel::Point(x, 2), gkernel::Point(x + 1, 3));
+        segments.emplace_back(gkernel::Point(x + 1, 3), gkernel::Point(x + 2, 4));
+        segments.emplace_back(gkernel::Point(x + 2, 4), gkernel::Point(x + 3, 3));
+        segments.emplace_back(gkernel::Point(x + 3, 3), gkernel::Point(x + 4, 2));
+        segments.emplace_back(gkernel::Point(x + 4, 2), gkernel::Point(x + 3, 1));
+        segments.emplace_back(gkernel::Point(x + 3, 1), gkernel::Point(x + 2, 0));
+        segments.emplace_back(gkernel::Point(x + 2, 0), gkernel::Point(x + 1, 1));
+        segments.emplace_back(gkernel::Point(x + 1, 1), gkernel::Point(x, 2));
+        x += 2;
+    }
+    return segments;
+}
+
+void BM_mark_area()
+{
+    auto segments = generate_layers();
+    gkernel::SegmentsSet input = segments;
+
+    gkernel::label_data_type layer_num = 0;
+    input.set_labels_types({0});
+    int idx = 0;
+    for (idx = 0; idx < 6; idx++)
+        input.set_label_value(0, input[idx], layer_num);
+    layer_num = 1;
+    for (idx = 6; idx < input.size(); idx += 8)
+    {
+        for (std::size_t j = 0; j < 8; j++)
+            input.set_label_value(0, input[idx + j], layer_num);
+        layer_num = 0 ? 1 : 0;
+    }
+    std::cout << idx;
+    gkernel::SegmentsSet layer = gkernel::AreaAnalysis::findSegmentsNeighbours(input);
+
+    gkernel::SegmentsSet result = gkernel::AreaAnalysis::markAreas(layer);
+
+    REQUIRE_EQ(true, true);
+}
 // DECLARE_TEST(TestAreasSimple);
 // DECLARE_TEST(TestAreasDefault);
-DECLARE_TEST(TestAreasFirstPhase);
-DECLARE_TEST(TestAreasSecondPhase);
+DECLARE_TEST(BM_mark_area);
+// DECLARE_TEST(TestAreasFirstPhase);
+// DECLARE_TEST(TestAreasSecondPhase);

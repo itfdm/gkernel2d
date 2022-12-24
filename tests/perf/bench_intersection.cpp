@@ -18,8 +18,10 @@ struct xorshift128_state
 class xorshift128
 {
     xorshift128_state state{1, 2, 3, 4};
+
 public:
-    uint32_t random() {
+    uint32_t random()
+    {
         uint32_t t = state.d;
         uint32_t const s = state.a;
         state.d = state.c;
@@ -42,7 +44,7 @@ gkernel::SegmentsSet generateRandomSegments(size_t count, int w_width, int w_hei
     for (size_t idx = 0; idx < count; ++idx)
     {
         segments.emplace_back({gkernel::Point(random.random() % window_width, random.random() % window_height),
-                              gkernel::Point(random.random() % window_width, random.random() % window_height)});
+                               gkernel::Point(random.random() % window_width, random.random() % window_height)});
     }
     return segments;
 }
@@ -67,19 +69,30 @@ gkernel::SegmentsSet generateRandomSegments(size_t count, int w_width, int w_hei
     return segments;
 }
 
-class SegmentsComparator {
+class SegmentsComparator
+{
 public:
-    bool operator()(const gkernel::Segment& lhs, const gkernel::Segment& rhs) const {
-        if (lhs.start() != rhs.start()) {
-            if (lhs.start().x() != rhs.start().x()) {
+    bool operator()(const gkernel::Segment &lhs, const gkernel::Segment &rhs) const
+    {
+        if (lhs.start() != rhs.start())
+        {
+            if (lhs.start().x() != rhs.start().x())
+            {
                 return lhs.start().x() < rhs.start().x();
-            } else {
+            }
+            else
+            {
                 return lhs.start().y() < rhs.start().y();
             }
-        } else {
-            if (lhs.end().x() != rhs.end().x()) {
+        }
+        else
+        {
+            if (lhs.end().x() != rhs.end().x())
+            {
                 return lhs.end().x() < rhs.end().x();
-            } else {
+            }
+            else
+            {
                 return lhs.end().y() < rhs.end().y();
             }
         }
@@ -102,12 +115,14 @@ static void BM_segment_set_intersection(benchmark::State &state)
 
     auto segments_set = generateRandomSegments(state.range(0), window_width, window_height, 25);
 
-    for (auto _ : state) {
+    for (auto _ : state)
+    {
         benchmark::DoNotOptimize(result = gkernel::Intersection::intersectSetSegments(segments_set));
     }
 
     // average relative segments length
-    for (std::size_t idx = 0; idx < segments_set.size(); ++idx) {
+    for (std::size_t idx = 0; idx < segments_set.size(); ++idx)
+    {
         auto segment = segments_set[idx];
         rel_length = std::sqrt(std::pow(segment.start().x() - segment.end().x(), 2) + std::pow(segment.start().y() - segment.end().y(), 2)) / static_cast<double>(long_side);
         if (rel_length > 1)
@@ -117,23 +132,28 @@ static void BM_segment_set_intersection(benchmark::State &state)
 
     double sum = 0;
     mean_rel_length = std::accumulate(rel_length_vec.begin(), rel_length_vec.end(), sum) / static_cast<double>(segments_set.size());
-    for (double x : rel_length_vec) {
-        if (x <= 0.25) {
+    for (double x : rel_length_vec)
+    {
+        if (x <= 0.25)
+        {
             bet_0_25++;
             continue;
         }
 
-        if (x <= 0.5) {
+        if (x <= 0.5)
+        {
             bet_25_50++;
             continue;
         }
 
-        if (x <= 0.8) {
+        if (x <= 0.8)
+        {
             bet_50_80++;
             continue;
         }
 
-        if (x <= 1) {
+        if (x <= 1)
+        {
             bet_80_100++;
             continue;
         }
@@ -148,7 +168,7 @@ static void BM_segment_set_intersection(benchmark::State &state)
 }
 
 BENCHMARK(BM_segment_set_intersection)
-->Unit(benchmark::kMillisecond)
+    ->Unit(benchmark::kMillisecond)
     ->Args({100})
     ->Args({1000})
     ->Args({3000})
@@ -159,7 +179,7 @@ BENCHMARK(BM_segment_set_intersection)
     ->Args({500000})
     ->Args({750000})
     ->Args({1000000});
-    // ->Args({2000000})
-    // ->Args({10000000});
+// ->Args({2000000})
+// ->Args({10000000});
 
 BENCHMARK_MAIN();
