@@ -36,7 +36,9 @@ public:
     static std::vector<IntersectionPoint> intersectSetSegments(const SegmentsSet& segments);
 private:
     enum event_status {
-        start = 2,
+        start = 4,
+        intersection_right = 3,
+        intersection_left = 2,
         vertical = 1,
         end = 0
     };
@@ -45,11 +47,10 @@ private:
         Event(const gkernel::Segment& segment, gkernel::data_type x, event_status status) : segment(&segment), x(x), status(status) {}
 
         bool operator<(const Event& other) const {
-            if (x != other.x) return x < other.x;
+            if (std::abs(x - other.x) > 3 * EPS) return x < other.x;
             if (status != other.status) return static_cast<int8_t>(status) > static_cast<int8_t>(other.status);
             return this->segment->id < other.segment->id;
         }
-
         const Segment* segment;
         gkernel::data_type x;
         event_status status;

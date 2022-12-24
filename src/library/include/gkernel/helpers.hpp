@@ -20,6 +20,8 @@ using segment_id = size_t;
 constexpr data_type min_data_type_value = std::numeric_limits<data_type>::min();
 constexpr data_type max_data_type_value = std::numeric_limits<data_type>::max();
 
+constexpr static double EPS = 1e-9;
+
 class Labeling {
 protected:
     Labeling() : _label_types({}), _labels_data({}) {}
