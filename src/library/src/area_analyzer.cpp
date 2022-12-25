@@ -13,9 +13,8 @@ enum event_status {
 };
 
 struct Event {
-    Event(double x, const Segment* segment, event_status status, double y = 0) : x(x), segment(segment), status(status) {}
+    Event(double x, const Segment* segment, event_status status) : x(x), segment(segment), status(status) {}
     double x;
-    double y;
     const Segment* segment;
     event_status status;
 };
@@ -53,9 +52,6 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
 
     SegmentsSet result(std::move(temp_result));
 
-#ifdef GKERNEL_DEBUG
-    bool vertical_segments_present = false;
-#endif
     for (std::size_t idx = 0; idx < result.size(); ++idx) {
         const Segment& segment = result[idx];
         if (segment.start().x() != segment.end().x()) {
@@ -67,11 +63,6 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
         }
     }
 
-#ifdef GKERNEL_DEBUG
-    if (vertical_segments_present) {
-        std::cerr << "Warning: vertical segments are not supported by findSegmentsNeighbours" << std::endl;
-    }
-#endif
 
     std::sort(events.begin(), events.end(), [](const Event& lhs, const Event& rhs) {
         if (lhs.x == rhs.x) {
