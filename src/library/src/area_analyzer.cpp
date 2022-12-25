@@ -9,7 +9,7 @@
 
 namespace gkernel
 {
-    tbb::global_control MAXTHREADS(tbb::global_control::max_allowed_parallelism, 4);
+    tbb::global_control MAXTHREADS(tbb::global_control::max_allowed_parallelism, 6);
     static constexpr double EPS = 1e-7;
 
     static constexpr label_data_type unchecked_segment = -2;
@@ -262,9 +262,9 @@ namespace gkernel
 
         tbb::parallel_for(tbb::blocked_range<size_t>(0, result.size()), [&](const auto &range)
                           {
-                               m.lock();
-            std::cout << "Range size " << (range.end()-range.begin()) << " from " << range.begin() << " to " << range.end() << std::endl;
-        m.unlock(); 
+        //                        m.lock();
+        //     std::cout << "Range size " << (range.end()-range.begin()) << " from " << range.begin() << " to " << range.end() << std::endl;
+        // m.unlock(); 
            for (size_t idx = range.begin(); idx < range.end(); ++idx ){
             label_data_type top = layer.get_label_value(_find_neighbours_label_type::top, layer[idx]);
             bool first_circuits_layer_top = false;
