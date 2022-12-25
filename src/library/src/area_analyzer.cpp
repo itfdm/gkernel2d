@@ -9,13 +9,15 @@ static constexpr label_data_type unchecked_segment = -2;
 static constexpr label_data_type unassigned = -1;
 
 enum event_status {
+    vertical,
     start,
     end
 };
 
 struct Event {
-    Event(double x, const Segment* segment, event_status status) : x(x), segment(segment), status(status) {}
+    Event(double x, const Segment* segment, event_status status, double y = 0) : x(x), segment(segment), status(status) {}
     double x;
+    double y;
     const Segment* segment;
     event_status status;
 };
@@ -62,11 +64,9 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
             events.emplace_back(segment.min().x(), &segment, event_status::start);
             events.emplace_back(segment.max().x(), &segment, event_status::end);
         }
-#ifdef GKERNEL_DEBUG
         else {
-            vertical_segments_present = true;
+             events.emplace_back(segment.min().x(), &segment, event_status::vertical);
         }
-#endif
     }
 
 #ifdef GKERNEL_DEBUG
@@ -116,8 +116,35 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
             if (current_event->status == event_status::start) {
                 x_sweeping_line = x_sweeping_line_new;
                 active_segments.insert(current_event->segment);
-            } else {
+            } else if (current_event->status == event_status::end) {
                 active_segments.erase(current_event->segment);
+            } else {
+                result.set_label_value(_find_neighbours_label_type::top, *current_event->segment, unassigned);
+                result.set_label_value(_find_neighbours_label_type::bottom, *current_event->segment, unassigned);
+
+
+                auto next_id = -1;
+                auto prev_id = -1;
+                auto active_iter = active_segments.end();
+                for (auto Idx = active_iter; Idx != active_segments.begin(); Idx--) {
+                    --active_iter;
+                    if (next_id != -1 && prev_id != -1) {
+                        break;
+                    }
+                    if (current_event->segment->max().y() <= (**active_iter).min().y()) {
+                        next_id = (**active_iter).id;
+                    }
+                    else if (current_event->segment->min().y() >= (**active_iter).min().y()) {
+                        prev_id = (**active_iter).id;
+                    }
+                }
+                if (next_id != -1) {
+                    result.set_label_value(_find_neighbours_label_type::top, *current_event->segment, next_id);
+                }
+                if (prev_id != -1) {
+                    result.set_label_value(_find_neighbours_label_type::bottom, *current_event->segment, prev_id);
+                }
+
             }
             ++current_event;
         }

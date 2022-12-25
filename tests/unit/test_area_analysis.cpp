@@ -56,31 +56,53 @@ void TestAreasSimple() {
 }
 
 void TestAreasDefault() {
+    // std::vector<Segment> segments = {
+    //     {{1, 3}, {3, 5}},
+    //     {{3, 5}, {6, 8}},
+    //     {{6, 8}, {10, 8}},
+    //     {{10, 8}, {11.5, 5.5}},
+    //     {{11.5, 5.5}, {13, 3}},
+    //     {{13, 3}, {9, 3}},
+    //     {{9, 3}, {5, 3}},
+    //     {{5, 3}, {1, 3}}, //
+    //     {{1, 7}, {6, 12}},
+    //     {{6, 12}, {10, 8}},
+    //     {{10, 8}, {12, 6}},
+    //     {{12, 6}, {11.5, 5.5}},
+    //     {{11.5, 5.5}, {9, 3}},
+    //     {{9, 3}, {7, 1}},
+    //     {{7, 1}, {5, 3}},
+    //     {{5, 3}, {3, 5}},
+    //     {{3, 5}, {1, 7}}
+    // };
+
     std::vector<Segment> segments = {
-        {{1, 3}, {3, 5}},
-        {{3, 5}, {6, 8}},
-        {{6, 8}, {10, 8}},
-        {{10, 8}, {11.5, 5.5}},
-        {{11.5, 5.5}, {13, 3}},
-        {{13, 3}, {9, 3}},
-        {{9, 3}, {5, 3}},
-        {{5, 3}, {1, 3}}, //
-        {{1, 7}, {6, 12}},
-        {{6, 12}, {10, 8}},
-        {{10, 8}, {12, 6}},
-        {{12, 6}, {11.5, 5.5}},
-        {{11.5, 5.5}, {9, 3}},
-        {{9, 3}, {7, 1}},
-        {{7, 1}, {5, 3}},
-        {{5, 3}, {3, 5}},
-        {{3, 5}, {1, 7}}
+        {{2, 1}, {2, 4}},
+        {{2, 4}, {2, 5}},
+        {{2, 5}, {2, 7}},
+        {{2, 7}, {4, 7}},
+        {{4, 7}, {6, 7}},
+        {{6, 7}, {8, 7}},
+        {{8, 7}, {8, 5}},
+        {{8, 5}, {8, 4}}, 
+        {{8, 4}, {8, 1}},
+        {{8, 1}, {2, 1}},  //
+        {{1, 4}, {2, 5}},
+        {{2, 5}, {4, 7}},
+        {{4, 7}, {5, 8}},
+        {{5, 8}, {6, 7}},
+        {{6, 7}, {8, 5}},
+        {{8, 5}, {9, 4}},
+        {{9, 4}, {8, 4}},
+        {{8, 4}, {2, 4}},
+        {{2, 4}, {1, 4}}
     };
     SegmentsSet layer(segments);
     layer.set_labels_types({ test_labels::circuits_layer_id });
-    for (std::size_t idx = 0; idx < 8; ++idx) {
+    for (std::size_t idx = 0; idx < 10; ++idx) {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 0);
     }
-    for (std::size_t idx = 8; idx < layer.size(); ++idx) {
+    for (std::size_t idx = 10; idx < layer.size(); ++idx) {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 1);
     }
 
@@ -297,7 +319,7 @@ void TestAreasSecond() {
 }
 
 // DECLARE_TEST(TestAreasSimple);
-// DECLARE_TEST(TestAreasDefault);
+DECLARE_TEST(TestAreasDefault);
 DECLARE_TEST(TestAreasFirstPhase);
 DECLARE_TEST(TestAreasSecondPhase);
 DECLARE_TEST(TestAreasFirst);
