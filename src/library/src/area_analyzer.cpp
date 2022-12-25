@@ -3,8 +3,6 @@
 
 namespace gkernel {
 
-static constexpr double EPS = 1e-7;
-
 static constexpr label_data_type unchecked_segment = -2;
 static constexpr label_data_type unassigned = -1;
 
