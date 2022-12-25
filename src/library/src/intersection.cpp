@@ -44,7 +44,7 @@ Point Intersection::intersectSegments(const Segment& first, const Segment& secon
 inline double get_sweeping_line_y(const Segment& segment, double x) {
     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
     double m = segment.start().y() - k * segment.start().x();
-    return k * x + m;
+    return k * (x + EPS) + m;
 }
 
 std::vector<IntersectionPoint> Intersection::intersectSetSegments(const SegmentsSet& segments) {
@@ -54,9 +54,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         return result;
     }
 
-    result.reserve(segments.size() * 2);
-
-    std::set<Event> events;
+	std::set<Event> events;
     double x_sweeping_line = 0;
 
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
@@ -66,36 +64,52 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         return first->id < second->id;
     };
 
+    auto compare_segments_pairs = [](const std::pair<const Segment*, const  Segment*>& first, const std::pair<const  Segment*, const Segment*>& second) -> bool {
+        if ((first.first == second.first || first.first == second.second) && (first.second == second.first || first.second == second.second)) {
+            return false;
+        }
+        if (first.first != second.first) {
+            return reinterpret_cast<uintptr_t>(first.first) < reinterpret_cast<uintptr_t>(second.first);
+        }
+        return reinterpret_cast<uintptr_t>(first.second) < reinterpret_cast<uintptr_t>(second.second);
+    };
+
+    std::set<std::pair<const Segment*, const Segment*>, decltype(compare_segments_pairs)> checked_pairs(compare_segments_pairs);
+
     using tree_type = RBTree<const Segment*, decltype(compare_segments)>;
     tree_type active_segments(compare_segments);
 
-    for (std::size_t idx = 0; idx < segments.size(); ++idx) {
-        const Segment& segment = segments[idx];
-        if (segment.min().x() != segment.max().x()) {
-            events.insert({segment, segment.min().x(), event_status::start});
-            events.insert({segment, segment.max().x(), event_status::end});
+	for (std::size_t idx = 0; idx < segments.size(); ++idx) {
+        Segment& segment = const_cast<Segment&>(segments[idx]);
+        if (segment.start().x() != segment.end().x()) {
+            events.insert({ segment, std::min(segment.start().x(), segment.end().x()), event_status::start });
+            events.insert({ segment, std::max(segment.start().x(), segment.end().x()), event_status::end });
         }
         else {
-            events.insert({segment, segment.min().x(), event_status::vertical});
+            events.insert({ segment, segment.start().x(), event_status::vertical });
         }
-    }
+	}
 
     std::vector<const Segment*> temp_segments;
     temp_segments.reserve(segments.size());
 
     while (events.size() > 0) {
         auto event = *events.begin();
-        if (event.x != x_sweeping_line) {
-            while (active_segments.size()) {
-                auto it = active_segments.begin();
-                temp_segments.push_back(*it);
-                active_segments.erase(it);
+        // TODO: check neighbors only for start and intersection events?
+        temp_segments.clear();
+        if (event.status == event_status::intersection_right) {
+            auto event_it = events.begin();
+            while (event_it != events.end() && event_it->x == event.x && event_it->status == event_status::intersection_right) {
+                temp_segments.push_back(event_it->segment);
+                active_segments.erase(event_it->segment);
+                ++event_it;
             }
             x_sweeping_line = event.x;
-            for (auto& elem : temp_segments) {
-                active_segments.insert(elem);
+            for (auto& segment : temp_segments) {
+                active_segments.insert(segment);
             }
-            temp_segments.clear();
+        } else {
+            x_sweeping_line = event.x;
         }
 
         if (event.status == event_status::vertical) {
@@ -109,39 +123,57 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             continue;
         }
 
-        tree_type::iterator insert_result;
+        auto insert_result = active_segments.insert(event.segment);
 
-        if (event.status == event_status::start) {
-            insert_result = active_segments.insert(event.segment).first;
-        } else {
-            insert_result = active_segments.find(event.segment);
-        }
-
-        auto prev_segment = insert_result;
-        while (prev_segment != active_segments.begin()) {
+        auto prev_segment = insert_result.first;
+        if (prev_segment != active_segments.begin()) {
             --prev_segment;
             if (intersect(*event.segment, **prev_segment)) {
                 auto intersection = intersectSegments(*event.segment, **prev_segment);
                 result.emplace_back(intersection, event.segment, *prev_segment);
+                if (checked_pairs.insert(std::make_pair(event.segment, *prev_segment)).second) {
+                    events.insert({*event.segment, intersection.x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({**prev_segment, intersection.x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({*event.segment, intersection.x() + 2 * EPS, event_status::intersection_right});
+                    events.insert({**prev_segment, intersection.x() + 2 * EPS, event_status::intersection_right});
+                }
             }
         }
 
-        auto next_segment = insert_result;
+        auto next_segment = insert_result.first;
         ++next_segment;
-        while (next_segment != active_segments.end()) {
+        if (next_segment != active_segments.end()) {
             if (intersect(*event.segment, **next_segment)) {
                 auto intersection = intersectSegments(*event.segment, **next_segment);
                 result.emplace_back(intersection, event.segment, *next_segment);
+                if (checked_pairs.insert(std::make_pair(event.segment, *next_segment)).second) {
+                    events.insert({*event.segment, intersection.x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({**next_segment, intersection.x() - 2 * EPS, event_status::intersection_left});
+                    events.insert({*event.segment, intersection.x() + 2 * EPS, event_status::intersection_right});
+                    events.insert({**next_segment, intersection.x() + 2 * EPS, event_status::intersection_right});
+                }
             }
-            ++next_segment;
         }
 
         if (event.status == event_status::end) {
-            active_segments.erase(event.segment);
+            if (prev_segment != active_segments.begin() && next_segment != active_segments.end()) {
+                if (intersect(**prev_segment, **next_segment)) {
+                    auto intersection = intersectSegments(**prev_segment, **next_segment);
+                    result.emplace_back(intersection, *prev_segment, *next_segment);
+                    if (checked_pairs.insert(std::make_pair(*prev_segment, *next_segment)).second) {
+                        events.insert({**next_segment, intersection.x() - 2 * EPS, event_status::intersection_left});
+                        events.insert({**prev_segment, intersection.x() - 2 * EPS, event_status::intersection_left});
+                        events.insert({**next_segment, intersection.x() + 2 * EPS, event_status::intersection_right});
+                        events.insert({**prev_segment, intersection.x() + 2 * EPS, event_status::intersection_right});
+                    }
+                }
+            }
+            if (event.status == event_status::end) {
+                active_segments.erase(event.segment);
+            }
         }
         events.erase(events.begin());
     }
-
     std::sort(result.begin(), result.end(), [](const IntersectionPoint& first, const gkernel::IntersectionPoint& second) {
         if (first.point().x() != second.point().x()) return first.point().x() < second.point().x();
         return first.point().y() < second.point().y();
