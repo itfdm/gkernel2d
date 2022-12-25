@@ -57,7 +57,6 @@ protected:
 class SegmentsSet : public SegmentsSetCommon {
 public:
     SegmentsSet() : SegmentsSetCommon() {}
-    // SegmentsSet(const SegmentsSet& segment_set) : SegmentsSetCommon(segment_set._segments) {}
     SegmentsSet(const std::vector<Segment>& segments) : SegmentsSetCommon(segments) {}
 
     virtual void emplace_back(const Segment& segment) {
