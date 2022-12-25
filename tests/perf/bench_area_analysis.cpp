@@ -18,15 +18,15 @@ gkernel::SegmentsLayer generate_layers()
 {
     gkernel::data_type x = 0;
     std::vector<gkernel::Segment> segments;
-    segments.emplace_back(gkernel::Point(x, 2), gkernel::Point(2, 4));
-    segments.emplace_back(gkernel::Point(x + 2, 0), gkernel::Point(x, 2));
-    segments.emplace_back(gkernel::Point(x + 2, 2), gkernel::Point(x + 3, 3));
-    segments.emplace_back(gkernel::Point(x + 3, 3), gkernel::Point(x + 4, 2));
-    segments.emplace_back(gkernel::Point(x + 4, 2), gkernel::Point(x + 3, 1));
-    segments.emplace_back(gkernel::Point(x + 3, 1), gkernel::Point(x + 2, 0));
+    segments.emplace_back(gkernel::Point(0, 2), gkernel::Point(2, 4));
+    segments.emplace_back(gkernel::Point(2, 4), gkernel::Point(3, 3));
+    segments.emplace_back(gkernel::Point(3, 3), gkernel::Point(4, 2));
+    segments.emplace_back(gkernel::Point(4, 2), gkernel::Point(3, 1));
+    segments.emplace_back(gkernel::Point(3, 1), gkernel::Point(2, 0));
+    segments.emplace_back(gkernel::Point(2, 0), gkernel::Point(0, 2));
     x += 2;
 
-    int seg_count = 5000;
+    int seg_count = 700000;
     for (int i = 0; i < seg_count; i++)
     {
         segments.emplace_back(gkernel::Point(x, 2), gkernel::Point(x + 1, 3));
@@ -73,8 +73,7 @@ static void BM_mark_area(benchmark::State &state)
 }
 
 BENCHMARK(BM_mark_area)
-    ->Unit(benchmark::kMillisecond)
-    ->Iterations(1);
+    ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();
 

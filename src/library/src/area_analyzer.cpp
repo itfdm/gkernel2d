@@ -1,12 +1,15 @@
+#define TBB_PREVIEW_GLOBAL_CONTROL 1
 #include "gkernel/area_analyzer.hpp"
 #include "gkernel/rbtree.hpp"
 #include <tbb/parallel_for.h>
 #include <tbb/concurrent_unordered_map.h>
 #include <tbb/blocked_range.h>
+#include <tbb/global_control.h>
+#include <mutex>
 
 namespace gkernel
 {
-
+    tbb::global_control MAXTHREADS(tbb::global_control::max_allowed_parallelism, 4);
     static constexpr double EPS = 1e-7;
 
     static constexpr label_data_type unchecked_segment = -2;
@@ -197,7 +200,6 @@ namespace gkernel
         for (std::size_t idx = 0; idx < result.size(); ++idx)
         {
             label_data_type top = layer.get_label_value(_find_neighbours_label_type::top, layer[idx]);
-            std::cout << top << std::endl;
             bool first_circuits_layer_top = false;
             bool second_circuits_layer_top = false;
 
@@ -252,7 +254,7 @@ namespace gkernel
             const Segment &segment = layer[idx];
             temp_result.emplace_back(segment);
         }
-
+        std::mutex m;
         SegmentsSet result(std::move(temp_result));
 
         result.set_labels_types({_mark_areas_label_type::first_circuits_layer_top, _mark_areas_label_type::second_circuits_layer_top,
@@ -260,6 +262,9 @@ namespace gkernel
 
         tbb::parallel_for(tbb::blocked_range<size_t>(0, result.size()), [&](const auto &range)
                           {
+                               m.lock();
+            std::cout << "Range size " << (range.end()-range.begin()) << " from " << range.begin() << " to " << range.end() << std::endl;
+        m.unlock(); 
            for (size_t idx = range.begin(); idx < range.end(); ++idx ){
             label_data_type top = layer.get_label_value(_find_neighbours_label_type::top, layer[idx]);
             bool first_circuits_layer_top = false;
