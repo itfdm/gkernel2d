@@ -133,7 +133,7 @@ void TestAreasVert() {
     expected.set_labels_types({0, 1, 2});
     expected.set_label_values(0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1});
     expected.set_label_values(1, {17, 11, 3, -1, 12, -1, -1, 15, 16, 17, -1, 3, -1, -1, 5, -1, 15, 11, 10});
-    expected.set_label_values(2, {9, 17, 11, 11, 17, 14, 16, 16, -1, -1, 18, 17, 4, 4, 17, 16, -1, 9, -1});
+    expected.set_label_values(2, {9, 17, 11, 11, 17, 14, 15, 16, -1, -1, 18, 17, 4, 4, 17, 16, -1, 9, -1});
 
     SegmentsSet test_layer = input_segments;
     test_layer.set_labels_types({0, 1, 2});

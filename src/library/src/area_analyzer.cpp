@@ -132,9 +132,10 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
                     if (current_event->segment->max().y() <= (**active_iter).min().y()) {
                         next_id = (**active_iter).id;
                     }
-                    else if (current_event->segment->min().y() >= (**active_iter).min().y()) {
+                    else if (current_event->segment->min().y() >= (**active_iter).min().y() && prev_id == -1) {
                         prev_id = (**active_iter).id;
                     }
+                    else break;
                 }
                 if (next_id != -1) {
                     result.set_label_value(_find_neighbours_label_type::top, *current_event->segment, next_id);
