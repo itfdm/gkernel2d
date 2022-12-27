@@ -105,6 +105,8 @@ BENCHMARK(BM_mark_area)
     ->Args({7000})
     ->Args({10000})
     ->Args({20000})
-    ->Args({50000});
+    ->Args({50000})
+    ->Args({100000})
+    ->Iterations(1);
 
 BENCHMARK_MAIN();
