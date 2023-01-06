@@ -4,7 +4,8 @@ add_library(gkernel
     src/parser.cpp
     src/intersection.cpp
     src/area_analyzer.cpp
-    src/serializer.cpp)
+    src/serializer.cpp
+    src/converter.cpp)
 
 add_library(GKERNEL::gkernel ALIAS gkernel)
 

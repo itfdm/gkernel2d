@@ -5,6 +5,8 @@
 
 namespace gkernel {
 
+class Converter;
+
 class SegmentsSetCommon : public Labeling {
 protected:
     SegmentsSetCommon() : _segments({}) {}
@@ -41,6 +43,9 @@ public:
     const Segment& operator[](size_t idx) const {
         return _segments[idx];
     }
+    Segment& operator[](size_t idx) {
+        return _segments[idx];
+    }
     size_t size() const {
         return _segments.size();
     }
@@ -52,6 +57,7 @@ protected:
     std::vector<Segment> _segments;
 
     friend class CircuitsSet;
+    friend class Converter;
 };
 
 class SegmentsSet : public SegmentsSetCommon {
