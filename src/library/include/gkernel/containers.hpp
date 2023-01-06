@@ -15,6 +15,11 @@ protected:
             _segments[i].id = i;
         }
     }
+    SegmentsSetCommon(std::vector<Segment>&& segments) : _segments(std::move(segments)) {
+        for (size_t i = 0; i < _segments.size(); ++i) {
+            _segments[i].id = i;
+        }
+    }
 
 public:
     bool operator==(const SegmentsSetCommon& other) const {
@@ -35,7 +40,6 @@ public:
     void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {
         _labels_data[get_offset(label) + segment.id] = label_value;
     }
-
     const Segment& operator[](size_t idx) const {
         return _segments[idx];
     }
@@ -155,7 +159,7 @@ public:
 
 private:
     std::vector<Segment> _segments;
-    std::vector<size_t> _indices; // circuit bounds (ex: if input circuits has size eq 2, 3, 4 respectively, then _indices={0, 2, 5, 9})
+    std::vector<size_t> _indices; // circuit bounds (ex: if input circuits have size eq 2, 3, 4 respectively, then _indices={0, 2, 5, 9})
 };
 
 using SegmentsLayer = const SegmentsSet;

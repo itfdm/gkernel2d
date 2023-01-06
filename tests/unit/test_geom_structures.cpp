@@ -57,8 +57,6 @@ void SegmentsSetlabels() {
 
     REQUIRE_EQ(segments_set.has_label(TestLabels::FIRST_LABEL), false);
 
-    REQUIRE_THROWS(segments_set.set_labels_types({TestLabels::RESERVED}));
-
     std::vector<label_type> label_types = { TestLabels::FIRST_LABEL, TestLabels::SECOND_LABEL };
     segments_set.set_labels_types(label_types);
 

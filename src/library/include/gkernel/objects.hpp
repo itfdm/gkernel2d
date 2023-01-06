@@ -10,6 +10,7 @@ class SegmentsSetCommon;
 class SegmentsSet;
 class Intersection;
 class Converter;
+class AreaAnalysis;
 
 struct Point {
     Point() : _x(max_data_type_value), _y(max_data_type_value) {};
@@ -23,11 +24,11 @@ struct Point {
     }
     bool operator<(const Point& other) const {
         return this->_x < other._x ||
-               this->_x == other._x && this->_y < other._y;
+            this->_x == other._x && this->_y < other._y;
     }
     bool operator>(const Point& other) const {
         return this->_x > other._x ||
-               this->_x == other._x && this->_y > other._y;
+            this->_x == other._x && this->_y > other._y;
     }
 
     data_type x() const { return _x; }
@@ -52,7 +53,7 @@ struct Segment {
 
     bool operator==(const Segment& other) const {
         return this->_begin_point == other._begin_point && this->_end_point == other._end_point ||
-               this->_begin_point == other._end_point && this->_end_point == other._begin_point;
+            this->_begin_point == other._end_point && this->_end_point == other._begin_point;
     }
 
     bool operator!=(const Segment& other) const {
@@ -79,6 +80,7 @@ private:
     friend class SegmentsSet;
     friend class Intersection;
     friend class Converter;
+    friend class AreaAnalysis;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Segment& segment) {

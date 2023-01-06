@@ -9,14 +9,6 @@ void SegmentsSetCommon::set_labels_types(const std::vector<label_type>& label_ty
     if (!_label_types.empty()) {
         throw std::runtime_error("Label types already initialized.");
     }
-    if (std::any_of(
-        label_types.begin(), label_types.end(),
-            [](label_type lt) {
-                return lt == static_cast<label_type>(0);
-            })
-        ) {
-        throw std::runtime_error("Zero label_type is reserved.");
-    }
     _label_types = label_types;
     _labels_data.resize(label_types.size() * _segments.size());
 }

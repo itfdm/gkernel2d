@@ -41,7 +41,7 @@ Point Intersection::intersectSegments(const Segment& first, const Segment& secon
     }
 }
 
-inline double get_sweeping_line_y(const Segment& segment, double x) {
+static inline double get_sweeping_line_y(const Segment& segment, double x) {
     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
     double m = segment.start().y() - k * segment.start().x();
     return k * (x + EPS) + m;
