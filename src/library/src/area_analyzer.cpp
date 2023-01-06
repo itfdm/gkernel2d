@@ -57,8 +57,7 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
         if (segment.start().x() != segment.end().x()) {
             events.emplace_back(segment.min().x(), &segment, event_status::start);
             events.emplace_back(segment.max().x(), &segment, event_status::end);
-        }
-        else {
+        } else {
              events.emplace_back(segment.min().x(), &segment, event_status::vertical);
         }
     }
@@ -111,11 +110,10 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
                 result.set_label_value(_find_neighbours_label_type::top, *current_event->segment, unassigned);
                 result.set_label_value(_find_neighbours_label_type::bottom, *current_event->segment, unassigned);
 
-
                 auto next_id = -1;
                 auto prev_id = -1;
                 auto active_iter = active_segments.end();
-                for (auto Idx = active_iter; Idx != active_segments.begin(); Idx--) {
+                for (auto idx = active_iter; idx != active_segments.begin(); idx--) {
                     --active_iter;
                     if (next_id != -1 && prev_id != -1) {
                         break;
@@ -125,8 +123,7 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
                     }
                     else if (current_event->segment->min().y() >= (**active_iter).min().y() && prev_id == -1) {
                         prev_id = (**active_iter).id;
-                    }
-                    else break;
+                    } else break;
                 }
                 if (next_id != -1) {
                     result.set_label_value(_find_neighbours_label_type::top, *current_event->segment, next_id);
@@ -134,7 +131,6 @@ SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
                 if (prev_id != -1) {
                     result.set_label_value(_find_neighbours_label_type::bottom, *current_event->segment, prev_id);
                 }
-
             }
             ++current_event;
         }

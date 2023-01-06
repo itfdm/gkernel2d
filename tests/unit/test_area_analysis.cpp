@@ -114,9 +114,9 @@ void TestAreasVert() {
         {{4, 7}, {6, 7}},
         {{6, 7}, {8, 7}},
         {{8, 7}, {8, 5}},
-        {{8, 5}, {8, 4}}, 
+        {{8, 5}, {8, 4}},
         {{8, 4}, {8, 1}},
-        {{8, 1}, {2, 1}},  //
+        {{8, 1}, {2, 1}},
         {{1, 4}, {2, 5}},
         {{2, 5}, {4, 7}},
         {{4, 7}, {5, 8}},
@@ -242,12 +242,6 @@ void check_result(const SegmentsLayer& actual, const SegmentsLayer& expected) {
     REQUIRE_EQ(actual.size(), expected.size());
 
     for (size_t i = 0; i < expected.size(); i++) {
-        // std::cout << "i = " << i << std::endl;
-        // std::cout << actual.get_label_value(0, actual[i]) << " " << expected.get_label_value(0, expected[i]) << std::endl;
-        // std::cout << actual.get_label_value(1, actual[i]) << " " << expected.get_label_value(1, expected[i]) << std::endl;
-        // std::cout << actual.get_label_value(2, actual[i]) << " " << expected.get_label_value(2, expected[i]) << std::endl;
-        // std::cout << actual.get_label_value(3, actual[i]) << " " << expected.get_label_value(3, expected[i]) << std::endl;
-
         REQUIRE_EQ(actual.get_label_value(0, actual[i]), expected.get_label_value(0, expected[i]));
         REQUIRE_EQ(actual.get_label_value(1, actual[i]), expected.get_label_value(1, expected[i]));
         REQUIRE_EQ(actual.get_label_value(2, actual[i]), expected.get_label_value(2, expected[i]));
