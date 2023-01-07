@@ -2,6 +2,7 @@
 #define __GKERNEL_HPP_CONVERTER
 
 #include "containers.hpp"
+#include "intersection.hpp"
 
 namespace gkernel {
 
@@ -17,9 +18,11 @@ public:
     static CircuitsSet convertToCircuitsSet(const CircuitsLayer& circuits);
     static SegmentsSet convertToSegmentsSet(const SegmentsLayer& segments);
 
+    static SegmentsSet mergeCircuitsLayers(const CircuitsLayer& first_layer, const CircuitsLayer& second_layer);
+
 // private: temp solution for testing
     static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& orig_segments,
-                                                const std::vector<std::tuple<Segment, segment_id, segment_id>>& intersections);
+                                                const std::vector<IntersectionPoint>& intersections);
 };
 
 } // namespace gkernel

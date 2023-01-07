@@ -75,19 +75,7 @@ void test_erase() {
     REQUIRE(tree.size() == 3);
 }
 
-TEST_CASE("Test item insertion")
-{
-    test_insert();
-}
-
-TEST_CASE("Test prev/next") {
-    test_prev_next();
-}
-
-TEST_CASE("Test erase") {
-    test_erase();
-}
-
-TEST_CASE("Test comparator") {
-    test_comparator();
-}
+DECLARE_TEST(test_insert)
+DECLARE_TEST(test_prev_next)
+DECLARE_TEST(test_erase)
+DECLARE_TEST(test_comparator)

@@ -20,8 +20,6 @@ using segment_id = size_t;
 constexpr data_type min_data_type_value = std::numeric_limits<data_type>::min();
 constexpr data_type max_data_type_value = std::numeric_limits<data_type>::max();
 
-constexpr static double EPS = 1e-9;
-
 class Labeling {
 protected:
     Labeling() : _label_types({}), _labels_data({}) {}
@@ -41,6 +39,8 @@ public:
     virtual void set_label_values(label_type label, const std::vector<label_data_type>& label_data) = 0;
 
     virtual void set_label_value(label_type label, const Segment& segment, label_data_type label_value) = 0;
+
+    virtual void set_label_value(label_type label, segment_id segment_id, label_data_type label_value) = 0;
 
 protected:
     std::vector<label_type> _label_types;

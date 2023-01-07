@@ -32,12 +32,6 @@ enum _mark_areas_label_type {
     second_circuits_layer_bottom
 };
 
-static inline double get_sweeping_line_y(const Segment& segment, double x) {
-    double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
-    double m = segment.start().y() - k * segment.start().x();
-    return k * (x + EPS) + m;
-}
-
 SegmentsLayer AreaAnalysis::findSegmentsNeighbours(const SegmentsLayer& layer) {
     std::vector<Event> events;
     events.reserve(layer.size() * 2);
