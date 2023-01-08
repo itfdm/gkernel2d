@@ -22,7 +22,7 @@ void TestAreasSimple() {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 0);
     }
 
-    SegmentsLayer segments_layer_with_neighbours = AreaAnalysis::findSegmentsNeighbours(layer);
+    SegmentsLayer segments_layer_with_neighbours = AreaAnalyzer::findSegmentsNeighbours(layer);
 
     for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx) {
         std::cout << "Segment: " << segments_layer_with_neighbours[idx] << std::endl;
@@ -42,7 +42,7 @@ void TestAreasSimple() {
 
     std::cout << std::endl << std::endl;
 
-    SegmentsLayer segments_layer_with_marked_areas = AreaAnalysis::markAreas(segments_layer_with_neighbours);
+    SegmentsLayer segments_layer_with_marked_areas = AreaAnalyzer::markAreas(segments_layer_with_neighbours);
 
     for (std::size_t idx = 0; idx < segments_layer_with_marked_areas.size(); ++idx) {
         std::cout << "Segment: " << segments_layer_with_marked_areas[idx] << std::endl;
@@ -85,7 +85,7 @@ void TestAreasDefault() {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 1);
     }
 
-    SegmentsLayer segments_layer_with_neighbours = AreaAnalysis::findSegmentsNeighbours(layer);
+    SegmentsLayer segments_layer_with_neighbours = AreaAnalyzer::findSegmentsNeighbours(layer);
 
     for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx) {
         std::cout << "Segment: " << segments_layer_with_neighbours[idx] << std::endl;
@@ -139,7 +139,7 @@ void TestAreasVert() {
     test_layer.set_labels_types({0, 1, 2});
     test_layer.set_label_values(0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1});
 
-    auto actual = AreaAnalysis::findSegmentsNeighbours(test_layer);
+    auto actual = AreaAnalyzer::findSegmentsNeighbours(test_layer);
 
     REQUIRE_EQ(actual.size(), expected.size());
 
@@ -182,7 +182,7 @@ void TestAreasFirstPhase() {
     test_layer.set_labels_types({0, 1, 2});
     test_layer.set_label_values(0, {1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0});
 
-    auto actual = AreaAnalysis::findSegmentsNeighbours(test_layer);
+    auto actual = AreaAnalyzer::findSegmentsNeighbours(test_layer);
 
     REQUIRE_EQ(actual.size(), expected.size());
 
@@ -226,7 +226,7 @@ void TestAreasSecondPhase() {
     test_layer.set_labels_types({0, 1, 2});
     test_layer.set_label_values(0, {1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0});
 
-    auto actual = AreaAnalysis::findAreas(test_layer);
+    auto actual = AreaAnalyzer::findAreas(test_layer);
 
     REQUIRE_EQ(actual.size(), expected.size());
 
@@ -271,7 +271,7 @@ void TestAreasFirst() {
     SegmentsSet input_phase1 = input_seg;
     input_phase1.set_labels_types({0, 1, 2});
     input_phase1.set_label_values(0, {0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0});
-    auto test_layer = AreaAnalysis::findSegmentsNeighbours(input_phase1);
+    auto test_layer = AreaAnalyzer::findSegmentsNeighbours(input_phase1);
 
     SegmentsSet expected = input_seg;
     expected.set_labels_types({0, 1, 2, 3});
@@ -281,7 +281,7 @@ void TestAreasFirst() {
     expected.set_label_values(2, {1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1});
     expected.set_label_values(3, {0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0});
 
-    auto actual = AreaAnalysis::markAreas(test_layer);
+    auto actual = AreaAnalyzer::markAreas(test_layer);
 
     check_result(actual, expected);
 }
@@ -321,7 +321,7 @@ void TestAreasSecond() {
     SegmentsSet input_phase1 = input_seg;
     input_phase1.set_labels_types({0, 1, 2});
     input_phase1.set_label_values(0, {1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0});
-    auto test_layer = AreaAnalysis::findSegmentsNeighbours(input_phase1);
+    auto test_layer = AreaAnalyzer::findSegmentsNeighbours(input_phase1);
 
     SegmentsSet expected = input_seg;
     expected.set_labels_types({0, 1, 2, 3});
@@ -332,7 +332,7 @@ void TestAreasSecond() {
     expected.set_label_values(3, {1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0});
 
 
-    auto actual = AreaAnalysis::markAreas(test_layer);
+    auto actual = AreaAnalyzer::markAreas(test_layer);
     check_result(actual, expected);
 }
 

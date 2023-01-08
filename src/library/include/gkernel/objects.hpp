@@ -10,7 +10,7 @@ class SegmentsSetCommon;
 class SegmentsSet;
 class Intersection;
 class Converter;
-class AreaAnalysis;
+class AreaAnalyzer;
 
 struct Point {
     Point() : _x(max_data_type_value), _y(max_data_type_value) {};
@@ -80,7 +80,7 @@ private:
     friend class SegmentsSet;
     friend class Intersection;
     friend class Converter;
-    friend class AreaAnalysis;
+    friend class AreaAnalyzer;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Segment& segment) {

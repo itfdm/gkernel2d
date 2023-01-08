@@ -9,9 +9,9 @@
 
 namespace gkernel {
 
-class AreaAnalysis {
+class AreaAnalyzer {
 public:
-    AreaAnalysis() = delete;
+    AreaAnalyzer() = delete;
 
     static SegmentsLayer findAreas(const SegmentsLayer& layer) {
         SegmentsLayer neighbours = findSegmentsNeighbours(layer);

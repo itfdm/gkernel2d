@@ -66,13 +66,13 @@ void test_areas(const SegmentsLayer& segments_layer) {
     expected.set_label_values(3, { 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 });
 
     auto layer = Converter::convertToSegmentsLayer(segments_layer);
-    auto marked_areas = AreaAnalysis::findAreas(layer);
+    auto marked_areas = AreaAnalyzer::findAreas(layer);
 
     check_result(marked_areas, expected);
 }
 
 void test_filter(const SegmentsLayer& segments_layer) {
-    SegmentsLayer filtered = AreaAnalysis::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
+    SegmentsLayer filtered = AreaAnalyzer::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
         return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
                 !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
                !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&

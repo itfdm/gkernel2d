@@ -45,7 +45,7 @@ SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segment
         return 1;
     };
 
-    size_t new_segments_count = orig_segments.size();
+    int64_t new_segments_count = orig_segments.size();
 
     for (const auto& intersect_info : intersections) {
         const auto& intersection = Segment(intersect_info.point(), intersect_info.point());
@@ -54,6 +54,8 @@ SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segment
 
         new_segments_count += calc_num_additional_segments(first_seg, second_seg, intersection);
     }
+
+    new_segments_count = std::max(new_segments_count, static_cast<int64_t>(orig_segments.size()));
 
     std::map<segment_id, std::vector<Segment>> divided_segments;
 
