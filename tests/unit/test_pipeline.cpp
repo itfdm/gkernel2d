@@ -25,32 +25,7 @@ void check_result(const SegmentsLayer& actual, const SegmentsLayer& expected) {
     }
 }
 
-void TestSimple() {
-    Circuit first_circuit = {{
-        {{8, 13}, {16, 13}},
-        {{16, 13}, {10, 10}},
-        {{10, 10}, {8, 13}}
-    }}; // zero layer
-
-    Circuit second_circuit = {{
-        {{8, 6}, {11, 12}},
-        {{11, 12}, {16, 12}},
-        {{16, 12}, {8, 6}}
-    }}; // first layer
-
-    Circuit third_circuit = {{
-        {{4, 3}, {7, 9}},
-        {{7, 9}, {12, 9}},
-        {{12, 9}, {15, 3}},
-        {{15, 3}, {4, 3}}
-    }}; // zero layer
-
-    Circuit fourth_circuit = {{
-        {{2.5, 6}, {16, 6}},
-        {{16, 6}, {10, 3}},
-        {{10, 3}, {2.5, 6}}
-    }}; // first layer
-
+void test_areas(const SegmentsLayer& segments_layer) {
     SegmentsSet expected = {{
         {{8, 13}, {16, 13}},
         {{10, 10}, {14, 12}},
@@ -83,10 +58,6 @@ void TestSimple() {
         {{5, 5}, {10, 3}}
     }};
 
-    CircuitsLayer first_layer = {{ first_circuit, third_circuit }};
-    CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
-    auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
-
     expected.set_labels_types({ 0, 1, 2, 3 });
 
     expected.set_label_values(0, { 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1 });
@@ -94,10 +65,53 @@ void TestSimple() {
     expected.set_label_values(2, { 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1 });
     expected.set_label_values(3, { 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 });
 
-    auto result_layer = Converter::convertToSegmentsLayer(merged_layers);
-    auto analyzed_areas = AreaAnalysis::findAreas(result_layer);
+    auto layer = Converter::convertToSegmentsLayer(segments_layer);
+    auto marked_areas = AreaAnalysis::findAreas(layer);
 
-    check_result(analyzed_areas, expected);
+    check_result(marked_areas, expected);
+}
+
+void test_filter(const SegmentsLayer& segments_layer) {
+    auto filtered = AreaAnalysis::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, segment_id id) {
+        return segments.get_label_value(0, id) == 1 && segments.get_label_value(1, id) == 1 &&
+                !(segments.get_label_value(2, id) == 1 && segments.get_label_value(3, id) == 1) ||
+               !(segments.get_label_value(0, id) == 1 && segments.get_label_value(1, id) == 1) &&
+                segments.get_label_value(2, id) == 1 && segments.get_label_value(3, id) == 1;
+    });
+    OutputSerializer::serializeSegmentsSet(filtered, "filtered.txt");
+}
+
+void TestSimple() {
+    Circuit first_circuit = {{
+        {{8, 13}, {16, 13}},
+        {{16, 13}, {10, 10}},
+        {{10, 10}, {8, 13}}
+    }};
+    Circuit second_circuit = {{
+        {{8, 6}, {11, 12}},
+        {{11, 12}, {16, 12}},
+        {{16, 12}, {8, 6}}
+    }};
+
+    Circuit third_circuit = {{
+        {{4, 3}, {7, 9}},
+        {{7, 9}, {12, 9}},
+        {{12, 9}, {15, 3}},
+        {{15, 3}, {4, 3}}
+    }};
+
+    Circuit fourth_circuit = {{
+        {{2.5, 6}, {16, 6}},
+        {{16, 6}, {10, 3}},
+        {{10, 3}, {2.5, 6}}
+    }};
+
+    CircuitsLayer first_layer = {{ first_circuit, third_circuit }};
+    CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
+    auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
+    auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
+    test_areas(segments_layer);
+    test_filter(segments_layer);
 }
 
 DECLARE_TEST(TestSimple);

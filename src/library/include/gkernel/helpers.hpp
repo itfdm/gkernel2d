@@ -34,6 +34,8 @@ public:
 
     virtual label_data_type get_label_value(label_type label, const Segment& segment) const = 0;
 
+    virtual label_data_type get_label_value(label_type label, segment_id segment_id) const = 0;
+
     virtual void set_labels_types(const std::vector<label_type>& label_types) = 0;
 
     virtual void set_label_values(label_type label, const std::vector<label_data_type>& label_data) = 0;

@@ -21,6 +21,18 @@ public:
 
     static SegmentsLayer findSegmentsNeighbours(const SegmentsLayer& layer);
     static SegmentsLayer markAreas(const SegmentsLayer& layer);
+
+    template<typename Callable>
+    static SegmentsLayer filterSegmentsByLabels(const SegmentsLayer& layer, Callable callable) {
+        auto areas = findAreas(layer);
+        std::vector<Segment> result;
+        for (std::size_t idx = 0; idx < areas.size(); ++idx) {
+            if (callable(areas, idx)) {
+                result.emplace_back(areas[idx]);
+            }
+        }
+        return result;
+    }
 };
 
 } // namespace gkernel
