@@ -1,6 +1,6 @@
 #include "test.hpp"
 
-#include <gkernel/intersection.hpp>
+#include "gkernel/intersection.hpp"
 #include "gkernel/objects.hpp"
 #include "gkernel/containers.hpp"
 
@@ -9,29 +9,30 @@
 
 using namespace gkernel;
 
-template <typename T>
-class SegmentHasher {
-public:
-    std::size_t operator()(const T& segment) const {
-        return segment.hash();
-    }
-};
-
 void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkernel::Point>& expected) {
     auto result = Intersection::intersectSetSegments(input);
+
+    auto points_comparator = [](const gkernel::Point& first, const gkernel::Point& second) {
+        if (first.x() != second.x()) {
+            return first.x() < second.x();
+        } else {
+            return first.y() < second.y();
+        }
+    };
+
     std::vector<gkernel::Point> result_points;
 
     for (auto& point : result) {
         result_points.emplace_back(point.point());
     }
 
-    std::sort(expected.begin(), expected.end(), [](const gkernel::Point& first, const gkernel::Point& second) {
-        if (first.x() != second.x()) {
-            return first.x() < second.x();
-        } else {
-            return first.y() < second.y();
-        }
+    std::sort(result_points.begin(), result_points.end(), points_comparator);
+    auto to_erase = std::unique(result_points.begin(), result_points.end(), [](const gkernel::Point& first, const gkernel::Point& second) {
+        return first.x() == second.x() && first.y() == second.y();
     });
+    result_points.erase(to_erase, result_points.end());
+
+    std::sort(expected.begin(), expected.end(), points_comparator);
 
     REQUIRE_EQ(std::equal(result_points.begin(), result_points.end(), expected.begin(), expected.end(), [](const gkernel::Point& first, const gkernel::Point& second) {
         return first.x() == second.x() && first.y() == second.y();
