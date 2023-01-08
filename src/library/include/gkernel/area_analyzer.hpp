@@ -27,7 +27,7 @@ public:
         auto areas = findAreas(layer);
         std::vector<Segment> result;
         for (std::size_t idx = 0; idx < areas.size(); ++idx) {
-            if (callable(areas, idx)) {
+            if (callable(areas, layer[idx])) {
                 result.emplace_back(areas[idx]);
             }
         }

@@ -75,7 +75,7 @@ void test_erase() {
     REQUIRE(tree.size() == 3);
 }
 
-DECLARE_TEST(test_insert)
-DECLARE_TEST(test_prev_next)
-DECLARE_TEST(test_erase)
-DECLARE_TEST(test_comparator)
+DECLARE_TEST(test_insert);
+DECLARE_TEST(test_prev_next);
+DECLARE_TEST(test_erase);
+DECLARE_TEST(test_comparator);

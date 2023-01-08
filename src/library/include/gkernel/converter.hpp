@@ -9,6 +9,9 @@ namespace gkernel {
 class Converter {
     Converter() = delete;
 
+    static SegmentsLayer _convertToSegmentsLayer(const SegmentsSet& orig_segments,
+                                                 const std::vector<IntersectionPoint>& intersections);
+
 public:
     static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& segments);
     static SegmentsLayer convertToSegmentsLayer(const CircuitsSet& circuits);
@@ -20,9 +23,11 @@ public:
 
     static SegmentsSet mergeCircuitsLayers(const CircuitsLayer& first_layer, const CircuitsLayer& second_layer);
 
-// private: temp solution for testing
+private:
     static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& orig_segments,
-                                                const std::vector<IntersectionPoint>& intersections);
+                                                const std::vector<IntersectionPoint>& intersections) {
+        return _convertToSegmentsLayer(orig_segments, intersections);
+    }
 };
 
 } // namespace gkernel

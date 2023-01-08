@@ -33,20 +33,12 @@ public:
         return _labels_data[get_offset(label) + segment.id];
     }
 
-    label_data_type get_label_value(label_type label, segment_id segment_id) const override {
-        return _labels_data[get_offset(label) + segment_id];
-    }
-
     void set_labels_types(const std::vector<label_type>& label_types) override;
 
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override;
 
     void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {
         _labels_data[get_offset(label) + segment.id] = label_value;
-    }
-
-    void set_label_value(label_type label, segment_id segment_id, label_data_type label_value) override {
-        _labels_data[get_offset(label) + segment_id] = label_value;
     }
 
     const Segment& operator[](size_t idx) const {
@@ -145,11 +137,9 @@ public:
     }
 
     label_data_type get_label_value(label_type label, const Segment& segment) const override { return 0; /*TODO*/};
-    label_data_type get_label_value(label_type label, segment_id segment_id) const override { return 0; /*TODO*/};
     void set_labels_types(const std::vector<label_type>& label_types) override {/*TODO*/};
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override {/*TODO*/};
     void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {/*TODO*/};
-    void set_label_value(label_type label, segment_id segment_id, label_data_type label_value) override {/*TODO*/};
 
     Circuit get_circuit(size_t idx) const {
         std::vector<Segment> segments(_segments.begin() + _indices[idx], _segments.begin() + _indices[idx + 1]);

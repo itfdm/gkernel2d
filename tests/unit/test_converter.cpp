@@ -1,6 +1,7 @@
 #include "test.hpp"
-#include "gkernel/converter.hpp"
 #include "gkernel/intersection.hpp"
+#define private public
+#include "gkernel/converter.hpp"
 
 using namespace gkernel;
 

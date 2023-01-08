@@ -6,8 +6,8 @@
 
 namespace gkernel {
 
-SegmentsLayer Converter::convertToSegmentsLayer(const SegmentsSet& orig_segments, const std::vector<IntersectionPoint>& intersections) {
-    auto calc_num_additional_seg_for_point_intersect = [](const Segment& first, const Segment& second, const Point& intersection) -> size_t {
+SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segments, const std::vector<IntersectionPoint>& intersections) {
+    auto calc_num_additional_seg_for_point_intersect = [](const Segment& first, const Segment& second, const Point& intersection) -> int8_t {
         size_t count_intersect_with_endpoints = static_cast<size_t>(first.start()  == intersection) +
                                                 static_cast<size_t>(first.end()    == intersection) +
                                                 static_cast<size_t>(second.start() == intersection) +
@@ -193,11 +193,11 @@ SegmentsSet Converter::mergeCircuitsLayers(const CircuitsLayer& first_layer, con
     result.set_labels_types({ 0 });
 
     for (std::size_t idx = 0; idx < first_layer._segments.size(); ++idx) {
-        result.set_label_value(0, idx, 0);
+        result.set_label_value(0, result[idx], 0);
     }
 
     for (std::size_t idx = first_layer._segments.size(); idx < temp_result.size(); ++idx) {
-        result.set_label_value(0, idx, 1);
+        result.set_label_value(0, result[idx], 1);
     }
 
     return result;

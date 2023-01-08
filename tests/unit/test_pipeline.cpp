@@ -72,11 +72,11 @@ void test_areas(const SegmentsLayer& segments_layer) {
 }
 
 void test_filter(const SegmentsLayer& segments_layer) {
-    auto filtered = AreaAnalysis::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, segment_id id) {
-        return segments.get_label_value(0, id) == 1 && segments.get_label_value(1, id) == 1 &&
-                !(segments.get_label_value(2, id) == 1 && segments.get_label_value(3, id) == 1) ||
-               !(segments.get_label_value(0, id) == 1 && segments.get_label_value(1, id) == 1) &&
-                segments.get_label_value(2, id) == 1 && segments.get_label_value(3, id) == 1;
+    auto filtered = AreaAnalysis::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
+        return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
+                !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
+               !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
+                segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1;
     });
     OutputSerializer::serializeSegmentsSet(filtered, "filtered.txt");
 }
