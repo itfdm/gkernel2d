@@ -72,13 +72,31 @@ void test_areas(const SegmentsLayer& segments_layer) {
 }
 
 void test_filter(const SegmentsLayer& segments_layer) {
-    auto filtered = AreaAnalysis::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
+    SegmentsLayer filtered = AreaAnalysis::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
         return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
                 !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
                !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
                 segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1;
     });
-    OutputSerializer::serializeSegmentsSet(filtered, "filtered.txt");
+
+    SegmentsLayer expected = {{
+        {{10, 10}, {14, 12}},
+        {{5, 5}, {5.5, 6}},
+        {{9.5, 9}, {12, 9}},
+        {{13.5, 6}, {14, 5}},
+        {{8, 6}, {9.5, 9}},
+        {{10, 10}, {11, 12}},
+        {{11, 12}, {14, 12}},
+        {{8, 6}, {12, 9}},
+        {{5.5, 6}, {8, 6}},
+        {{8, 6}, {13.5, 6}},
+        {{10, 3}, {14, 5}},
+        {{5, 5}, {10, 3}}
+    }};
+
+    for (size_t i = 0; i < filtered.size(); ++i) {
+        REQUIRE_EQ(filtered[i], expected[i]);
+    }
 }
 
 void TestSimple() {
