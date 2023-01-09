@@ -16,8 +16,7 @@ class AreaAnalyzer;
  * @brief Структура, описывающая геометрический объект "точка" в двумерном пространстве.
  *
  */
-struct Point
-{
+struct Point {
     /**
      * @brief Конструктор структуры.
      *
@@ -104,8 +103,7 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point) {
  * @brief Структура, описывающая геометрический объект "отрезок" в двумерном пространстве.
  *
  */
-struct Segment
-{
+struct Segment {
     /**
      * @brief Конструктор структуры.
      *

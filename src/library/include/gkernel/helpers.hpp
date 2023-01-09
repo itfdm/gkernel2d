@@ -25,8 +25,7 @@ constexpr data_type max_data_type_value = std::numeric_limits<data_type>::max();
  * @brief Контейнер для хранения типов меток и их значений.
  *
  */
-class Labeling
-{
+class Labeling {
 protected:
     Labeling(): _label_types({}), _labels_data({}) {}
 
@@ -95,8 +94,7 @@ protected:
  * @brief Родительский класс для контейнеров отрезков, добавляющий возможность определять функцию валидации хранящихся данных.
  *
  */
-class Validator
-{
+class Validator {
 protected:
     Validator(bool validation = true): _validation(validation) {}
 
