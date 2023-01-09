@@ -32,6 +32,7 @@ public:
                 result.emplace_back(areas[idx]);
                 ids.emplace_back(idx);
             }
+            return result;
         }
         if (result.empty()) {
             return SegmentsLayer();
