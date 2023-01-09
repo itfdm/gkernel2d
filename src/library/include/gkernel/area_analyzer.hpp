@@ -13,8 +13,7 @@ namespace gkernel {
      * @brief Класс, решающий задачу анализа областей.
      *
      */
-    class AreaAnalyzer
-    {
+    class AreaAnalyzer {
     public:
         AreaAnalyzer() = delete;
 

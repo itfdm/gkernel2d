@@ -24,8 +24,7 @@ namespace gkernel {
      * @brief Контейнер для хранения типов меток и их значений.
      *
      */
-    class Labeling
-    {
+    class Labeling {
     protected:
         Labeling(): _label_types({}), _labels_data({}) {}
 
@@ -92,8 +91,7 @@ namespace gkernel {
      * @brief Родительский класс для контейнеров отрезков, добавляющий возможность определять функцию валидации хранящихся данных.
      *
      */
-    class Validator
-    {
+    class Validator {
     protected:
         Validator(bool validation = true): _validation(validation) {}
 

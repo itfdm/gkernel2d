@@ -9,8 +9,7 @@ namespace gkernel {
      * @brief Класс для преобразования контейнеров одного класса в контейнеры другого класса.
      * Методы класса создают новые контейнеры на основе содержимого входных контейнеров, состояние входных данных при этом не меняется.
      */
-    class Converter
-    {
+    class Converter {
         Converter() = delete;
         static SegmentsLayer _convertToSegmentsLayer(const SegmentsSet& orig_segments,
             const std::vector<IntersectionPoint>& intersections);

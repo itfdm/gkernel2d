@@ -20,8 +20,7 @@ namespace gkernel {
      * @brief Структура, хранящая точку пересечения двух отрезков и индексы этих отрезков.
      *
      */
-    struct IntersectionPoint
-    {
+    struct IntersectionPoint {
         /**
          * @brief Конструктор структуры.
          *
@@ -70,8 +69,7 @@ namespace gkernel {
      * @brief Класс для поиска пересечений отрезков.
      *
      */
-    class Intersection
-    {
+    class Intersection {
     public:
         Intersection() = delete;
         /**
@@ -92,8 +90,7 @@ namespace gkernel {
         static std::vector<IntersectionPoint> intersectSetSegments(const SegmentsSet& segments);
 
     private:
-        enum event_status
-        {
+        enum event_status {
             start = 4,
             intersection_right = 3,
             intersection_left = 2,
@@ -101,8 +98,7 @@ namespace gkernel {
             end = 0
         };
 
-        struct Event
-        {
+        struct Event {
             Event(const gkernel::Segment& segment, gkernel::data_type x, event_status status): segment(&segment), x(x), status(status) {}
 
             bool operator<(const Event& other) const {

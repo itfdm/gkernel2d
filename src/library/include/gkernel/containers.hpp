@@ -10,8 +10,7 @@ namespace gkernel {
     /**
      * @brief Родительский класс, содержащий общие методы для контейнеров отрезков.
      */
-    class SegmentsSetCommon: public Labeling
-    {
+    class SegmentsSetCommon: public Labeling {
     protected:
         SegmentsSetCommon(): _segments({}) {}
         SegmentsSetCommon(const std::vector<Segment>& segments): _segments(segments.begin(), segments.end()) {
@@ -129,8 +128,7 @@ namespace gkernel {
      * @brief Набор отрезков, контейнер, хранящий объекты класса Segment.
      *
      */
-    class SegmentsSet: public SegmentsSetCommon
-    {
+    class SegmentsSet: public SegmentsSetCommon {
     public:
         /**
          * @brief Конструктор класса.
@@ -164,8 +162,7 @@ namespace gkernel {
      * @details Цепь представляет из себя последовательность непересекающихся отрезков, в котором конец каждого отрезка совпадает с началом последующего.
      *
      */
-    class VertexChain: public SegmentsSet, public Validator
-    {
+    class VertexChain: public SegmentsSet, public Validator {
     public:
         /**
          * @brief Конструктор класса.
@@ -215,8 +212,7 @@ namespace gkernel {
      * @brief Контур, контейнер, хранящий объекты класса Segment.
      * @details Контур — цепь, в которой начальная точка первого отрезка совпадает с конечной точкой последнего отрезка.
      */
-    class Circuit: public SegmentsSetCommon, public Validator
-    {
+    class Circuit: public SegmentsSetCommon, public Validator {
     public:
         /**
          * @brief Конструктор класса.
@@ -258,8 +254,7 @@ namespace gkernel {
      * @brief Набор контуров, контейнер для объектов класса Circuits.
      *
      */
-    class CircuitsSet: public Labeling
-    {
+    class CircuitsSet: public Labeling {
     public:
         /**
          * @brief Конструктор класса.
