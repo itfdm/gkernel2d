@@ -94,5 +94,12 @@ int main() {
     CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
     auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
+    
+    SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
+        return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
+                !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
+               !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
+                segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1;
+    });
 }
 ```
