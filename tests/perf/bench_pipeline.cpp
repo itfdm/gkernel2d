@@ -105,7 +105,7 @@ static void BM_full_pipeline(benchmark::State &state) {
 
     for (auto _ : state) {
         gkernel::SegmentsLayer segments_layer = gkernel::Converter::convertToSegmentsLayer(merged_circuits);
-        gkernel::SegmentsLayer filtered = gkernel::AreaAnalyzer::filterSegmentsByLabels(segments_layer, [](const gkernel::SegmentsLayer& segments, const gkernel::Segment& segment) {
+        gkernel::SegmentsLayer filtered = gkernel::AreaAnalyzer::markAreasAndFilter(segments_layer, [](const gkernel::SegmentsLayer& segments, const gkernel::Segment& segment) {
             return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
                     !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
                 !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&

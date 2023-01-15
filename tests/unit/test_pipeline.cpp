@@ -72,7 +72,7 @@ void test_areas(const SegmentsLayer& segments_layer) {
 }
 
 void test_filter(const SegmentsLayer& segments_layer) {
-    SegmentsLayer filtered = AreaAnalyzer::filterSegmentsByLabels(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
+    SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
         return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
                 !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
                !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
