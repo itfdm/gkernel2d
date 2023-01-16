@@ -213,8 +213,9 @@ void test_pipeline_1() {
 
     CircuitsLayer first_layer = { {circuit_1, circuit_2, circuit_3, circuit_4} };
     CircuitsLayer second_layer = { {circuit_5, circuit_6, circuit_7} };
-
-    // проверка слияния отрезков
+    //====================================================================================================
+    //      проверка слияния отрезков
+    //====================================================================================================
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
     SegmentsSet expected_merged_layers = { {
         {{2, 2}, {2, 10}},
@@ -257,8 +258,9 @@ void test_pipeline_1() {
         expected_merged_layers.set_label_value(0, expected_merged_layers[i], 1);
 
     check_merge(merged_layers, expected_merged_layers);
-
-    // проверка конвертации в слой отрезков
+    //==========================================================================================================
+    //      проверка конвертации в слой отрезков
+    //=========================================================================================================
     SegmentsLayer layer = Converter::convertToSegmentsLayer(merged_layers);
     std::vector<Segment> segments_layer = {
         {{2, 2}, {2, 10}},      // 0, 0, 1, 0       // результат 1, 0, 1, 0
@@ -320,8 +322,9 @@ void test_pipeline_1() {
         expected_layer.set_label_value(0, expected_layer[i], 1);
 
     check_intersection(layer, expected_layer);
-
-    // проверка разметки областей
+    //====================================================================================================
+    //      проверка разметки областей
+    //====================================================================================================
     auto marked_areas = AreaAnalyzer::findAreas(layer);
     for (int i = 0; i < marked_areas.size(); i++) {
         std::cout << "(" << marked_areas[i].start().x() << ", " << marked_areas[i].start().y() << ") (" << marked_areas[i].end().x() << ", " << marked_areas[i].end().y() << ") " << marked_areas.get_label_value(0, marked_areas[i]) << " " << marked_areas.get_label_value(1, marked_areas[i]) << " " << marked_areas.get_label_value(2, marked_areas[i]) << " " << marked_areas.get_label_value(3, marked_areas[i]) << std::endl;
@@ -333,14 +336,15 @@ void test_pipeline_1() {
     expected_marked_areas.set_label_values(2, { 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1 });
     expected_marked_areas.set_label_values(3, { 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0 });
     check_result(marked_areas, expected_marked_areas);
-
-    // проверка фильтра
-    // пересечение областей
-    SegmentsLayer filtered = AreaAnalyzer::filterSegmentsByLabels(marked_areas, [](const SegmentsLayer& segments, const Segment& segment) {
-        return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
-        !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
-        !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
-        segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1;
+    //====================================================================================================
+    //      проверка фильтра
+    //      пересечение областей
+    //====================================================================================================
+    SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(layer, [](const SegmentsSet& seg_set, const Segment& segment) {
+        return seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1 &&
+        !(seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1) ||
+        !(seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1) &&
+        seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1;
         });
 
     SegmentsSet expected_filtered = { {
