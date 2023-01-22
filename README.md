@@ -15,6 +15,9 @@ GKERNEL_STRICT - warnings treated as errors when enabled
 ```
 **How to build project and run tests**
 ```bash
+# Run these commands in the root directory of the repository.
+mkdir build
+cd build
 cmake -DGKERNEL_UNIT_TESTING=ON ..
 cmake --build . --config debug
 ctest -C debug
