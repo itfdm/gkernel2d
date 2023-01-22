@@ -52,7 +52,7 @@ foreach(output_type LIBRARY ARCHIVE PDB RUNTIME)
     endif()
 endforeach()
 
-if (GNU)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(GKERNEL_WARNING_LEVEL -Wall -Wextra $<$<BOOL:${GKERNEL_STRICT}>:-Werror> -Wfatal-errors)
 endif()
 

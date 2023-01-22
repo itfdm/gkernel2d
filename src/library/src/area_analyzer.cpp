@@ -95,6 +95,9 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
 
     auto current_event = events.begin();
 
+    std::vector<const Segment*> active_segments_new;
+    active_segments_new.reserve(events.size());
+
     while (current_event != events.end()) {
         double x_sweeping_line_new = current_event->x;
 
@@ -102,6 +105,7 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
             if (current_event->status == event_status::start) {
                 x_sweeping_line = x_sweeping_line_new;
                 active_segments.insert(current_event->segment);
+                active_segments_new.push_back(current_event->segment);
             } else if (current_event->status == event_status::end) {
                 active_segments.erase(current_event->segment);
             } else {
@@ -133,31 +137,25 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
             ++current_event;
         }
 
-        auto current_segment = active_segments.begin();
-        while (current_segment != active_segments.end()) {
-            // if current_segment is already processed then skip
-            if (result.get_label_value(find_neighbours_label_type::top, **current_segment) != unchecked_segment || result.get_label_value(find_neighbours_label_type::bottom, **current_segment) != unchecked_segment) {
-                ++current_segment;
-                continue;
-            }
+        for (auto current_segment : active_segments_new) {
+            result.set_label_value(find_neighbours_label_type::top, *current_segment, unassigned);
+            result.set_label_value(find_neighbours_label_type::bottom, *current_segment, unassigned);
 
-            result.set_label_value(find_neighbours_label_type::top, **current_segment, unassigned);
-            result.set_label_value(find_neighbours_label_type::bottom, **current_segment, unassigned);
-
-            auto next_segment = current_segment;
+            auto next_segment = active_segments.find(current_segment);
             ++next_segment;
             if (next_segment != active_segments.end()) {
-                result.set_label_value(find_neighbours_label_type::top, **current_segment, (**next_segment).id);
+                result.set_label_value(find_neighbours_label_type::top, *current_segment, (**next_segment).id);
             }
 
-            auto prev_segment = current_segment;
-            if (current_segment != active_segments.begin()) {
+            auto prev_segment = active_segments.find(current_segment);
+            if (prev_segment != active_segments.begin()) {
                 --prev_segment;
-                result.set_label_value(find_neighbours_label_type::bottom, **current_segment, (**prev_segment).id);
+                result.set_label_value(find_neighbours_label_type::bottom, *current_segment, (**prev_segment).id);
             }
 
             ++current_segment;
         }
+        active_segments_new.clear();
     }
 
     return static_cast<SegmentsLayer>(result);

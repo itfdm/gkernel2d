@@ -24,11 +24,11 @@ struct Point {
     }
     bool operator<(const Point& other) const {
         return this->_x < other._x ||
-            this->_x == other._x && this->_y < other._y;
+            (this->_x == other._x && this->_y < other._y);
     }
     bool operator>(const Point& other) const {
         return this->_x > other._x ||
-            this->_x == other._x && this->_y > other._y;
+            (this->_x == other._x && this->_y > other._y);
     }
 
     data_type x() const { return _x; }
@@ -52,8 +52,8 @@ struct Segment {
     }
 
     bool operator==(const Segment& other) const {
-        return this->_begin_point == other._begin_point && this->_end_point == other._end_point ||
-            this->_begin_point == other._end_point && this->_end_point == other._begin_point;
+        return (this->_begin_point == other._begin_point && this->_end_point == other._end_point) ||
+            (this->_begin_point == other._end_point && this->_end_point == other._begin_point);
     }
 
     bool operator!=(const Segment& other) const {
