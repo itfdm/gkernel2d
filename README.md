@@ -24,6 +24,26 @@ ctest -C debug
 ```
 **Basic usage**
 
+How to build sample on Linux with g++
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config debug --target gkernel
+
+cd ..
+mkdir sample
+mv build/bin_release/*gkernel* sample
+
+cp -r src/library/include sample
+
+cd sample
+# insert sample code into sample.cpp here
+g++ sample.cpp -std=c++17 -O0 -g -Wall -L . -lgkernel -I include -o sample.exe
+export LD_LIBRARY_PATH=$(pwd):${LD_LIBRARY_PATH}
+./sample.exe
+```
+
 How to create SegmentsSet and set labels
 ```c++
 #include "gkernel/objects.hpp"
@@ -37,7 +57,7 @@ int main() {
         {{10, 10}, {14, 12}}
     }};
     segments.set_labels_types({ 0 });
-    segments.set_label_values(0, { 0, 1});
+    segments.set_label_values(0, { 0, 1 });
 }
 ```
 How to convert SegmentsSet to SegmentsLayer (find all intersections and split segments)
@@ -54,8 +74,12 @@ int main() {
     input.emplace_back({gkernel::Point(6, 1), gkernel::Point(10, 5)});
     input.emplace_back({gkernel::Point(3.5, 5.5), gkernel::Point(4, 1)});
     input.emplace_back({gkernel::Point(3.5, 5.5), gkernel::Point(6, 3)});
-    
+
     auto segments_layer = Converter::convertToSegmentsLayer(input);
+
+    for (std::size_t idx = 0; idx < segments_layer.size(); ++idx) {
+        std::cout << segments_layer[idx] << std::endl;
+    }
 }
 ```
 
@@ -97,12 +121,16 @@ int main() {
     CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
     auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
-    
+
     SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
         return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
                 !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
                !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
                 segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1;
     });
+
+    for (std::size_t idx = 0; idx < filtered.size(); ++idx) {
+        std::cout << filtered[idx] << std::endl;
+    }
 }
 ```

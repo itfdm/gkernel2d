@@ -128,6 +128,9 @@ void TestSimple() {
     CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
     auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
+    for (std::size_t idx = 0; idx < segments_layer.size(); ++idx) {
+        std::cout << segments_layer[idx] << std::endl;
+    }
     test_areas(segments_layer);
     test_filter(segments_layer);
 }
