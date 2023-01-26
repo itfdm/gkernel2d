@@ -16,6 +16,12 @@ static inline double get_sweeping_line_y(const Segment& segment, double x) {
     return k * (x + EPS) + m;
 }
 
+static inline double get_sweeping_line_y2(const Segment& segment, double x) {
+    double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
+    double m = segment.start().y() - k * segment.start().x();
+    return k * (x) + m;
+}
+
 struct IntersectionPoint {
     IntersectionPoint(const Point& point, segment_id first_segment_id, segment_id second_segment_id) :
         _point(point),
