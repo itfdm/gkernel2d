@@ -181,33 +181,37 @@ SegmentsLayer AreaAnalyzer::markAreas(const SegmentsLayer& layer) {
     result.set_labels_types({ mark_areas_label_type::first_circuits_layer_top, mark_areas_label_type::second_circuits_layer_top,
                                 mark_areas_label_type::first_circuits_layer_bottom, mark_areas_label_type::second_circuits_layer_bottom });
 
+    auto label_values_id = layer.get_label_values(find_neighbours_label_type::circuits_layer_id);
+    auto label_values_top = layer.get_label_values(find_neighbours_label_type::top);
+    auto label_values_bottom = layer.get_label_values(find_neighbours_label_type::bottom);
+
     for (std::size_t idx = 0; idx < result.size(); ++idx) {
-        label_data_type top = layer.get_label_value(find_neighbours_label_type::top, layer[idx]);
+        label_data_type top = label_values_top[layer[idx].id];
         bool first_circuits_layer_top = false;
         bool second_circuits_layer_top = false;
 
         while (top != unassigned) {
-            if (layer.get_label_value(find_neighbours_label_type::circuits_layer_id, layer[top]) == 0) {
+            if (label_values_id[layer[top].id] == 0) {
                 first_circuits_layer_top ^= true;
             } else {
                 second_circuits_layer_top ^= true;
             }
 
-            top = layer.get_label_value(find_neighbours_label_type::top, layer[top]);
+            top = label_values_top[layer[top].id];
         }
 
-        label_data_type bottom = layer.get_label_value(find_neighbours_label_type::bottom, layer[idx]);
+        label_data_type bottom = label_values_bottom[layer[idx].id];
         bool first_circuits_layer_bottom = false;
         bool second_circuits_layer_bottom = false;
 
         while (bottom != unassigned) {
-            if (layer.get_label_value(find_neighbours_label_type::circuits_layer_id, layer[bottom]) == 0) {
+            if (label_values_id[layer[bottom].id] == 0) {
                 first_circuits_layer_bottom ^= true;
             } else {
                 second_circuits_layer_bottom ^= true;
             }
 
-            bottom = layer.get_label_value(find_neighbours_label_type::bottom, layer[bottom]);
+            bottom = label_values_bottom[layer[bottom].id];
         }
 
         result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], first_circuits_layer_top);
