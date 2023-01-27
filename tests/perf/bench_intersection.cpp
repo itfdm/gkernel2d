@@ -36,13 +36,13 @@ gkernel::SegmentsSet generateRandomSegments(size_t count, int w_width, int w_hei
 {
     int window_width = w_width;
     int window_height = w_height;
-    xorshift128 random;
+    xorshift128 random_generator;
 
     gkernel::SegmentsSet segments;
     for (size_t idx = 0; idx < count; ++idx)
     {
-        segments.emplace_back({gkernel::Point(random.random() % window_width, random.random() % window_height),
-                              gkernel::Point(random.random() % window_width, random.random() % window_height)});
+        segments.emplace_back({gkernel::Point(random_generator.random() % window_width, random_generator.random() % window_height),
+                              gkernel::Point(random_generator.random() % window_width, random_generator.random() % window_height)});
     }
     return segments;
 }
@@ -53,15 +53,15 @@ gkernel::SegmentsSet generateRandomSegments(size_t count, int w_width, int w_hei
     int window_width = w_width;
     int window_height = w_height;
 
-    xorshift128 random;
+    xorshift128 random_generator;
 
     gkernel::SegmentsSet segments;
     for (size_t idx = 0; idx < count; ++idx)
     {
-        int x1 = random.random() % window_width;
-        int y1 = random.random() % window_height;
-        int x2 = x1 + random.random() % length;
-        int y2 = y1 + random.random() % length;
+        int x1 = random_generator.random() % window_width;
+        int y1 = random_generator.random() % window_height;
+        int x2 = x1 + random_generator.random() % length;
+        int y2 = y1 + random_generator.random() % length;
         segments.emplace_back({gkernel::Point(x1, y1), gkernel::Point(x2, y2)});
     }
     return segments;

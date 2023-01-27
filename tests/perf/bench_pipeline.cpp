@@ -32,7 +32,7 @@ public:
     }
 };
 
-xorshift128 random;
+xorshift128 random_generator;
 
 // generate segments with length
 gkernel::SegmentsSet generateRandomSegments(size_t count, int w_width, int w_height, int length) {
@@ -42,10 +42,10 @@ gkernel::SegmentsSet generateRandomSegments(size_t count, int w_width, int w_hei
     gkernel::SegmentsSet segments;
     for (size_t idx = 0; idx < count; ++idx)
     {
-        int x1 = random.random() % window_width;
-        int y1 = random.random() % window_height;
-        int x2 = x1 + random.random() % length + 1;
-        int y2 = y1 + random.random() % length + 1;
+        int x1 = random_generator.random() % window_width;
+        int y1 = random_generator.random() % window_height;
+        int x2 = x1 + random_generator.random() % length + 1;
+        int y2 = y1 + random_generator.random() % length + 1;
         segments.emplace_back({gkernel::Point(x1, y1), gkernel::Point(x2, y2)});
     }
     return segments;
