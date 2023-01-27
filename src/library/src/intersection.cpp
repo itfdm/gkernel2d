@@ -59,7 +59,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
     };
 
     auto compare_segments_ids_pairs = [](const std::pair<segment_id, segment_id>& first, const std::pair<segment_id, segment_id>& second) -> bool {
-        if ((first.first == second.first || first.first == second.second) && (first.second == second.first || first.second == second.second)) {
+        if (first.first == second.first && first.second == second.second || first.first == second.second && first.second == second.first) {
             return false;
         }
         if (first.first != second.first) {
