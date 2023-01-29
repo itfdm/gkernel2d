@@ -1,12 +1,13 @@
 #ifndef __GKERNEL_HPP_HELPERS
 #define __GKERNEL_HPP_HELPERS
 
+#define NOMINMAX
+
+#include <cmath>
 #include <vector>
 #include <algorithm>
 #include <limits>
 #include <stdexcept>
-
-#define NOMINMAX
 
 namespace gkernel {
 
