@@ -142,7 +142,7 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
                             prev_id = (**active_iter).id;
                             prev_segment = **active_iter;
                         }
-                        else if (prev_segment.min().x() <= (**active_iter).min().x()) {
+                        else if (prev_segment.min().x() < (**active_iter).min().x() && current_event->segment->min().x() <= (**active_iter).min().x() ) {
                             prev_id = (**active_iter).id;
                             prev_segment = **active_iter;
                             break;
