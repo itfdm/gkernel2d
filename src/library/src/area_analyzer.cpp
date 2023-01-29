@@ -83,13 +83,18 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
         double y1;
         double y2;
-        if (first->max().x() > x_sweeping_line)
+        if (first->max().x() > x_sweeping_line) {
             y1 = get_sweeping_line_y(*first, x_sweeping_line);
-        else 
-            y1 = get_sweeping_line_y2(*first, x_sweeping_line-EPS);
-        if (second->max().x() > x_sweeping_line)
+        }
+        else {
+            y1 = get_sweeping_line_y(*first, x_sweeping_line, -EPS);
+        }
+        if (second->max().x() > x_sweeping_line) {
             y2 = get_sweeping_line_y(*second, x_sweeping_line);
-        else y2 = get_sweeping_line_y2(*second, x_sweeping_line-EPS);
+        }
+        else {
+            y2 = get_sweeping_line_y(*second, x_sweeping_line, -EPS);
+        }
         if (y1 != y2) {
             return y1 < y2;
         } else {
@@ -160,11 +165,6 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
             result.set_label_value(find_neighbours_label_type::bottom, **current_segment, unassigned);
 
             auto next_segment = current_segment;
-            if (next_segment == active_segments.end()) {
-                auto test = active_segments.begin();
-                std::cout << std::endl;
-            }
-
             ++next_segment;
             if (next_segment != active_segments.end()) {
                 result.set_label_value(find_neighbours_label_type::top, **current_segment, (**next_segment).id);
