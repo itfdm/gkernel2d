@@ -33,6 +33,15 @@ public:
         return _labels_data[get_offset(label) + segment.id];
     }
 
+    std::vector<label_data_type> get_label_values(label_type label) const override {
+        std::vector<label_data_type> label_values(_segments.size());
+        auto offset = get_offset(label);
+        std::copy(_labels_data.begin() + offset,
+                  _labels_data.begin() + offset + _segments.size(),
+                  label_values.begin());
+        return label_values;
+    }
+
     void set_labels_types(const std::vector<label_type>& label_types) override;
 
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override;
@@ -137,6 +146,7 @@ public:
     }
 
     label_data_type get_label_value(label_type label, const Segment& segment) const override { return 0; /*TODO*/};
+    std::vector<label_data_type> get_label_values(label_type label) const override { return {}; /*TODO*/};
     void set_labels_types(const std::vector<label_type>& label_types) override {/*TODO*/};
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override {/*TODO*/};
     void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {/*TODO*/};

@@ -96,9 +96,7 @@ void test_areas(const SegmentsLayer& segments_layer) {
     expected.set_label_values(2, { 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1 });
     expected.set_label_values(3, { 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 });
 
-    auto layer = Converter::convertToSegmentsLayer(segments_layer);
-    auto marked_areas = AreaAnalyzer::findAreas(layer);
-
+    auto marked_areas = AreaAnalyzer::findAreas(segments_layer);
     check_result(marked_areas, expected);
 }
 
