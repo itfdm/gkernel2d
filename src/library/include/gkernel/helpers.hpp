@@ -22,8 +22,7 @@ constexpr data_type min_data_type_value = std::numeric_limits<data_type>::min();
 constexpr data_type max_data_type_value = std::numeric_limits<data_type>::max();
 
 /**
- * @brief Контейнер для хранения типов меток и их значений.
- *
+ * @brief Интерфейс, обязывающий реализовать методы, необходимые для обеспечения функционала по работе с системой меток (установка, чтение, проверка наличия).
  */
 class Labeling {
 protected:
@@ -59,6 +58,12 @@ public:
      */
     virtual label_data_type get_label_value(label_type label, const Segment& segment) const = 0;
 
+    /**
+     * @brief Возвращает значение метки label всех элементов в контейнере.
+     *
+     * @param label Тип метки, значения которых
+     * @return std::vector<label_data_type> Значения метки label всех элементов в контейнере.
+     */
     virtual std::vector<label_data_type> get_label_values(label_type label) const = 0;
 
     /**
@@ -91,7 +96,7 @@ protected:
 };
 
 /**
- * @brief Родительский класс для контейнеров отрезков, добавляющий возможность определять функцию валидации хранящихся данных.
+ * @brief Интерфейс, обязывающий реализовать метод проверки валидности структуры. Решение запуска метода валидации остается за классом потомком.
  *
  */
 class Validator {
