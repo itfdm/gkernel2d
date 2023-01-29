@@ -132,26 +132,24 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
                         (current_event->segment->max().x() == (**active_iter).min().x() && current_event->segment->max().y() == (**active_iter).min().y()))) {
                        next_id = (**active_iter).id;
                        next_segment = **active_iter;
-                    } else if (current_event->segment->min().y() >= (**active_iter).min().y() && current_event->segment->min().y() <= (**active_iter).max().y() &&
-                        ((current_event->segment->min().x() == (**active_iter).min().x() && current_event->segment->min().y() == (**active_iter).min().y()) ||
-                        (current_event->segment->min().x() == (**active_iter).max().x() && current_event->segment->min().y() == (**active_iter).max().y()))) {
+                    } else if ((current_event->segment->min().x() == (**active_iter).min().x() && current_event->segment->min().y() == (**active_iter).min().y()) ||
+                        (current_event->segment->min().x() == (**active_iter).max().x() && current_event->segment->min().y() == (**active_iter).max().y())) {
                         if (prev_id == -1) {
                             prev_id = (**active_iter).id;
                             prev_segment = **active_iter;
                         }
-                        else if (prev_segment.min().x() <= (**active_iter).min().x() && prev_segment.max().y() == (**active_iter).max().y()) {
+                        else if (prev_segment.min().x() <= (**active_iter).min().x()) {
                             prev_id = (**active_iter).id;
                             prev_segment = **active_iter;
+                            break;
                         }
                     }
                 }
                 if (next_id != -1) {
-                    auto bfu = result.get_label_value(find_neighbours_label_type::top, next_segment);
                     result.set_label_value(find_neighbours_label_type::top, *current_event->segment, next_id);
                 }
                 if (prev_id != -1) {
                     result.set_label_value(find_neighbours_label_type::bottom, *current_event->segment, prev_id);
-                    auto bfu = result.get_label_value(find_neighbours_label_type::bottom, prev_segment);
                 }
             }
             ++current_event;
