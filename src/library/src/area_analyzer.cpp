@@ -108,7 +108,7 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
     while (current_event != events.end()) {
         double x_sweeping_line_new = current_event->x;
 
-        std::vector<gkernel::Segment> vertical_segments;
+        std::vector<Segment> vertical_segments;
         while (current_event != events.end() && current_event->x == x_sweeping_line_new) {
             if (current_event->status == event_status::start) {
                 x_sweeping_line = x_sweeping_line_new;
@@ -117,23 +117,24 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
             } else if (current_event->status == event_status::end) {
                 active_segments.erase(current_event->segment);
             } else {
-                //vertical_segments.push_back(*current_event->segment);
                 result.set_label_value(find_neighbours_label_type::top, *current_event->segment, unassigned);
                 result.set_label_value(find_neighbours_label_type::bottom, *current_event->segment, unassigned);
 
                 auto next_id = -1;
                 auto prev_id = -1;
-                gkernel::Segment next_segment;
-                gkernel::Segment prev_segment;
+                Segment next_segment;
+                Segment prev_segment;
                 auto active_iter = active_segments.end();
                 for (auto idx = active_iter; idx != active_segments.begin(); idx--) {
                     --active_iter;
-                    if (!(current_event->segment->max().y() > (**active_iter).min().y() && current_event->segment->max().y() > (**active_iter).max().y()) && ((current_event->segment->max().x() == (**active_iter).max().x() && current_event->segment->max().y() == (**active_iter).max().y()) ||
+                    if (!(current_event->segment->max().y() > (**active_iter).min().y() && current_event->segment->max().y() > (**active_iter).max().y()) &&
+                        ((current_event->segment->max().x() == (**active_iter).max().x() && current_event->segment->max().y() == (**active_iter).max().y()) ||
                         (current_event->segment->max().x() == (**active_iter).min().x() && current_event->segment->max().y() == (**active_iter).min().y()))) {
                        next_id = (**active_iter).id;
                        next_segment = **active_iter;
                     } else if (current_event->segment->min().y() >= (**active_iter).min().y() && current_event->segment->min().y() <= (**active_iter).max().y() &&
-                        ((current_event->segment->min().x() == (**active_iter).min().x() && current_event->segment->min().y() == (**active_iter).min().y()) || (current_event->segment->min().x() == (**active_iter).max().x() && current_event->segment->min().y() == (**active_iter).max().y()))) {
+                        ((current_event->segment->min().x() == (**active_iter).min().x() && current_event->segment->min().y() == (**active_iter).min().y()) ||
+                        (current_event->segment->min().x() == (**active_iter).max().x() && current_event->segment->min().y() == (**active_iter).max().y()))) {
                         if (prev_id == -1) {
                             prev_id = (**active_iter).id;
                             prev_segment = **active_iter;
@@ -244,38 +245,34 @@ SegmentsLayer AreaAnalyzer::markAreas(const SegmentsLayer& layer) {
         result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], first_circuits_layer_bottom);
         result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], second_circuits_layer_bottom);
     }
-
+    }
     for (auto& idx : vertical) {
         bool flag_inside = false;
+        auto top = layer.get_label_value(find_neighbours_label_type::top, layer[idx]);
         if (top == -1) {
             result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], 0);
             result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], 0);
-        } else 
-        if (layer[idx].max().x() >= layer[top].max().x()) {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[top]));
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[top]));
-                flag_inside = true;
-        }
-        else {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_top, result[top]));
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_top, result[top]));
+        } else if (layer[idx].max().x() >= layer[top].max().x()) {
+            result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[top]));
+            result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[top]));
+            flag_inside = true;
+        } else {
+            result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_top, result[top]));
+            result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_top, result[top]));
         }
 
         auto bottom = layer.get_label_value(find_neighbours_label_type::bottom, layer[idx]);
         if (bottom == -1) {
             result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], 0);
             result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], 0);
-        } else
-        if (layer[idx].max().x() >= layer[bottom].max().x()) {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[bottom]));
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[bottom]));
-        }
-        else {
+        } else if (layer[idx].max().x() >= layer[bottom].max().x()) {
+            result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[bottom]));
+            result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[bottom]));
+        } else {
             if (!flag_inside) {
                 result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_top, result[bottom]));
                 result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_top, result[bottom]));
-            } 
-            else {
+            } else {
                 result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_top, result[bottom]));
                 result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_top, result[bottom]));
             }
@@ -284,5 +281,4 @@ SegmentsLayer AreaAnalyzer::markAreas(const SegmentsLayer& layer) {
 
     return result;
 }
-
 } // namespace gkernel
