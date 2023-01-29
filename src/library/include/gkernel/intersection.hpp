@@ -10,10 +10,10 @@ namespace gkernel {
 
 constexpr static double EPS = 1e-9;
 
-static inline double get_sweeping_line_y(const Segment& segment, double x) {
+static inline double get_sweeping_line_y(const Segment& segment, double x, double eps = EPS) {
     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
     double m = segment.start().y() - k * segment.start().x();
-    return k * (x + EPS) + m;
+    return k * (x + eps) + m;
 }
 
 struct IntersectionPoint {
