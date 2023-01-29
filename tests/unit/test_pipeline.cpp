@@ -15,13 +15,13 @@ using namespace gkernel;
 void check_result(const SegmentsSet& actual, const SegmentsSet& expected) {
     REQUIRE_EQ(actual.size(), expected.size());
 
-    for (size_t i = 0; i < expected.size(); i++) {
-        REQUIRE_EQ(actual[i].min(), expected[i].min());
-        REQUIRE_EQ(actual[i].max(), expected[i].max());
-        REQUIRE_EQ(actual.get_label_value(0, actual[i]), expected.get_label_value(0, expected[i]));
-        REQUIRE_EQ(actual.get_label_value(1, actual[i]), expected.get_label_value(1, expected[i]));
-        REQUIRE_EQ(actual.get_label_value(2, actual[i]), expected.get_label_value(2, expected[i]));
-        REQUIRE_EQ(actual.get_label_value(3, actual[i]), expected.get_label_value(3, expected[i]));
+    for (size_t idx = 0; idx < expected.size(); ++idx) {
+        REQUIRE_EQ(actual[idx].min(), expected[idx].min());
+        REQUIRE_EQ(actual[idx].max(), expected[idx].max());
+        REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
+        REQUIRE_EQ(actual.get_label_value(1, actual[idx]), expected.get_label_value(1, expected[idx]));
+        REQUIRE_EQ(actual.get_label_value(2, actual[idx]), expected.get_label_value(2, expected[idx]));
+        REQUIRE_EQ(actual.get_label_value(3, actual[idx]), expected.get_label_value(3, expected[idx]));
     }
 }
 
@@ -110,12 +110,12 @@ void test_filter(const SegmentsLayer& segments_layer) {
         {{5, 5}, {10, 3}}
     }};
 
-    for (size_t i = 0; i < filtered.size(); ++i) {
-        REQUIRE_EQ(filtered[i], expected[i]);
+    for (size_t idx = 0; idx < filtered.size(); ++idx) {
+        REQUIRE_EQ(filtered[idx], expected[idx]);
     }
 }
 
-void TestSimple() {
+void test_simple() {
     Circuit first_circuit = {{
         {{8, 13}, {16, 13}},
         {{16, 13}, {10, 10}},
@@ -151,7 +151,7 @@ void TestSimple() {
     test_filter(segments_layer);
 }
 
-void test_pipeline_1() {
+void test_complex() {
     Circuit circuit_1 = { {
         {{2, 2}, {2, 10}},
         {{2, 10}, {8, 10}},
@@ -237,91 +237,98 @@ void test_pipeline_1() {
     } };
 
     expected_merged_layers.set_labels_types({ 0 });
-    for (int i = 0; i < (circuit_1.size() + circuit_2.size() + circuit_3.size() + circuit_4.size()); i++)
-        expected_merged_layers.set_label_value(0, expected_merged_layers[i], 0);
 
-    for (int i = (circuit_1.size() + circuit_2.size() + circuit_3.size() + circuit_4.size()); i < expected_merged_layers.size(); i++)
-        expected_merged_layers.set_label_value(0, expected_merged_layers[i], 1);
+    for (std::size_t idx = 0; idx < (circuit_1.size() + circuit_2.size() + circuit_3.size() + circuit_4.size()); ++idx) {
+        expected_merged_layers.set_label_value(0, expected_merged_layers[idx], 0);
+    }
+
+    for (std::size_t idx = (circuit_1.size() + circuit_2.size() + circuit_3.size() + circuit_4.size()); idx < expected_merged_layers.size(); ++idx) {
+        expected_merged_layers.set_label_value(0, expected_merged_layers[idx], 1);
+    }
 
     REQUIRE_EQ(merged_layers.size(), expected_merged_layers.size());
-    for (int i = 0; i < merged_layers.size(); i++) {
-        REQUIRE_EQ(merged_layers[i].min(), expected_merged_layers[i].min());
-        REQUIRE_EQ(merged_layers[i].max(), expected_merged_layers[i].max());
-        REQUIRE_EQ(merged_layers.get_label_value(0, merged_layers[i]), expected_merged_layers.get_label_value(0, expected_merged_layers[i]));
+
+    for (std::size_t idx = 0; idx < merged_layers.size(); ++idx) {
+        REQUIRE_EQ(merged_layers[idx].min(), expected_merged_layers[idx].min());
+        REQUIRE_EQ(merged_layers[idx].max(), expected_merged_layers[idx].max());
+        REQUIRE_EQ(merged_layers.get_label_value(0, merged_layers[idx]), expected_merged_layers.get_label_value(0, expected_merged_layers[idx]));
     }
+
     //==========================================================================================================
     //      check conversion to segments layer
     //=========================================================================================================
     SegmentsLayer layer = Converter::convertToSegmentsLayer(merged_layers);
     std::vector<Segment> segments_layer = {
-        {{2, 2}, {2, 10}},     
-        {{2, 10}, {5, 10}},    
-        {{5, 10}, {8, 10}},    
-        {{8, 3}, {8, 2}},      
-        {{8, 6}, {8, 3}},      
-        {{8, 8}, {8, 6}},      
-        {{8, 10}, {8, 8}},     
-        {{8, 2}, {2, 2}},      
+        {{2, 2}, {2, 10}},
+        {{2, 10}, {5, 10}},
+        {{5, 10}, {8, 10}},
+        {{8, 3}, {8, 2}},
+        {{8, 6}, {8, 3}},
+        {{8, 8}, {8, 6}},
+        {{8, 10}, {8, 8}},
+        {{8, 2}, {2, 2}},
 
-        {{10, 6}, {12, 9}},    
-        {{12, 9}, {11, 6}},    
-        {{11, 6}, {10, 6}},    
+        {{10, 6}, {12, 9}},
+        {{12, 9}, {11, 6}},
+        {{11, 6}, {10, 6}},
 
-        { {9, 9}, {10, 10}},   
-        {{10, 10}, {12, 12}},  
-        {{12, 12}, {17, 9}},   
-        {{10, 9}, {9, 9}},     
-        {{12, 9}, {10, 9}},    
-        {{17, 9}, {12, 9}},    
+        {{9, 9}, {10, 10}},
+        {{10, 10}, {12, 12}},
+        {{12, 12}, {17, 9}},
+        {{10, 9}, {9, 9}},
+        {{12, 9}, {10, 9}},
+        {{17, 9}, {12, 9}},
 
-        {{9, 1}, {9, 3}},      
-        {{9, 3}, {9, 5}},      
-        {{9, 5}, {12, 5}},        
-        {{12, 5}, {15, 5}},       
-        {{12, 3}, {9, 1}},     
-        {{15, 5}, {12, 3}},    
-      
+        {{9, 1}, {9, 3}},
+        {{9, 3}, {9, 5}},
+        {{9, 5}, {12, 5}},
+        {{12, 5}, {15, 5}},
+        {{12, 3}, {9, 1}},
+        {{15, 5}, {12, 3}},
 
-        {{4, 3}, {8, 6}},      
-        {{8, 6}, {12, 9}},     
-        {{12, 5}, {12, 3}},    
-        {{12, 9}, {12, 5}},    
-        {{8, 3}, {4, 3}},      
-        {{9, 3}, {8, 3}},      
-        {{12, 3}, {9, 3}},     
- 
 
-        {{5, 8}, {5, 10}},     
-        {{5, 10}, {5, 12}},    
+        {{4, 3}, {8, 6}},
+        {{8, 6}, {12, 9}},
+        {{12, 5}, {12, 3}},
+        {{12, 9}, {12, 5}},
+        {{8, 3}, {4, 3}},
+        {{9, 3}, {8, 3}},
+        {{12, 3}, {9, 3}},
+
+
+        {{5, 8}, {5, 10}},
+        {{5, 10}, {5, 12}},
         {{5, 12}, {10, 12}},
         {{10, 9}, {10, 8}},
         {{10, 10}, {10, 9}},
         {{10, 12}, {10, 10}},
         {{8, 8}, {5, 8}},
-        {{10, 8}, {8, 8}},  
- 
+        {{10, 8}, {8, 8}},
+
 
         {{3, 4}, {3, 8}},
         {{3, 8}, {5, 8}},
         {{5, 8}, {6, 6}},
-        {{6, 6}, {3, 4}}    
+        {{6, 6}, {3, 4}}
     };
+
     SegmentsSet expected_layer(segments_layer);
     expected_layer.set_labels_types({ 0 });
 
-    for (int i = 0; i < 23; i++)
-        expected_layer.set_label_value(0, expected_layer[i], 0);
+    for (std::size_t idx = 0; idx < 23; ++idx)
+        expected_layer.set_label_value(0, expected_layer[idx], 0);
 
-    for (int i = 23; i < expected_layer.size(); i++)
-        expected_layer.set_label_value(0, expected_layer[i], 1);
+    for (std::size_t idx = 23; idx < expected_layer.size(); ++idx)
+        expected_layer.set_label_value(0, expected_layer[idx], 1);
 
     check_intersection(layer, expected_layer);
+
     //====================================================================================================
     //      check areas marks
     //====================================================================================================
     auto marked_areas = AreaAnalyzer::findAreas(layer);
-    for (int i = 0; i < marked_areas.size(); i++) {
-        std::cout << "(" << marked_areas[i].start().x() << ", " << marked_areas[i].start().y() << ") (" << marked_areas[i].end().x() << ", " << marked_areas[i].end().y() << ") " << marked_areas.get_label_value(0, marked_areas[i]) << " " << marked_areas.get_label_value(1, marked_areas[i]) << " " << marked_areas.get_label_value(2, marked_areas[i]) << " " << marked_areas.get_label_value(3, marked_areas[i]) << std::endl;
+    for (std::size_t idx = 0; idx < marked_areas.size(); ++idx) {
+        std::cout << "(" << marked_areas[idx].start().x() << ", " << marked_areas[idx].start().y() << ") (" << marked_areas[idx].end().x() << ", " << marked_areas[idx].end().y() << ") " << marked_areas.get_label_value(0, marked_areas[idx]) << " " << marked_areas.get_label_value(1, marked_areas[idx]) << " " << marked_areas.get_label_value(2, marked_areas[idx]) << " " << marked_areas.get_label_value(3, marked_areas[idx]) << std::endl;
     }
     SegmentsSet expected_marked_areas(segments_layer);
     expected_marked_areas.set_labels_types({ 0, 1, 2, 3 });
@@ -330,18 +337,19 @@ void test_pipeline_1() {
     expected_marked_areas.set_label_values(2, { 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
     expected_marked_areas.set_label_values(3, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0 });
     check_result(marked_areas, expected_marked_areas);
+
     //====================================================================================================
     //      check filter
     //      areas intersection
     //====================================================================================================
     SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(layer, [](const SegmentsSet& seg_set, const Segment& segment) {
         return seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1 &&
-        !(seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1) ||
-        !(seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1) &&
-        seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1;
-        });
+            !(seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1) ||
+            !(seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1) &&
+            seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1;
+    });
 
-    SegmentsSet expected_filtered = { {
+    SegmentsSet expected_filtered = {{
         {{5, 10}, {8, 10}},
         {{8, 6}, {8, 3}},
         {{8, 10}, {8, 8}},
@@ -363,15 +371,12 @@ void test_pipeline_1() {
         {{3, 8}, {5, 8}},
         {{5, 8}, {6, 6}},
         {{6, 6}, {3, 4}},
+    }};
 
-        
-    } };
-    for (size_t i = 0; i < filtered.size(); ++i) {
-        REQUIRE_EQ(filtered[i], expected_filtered[i]);
+    for (size_t idx = 0; idx < filtered.size(); ++idx) {
+        REQUIRE_EQ(filtered[idx], expected_filtered[idx]);
     }
 }
 
-DECLARE_TEST(TestSimple);
-DECLARE_TEST(test_pipeline_1);
-
-
+DECLARE_TEST(test_simple);
+DECLARE_TEST(test_complex);
