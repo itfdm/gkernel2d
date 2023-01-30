@@ -1,9 +1,9 @@
 add_executable(visualizer
     main.cpp)
 
-find_package(PythonLibs REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Development)
 
-target_include_directories(visualizer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHON_INCLUDE_DIRS})
+target_include_directories(visualizer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${Python3_INCLUDE_DIRS})
 
 target_compile_options(visualizer
     PRIVATE
@@ -15,6 +15,4 @@ target_compile_options(visualizer
 target_compile_definitions(visualizer PRIVATE
     $<$<CONFIG:DEBUG>:GKERNEL_DEBUG>)
 
-# Workaround for macOS
-# target_link_libraries(visualizer PRIVATE GKERNEL::gkernel GKERNEL::file_parser ${PYTHON_LIBRARIES}/../Python3)
-target_link_libraries(visualizer PRIVATE GKERNEL::gkernel ${PYTHON_LIBRARIES})
+target_link_libraries(visualizer PRIVATE GKERNEL::gkernel ${Python3_LIBRARIES})
