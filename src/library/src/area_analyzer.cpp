@@ -136,16 +136,20 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
                         (current_event->segment->max().x() == (**active_iter).min().x() && current_event->segment->max().y() == (**active_iter).min().y()))) {
                        next_id = (**active_iter).id;
                        next_segment = **active_iter;
-                    } else if ((current_event->segment->min().x() == (**active_iter).min().x() && current_event->segment->min().y() == (**active_iter).min().y()) ||
-                        (current_event->segment->min().x() == (**active_iter).max().x() && current_event->segment->min().y() == (**active_iter).max().y())) {
-                        if (prev_id == -1) {
-                            prev_id = (**active_iter).id;
-                            prev_segment = **active_iter;
-                        }
-                        else if (prev_segment.min().x() <= (**active_iter).min().x()) {
-                            prev_id = (**active_iter).id;
-                            prev_segment = **active_iter;
-                            break;
+                    } else {
+                        if ((current_event->segment->min().x() == (**active_iter).min().x() && current_event->segment->min().y() == (**active_iter).min().y()) ||
+                             (current_event->segment->min().x() == (**active_iter).max().x() && current_event->segment->min().y() == (**active_iter).max().y())) {
+                            if (prev_id == -1) {
+                                prev_id = (**active_iter).id;
+                                prev_segment = **active_iter;
+                            }
+                            else {
+                                if (prev_segment.min().x() < (**active_iter).min().x() && current_event->segment->min().x() <= (**active_iter).min().x()) {
+                                    prev_id = (**active_iter).id;
+                                    prev_segment = **active_iter;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
