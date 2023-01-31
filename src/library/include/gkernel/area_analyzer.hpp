@@ -22,6 +22,22 @@ public:
     static SegmentsLayer findSegmentsNeighbours(const SegmentsLayer& layer);
     static SegmentsLayer markAreas(const SegmentsLayer& layer);
 
+    /**
+     * @brief Проводит селекцию отрезков, удовлетворяющих заданной пользователем функции отбора.
+          Пример: <br>
+          SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) { <br>
+        return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 && <br>
+                !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) || <br>
+               !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) && <br>
+                segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1; <br>
+
+            SegmentsLayer& segments - слой отрезков, на котором осуществляется отбор.<br>
+            Segment& segment - исследуемый отрезок.<br>
+     * @tparam Callable
+     * @param layer Слой отрезков, на котором осуществляется отбор.
+     * @param callable Функция отбора по меткам.
+     * @return SegmentsLayer Отрезки, удовлетворяющие условию отбора.
+     */
     template<typename Callable>
     static SegmentsLayer markAreasAndFilter(const SegmentsLayer& layer, Callable callable) {
         auto areas = findAreas(layer);
