@@ -87,13 +87,13 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
         double y1;
         double y2;
         if (first->max().x() > x_sweeping_line) {
-            y1 = get_sweeping_line_y(*first, x_sweeping_line);
+            y1 = get_sweeping_line_y(*first, x_sweeping_line, EPS);
         }
         else {
             y1 = get_sweeping_line_y(*first, x_sweeping_line, -EPS);
         }
         if (second->max().x() > x_sweeping_line) {
-            y2 = get_sweeping_line_y(*second, x_sweeping_line);
+            y2 = get_sweeping_line_y(*second, x_sweeping_line, EPS);
         }
         else {
             y2 = get_sweeping_line_y(*second, x_sweeping_line, -EPS);

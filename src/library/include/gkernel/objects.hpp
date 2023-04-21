@@ -72,6 +72,10 @@ struct Segment {
         return _begin_point > _end_point ? _begin_point : _end_point;
     }
 
+    const segment_id get_id() const {
+        return id;
+    }
+
 private:
     Point _begin_point, _end_point;
     segment_id id;

@@ -3,13 +3,16 @@
 #include "gkernel/intersection.hpp"
 #include "gkernel/objects.hpp"
 #include "gkernel/containers.hpp"
+#include "gkernel/serializer.hpp"
 
 #include <unordered_set>
 #include <algorithm>
+#include <iterator>
 
 using namespace gkernel;
 
 void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkernel::Point>& expected) {
+    gkernel::OutputSerializer::serializeSegmentsSet(input, "result.txt");
     auto result = Intersection::intersectSetSegments(input);
 
     auto points_comparator = [](const gkernel::Point& first, const gkernel::Point& second) {
@@ -32,7 +35,18 @@ void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkerne
     });
     result_points.erase(to_erase, result_points.end());
 
+    for (std::size_t idx = 0; idx < result_points.size(); ++idx) {
+        std::cout << "result_points[" << idx << "]: " << result_points[idx] << std::endl;
+    }
+
     std::sort(expected.begin(), expected.end(), points_comparator);
+
+    std::set_symmetric_difference(expected.begin(), expected.end(), result_points.begin(), result_points.end(), std::ostream_iterator<gkernel::Point>(std::cout, " "));
+
+    std::cout << std::endl;
+    std::cout << "expected_size: " << expected.size() << std::endl;
+    std::cout << "result_size: " << result_points.size() << std::endl;
+
 
     REQUIRE_EQ(std::equal(result_points.begin(), result_points.end(), expected.begin(), expected.end(), [](const gkernel::Point& first, const gkernel::Point& second) {
         return first.x() == second.x() && first.y() == second.y();

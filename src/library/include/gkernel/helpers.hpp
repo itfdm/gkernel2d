@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <limits>
 #include <stdexcept>
+#include <iostream>
 
 namespace gkernel {
 
@@ -61,6 +62,11 @@ protected:
 
     bool _validation;
 };
+
+static inline void throw_exception(std::string message) {
+    std::cerr << message << std::endl;
+    throw std::runtime_error(message);
+}
 
 } // namespace gkernel
 #endif /* __GKERNEL_HPP_HELPERS */

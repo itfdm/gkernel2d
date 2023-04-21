@@ -10,7 +10,7 @@ namespace gkernel {
 
 constexpr static double EPS = 1e-9;
 
-static inline double get_sweeping_line_y(const Segment& segment, double x, double eps = EPS) {
+static inline double get_sweeping_line_y(const Segment& segment, double x, double eps = 0) {
     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
     double m = segment.start().y() - k * segment.start().x();
     return k * (x + eps) + m;
@@ -58,7 +58,15 @@ private:
         Event(const gkernel::Segment& segment, gkernel::data_type x, event_status status) : segment(&segment), x(x), status(status) {}
 
         bool operator<(const Event& other) const {
-            if (std::abs(x - other.x) > 3 * EPS) return x < other.x;
+            // if (other.x > 8 && other.status == event_status::intersection_right) {
+            //     std::cout << "aaa" << std::endl;
+            // }
+            // if (other.status == event_status::intersection_right) {
+            //     if (other.x - this->segment->max().x() > EPS) {
+            //         return true;
+            //     }
+            // }
+            if (std::abs(x - other.x) > EPS) return x < other.x;
             if (status != other.status) return static_cast<int8_t>(status) > static_cast<int8_t>(other.status);
             return this->segment->id < other.segment->id;
         }

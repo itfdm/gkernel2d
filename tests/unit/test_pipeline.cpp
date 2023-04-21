@@ -143,6 +143,7 @@ void test_simple() {
     CircuitsLayer first_layer = {{ first_circuit, third_circuit }};
     CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
+    gkernel::OutputSerializer::serializeSegmentsSet(merged_layers, "result.txt");
     auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
     for (std::size_t idx = 0; idx < segments_layer.size(); ++idx) {
         std::cout << segments_layer[idx] << std::endl;
