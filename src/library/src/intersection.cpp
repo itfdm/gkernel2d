@@ -3,6 +3,18 @@
 
 namespace gkernel {
 
+
+// old implementation, detects overlapping segments
+// inline int get_area(const Point& a, const Point& b, const Point& c) {
+//     data_type area = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
+//     return area == 0 ? 0 : area > 0 ? 1 : -1;
+// }
+
+// inline bool intersect(const Segment& first, const Segment& second) {
+//     return get_area(first.start(), first.end(), second.start()) * get_area(first.start(), first.end(), second.end()) <= 0 &&
+//            get_area(second.start(), second.end(), first.start()) * get_area(second.start(), second.end(), first.end()) <= 0;
+// }
+
 inline int orientation(const Point& first, const Point& second, const Point& third) {
     double val = (second.y() - first.y()) * (third.x() - second.x()) -
               (second.x() - first.x()) * (third.y() - second.y());
