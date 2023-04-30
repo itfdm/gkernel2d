@@ -3,14 +3,23 @@
 
 namespace gkernel {
 
-inline int get_area(const Point& a, const Point& b, const Point& c) {
-    data_type area = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
-    return area == 0 ? 0 : area > 0 ? 1 : -1;
+inline int orientation(const Point& first, const Point& second, const Point& third) {
+    double val = (second.y() - first.y()) * (third.x() - second.x()) -
+              (second.x() - first.x()) * (third.y() - second.y());
+    if (val == 0) return 0;
+    return (val > 0)? 1: 2;
 }
 
 inline bool intersect(const Segment& first, const Segment& second) {
-    return get_area(first.start(), first.end(), second.start()) * get_area(first.start(), first.end(), second.end()) <= 0 &&
-           get_area(second.start(), second.end(), first.start()) * get_area(second.start(), second.end(), first.end()) <= 0;
+    double o1 = orientation(first.start(), first.end(), second.start());
+    double o2 = orientation(first.start(), first.end(), second.end());
+    double o3 = orientation(second.start(), second.end(), first.start());
+    double o4 = orientation(second.start(), second.end(), first.end());
+    if (o1 != o2 && o3 != o4) {
+        return true;
+    }
+
+    return false;
 }
 
 // intersect two segments

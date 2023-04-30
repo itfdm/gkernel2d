@@ -45,7 +45,45 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point) {
 
 struct Segment {
     Segment() : _begin_point(), _end_point(), _min_point(nullptr), _max_point(nullptr) {};
-    Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {}
+    Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {
+        if (_begin_point < _end_point) {
+            _min_point = &_begin_point;
+            _max_point = &_end_point;
+        } else {
+            _min_point = &_end_point;
+            _max_point = &_begin_point;
+        }
+    }
+
+    // copy constructor
+
+    Segment(const Segment& other) : _begin_point(other._begin_point), _end_point(other._end_point), id(other.id) {
+        if (_begin_point < _end_point) {
+            _min_point = &_begin_point;
+            _max_point = &_end_point;
+        } else {
+            _min_point = &_end_point;
+            _max_point = &_begin_point;
+        }
+    }
+
+    // assignment operator
+    Segment& operator=(const Segment& other) {
+        if (this == &other) {
+            return *this;
+        }
+        _begin_point = other._begin_point;
+        _end_point = other._end_point;
+        id = other.id;
+        if (_begin_point < _end_point) {
+            _min_point = &_begin_point;
+            _max_point = &_end_point;
+        } else {
+            _min_point = &_end_point;
+            _max_point = &_begin_point;
+        }
+        return *this;
+    }
 
     bool is_point() const {
         return _begin_point == _end_point;
@@ -65,11 +103,11 @@ struct Segment {
     const Point& end() const { return _end_point; }
 
     const Point& min() const {
-        return _begin_point < _end_point ? _begin_point : _end_point;
+        return *_min_point;
     }
 
     const Point& max() const {
-        return _begin_point > _end_point ? _begin_point : _end_point;
+        return *_max_point;
     }
 
     segment_id get_id() const {
