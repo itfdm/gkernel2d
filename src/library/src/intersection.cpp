@@ -39,6 +39,8 @@ Point Intersection::intersectSegments(const Segment& first, const Segment& secon
         else if (first.end() == second.start())
             return Point({first.end().x(), first.end().y()});
     }
+    throw_exception("Segments do not intersect");
+    return Point();
 }
 
 std::vector<IntersectionPoint> Intersection::intersectSetSegments(const SegmentsSet& segments) {
@@ -125,6 +127,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         }
 
         if (event.status == event_status::vertical) {
+            // auto item = active_segments.find_next(event.segment->min().x)
             for (auto item : active_segments) {
                 if (intersect(*event.segment, *item)) {
                     auto intersection = intersectSegments(*event.segment, *item);

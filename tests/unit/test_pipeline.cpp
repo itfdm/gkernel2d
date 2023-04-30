@@ -89,10 +89,10 @@ void test_areas(const SegmentsLayer& segments_layer) {
 
 void test_filter(const SegmentsLayer& segments_layer) {
     SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
-        return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
-                !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
-               !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
-                segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1;
+        return (segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
+                !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1)) ||
+               (!(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
+                segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1);
     });
 
     SegmentsLayer expected = {{
@@ -344,10 +344,10 @@ void test_complex() {
     //      areas intersection
     //====================================================================================================
     SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(layer, [](const SegmentsSet& seg_set, const Segment& segment) {
-        return seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1 &&
-            !(seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1) ||
-            !(seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1) &&
-            seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1;
+        return (seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1 &&
+            !(seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1)) ||
+            (!(seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1) &&
+            seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1);
     });
 
     SegmentsSet expected_filtered = {{

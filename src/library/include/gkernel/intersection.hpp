@@ -58,14 +58,6 @@ private:
         Event(const gkernel::Segment& segment, gkernel::data_type x, event_status status) : segment(&segment), x(x), status(status) {}
 
         bool operator<(const Event& other) const {
-            // if (other.x > 8 && other.status == event_status::intersection_right) {
-            //     std::cout << "aaa" << std::endl;
-            // }
-            // if (other.status == event_status::intersection_right) {
-            //     if (other.x - this->segment->max().x() > EPS) {
-            //         return true;
-            //     }
-            // }
             if (std::abs(x - other.x) > EPS) return x < other.x;
             if (status != other.status) return static_cast<int8_t>(status) > static_cast<int8_t>(other.status);
             return this->segment->id < other.segment->id;

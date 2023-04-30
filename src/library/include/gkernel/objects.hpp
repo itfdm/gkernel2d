@@ -44,7 +44,7 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point) {
 }
 
 struct Segment {
-    Segment() : _begin_point(), _end_point() {};
+    Segment() : _begin_point(), _end_point(), _min_point(nullptr), _max_point(nullptr) {};
     Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {}
 
     bool is_point() const {
@@ -52,8 +52,8 @@ struct Segment {
     }
 
     bool operator==(const Segment& other) const {
-        return (this->_begin_point == other._begin_point && this->_end_point == other._end_point) ||
-            (this->_begin_point == other._end_point && this->_end_point == other._begin_point);
+        return ((this->_begin_point == other._begin_point) && (this->_end_point == other._end_point)) ||
+            ((this->_begin_point == other._end_point) && (this->_end_point == other._begin_point));
     }
 
     bool operator!=(const Segment& other) const {
@@ -72,12 +72,14 @@ struct Segment {
         return _begin_point > _end_point ? _begin_point : _end_point;
     }
 
-    const segment_id get_id() const {
+    segment_id get_id() const {
         return id;
     }
 
 private:
     Point _begin_point, _end_point;
+    Point* _min_point;
+    Point* _max_point;
     segment_id id;
 
     friend class SegmentsSetCommon;
