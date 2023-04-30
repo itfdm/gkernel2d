@@ -148,12 +148,19 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         }
 
         if (event.status == event_status::vertical) {
-            // auto item = active_segments.find_next(event.segment->min().x)
-            for (auto item : active_segments) {
-                if (intersect(*event.segment, *item)) {
-                    auto intersection = intersectSegments(*event.segment, *item);
-                    result.emplace_back(intersection, event.segment->id, item->id);
+            auto lower_bound = Segment(Point{event.segment->min().x() - EPS, event.segment->min().y()}, Point{event.segment->min().x() + EPS, event.segment->min().y()});
+            auto upper_bound = Segment(Point{event.segment->min().x() - EPS, event.segment->max().y()}, Point{event.segment->min().x() + EPS, event.segment->max().y()});
+            auto start_segment = active_segments.find_prev(&lower_bound).first;
+            auto end_segment = active_segments.find_next(&upper_bound).first;
+            if (end_segment != active_segments.end()) {
+                ++end_segment;
+            }
+            while (start_segment != end_segment) {
+                if (intersect(*event.segment, **start_segment)) {
+                    auto intersection = intersectSegments(*event.segment, **start_segment);
+                    result.emplace_back(intersection, event.segment->id, (**start_segment).id);
                 }
+                ++start_segment;
             }
             events.erase(events.begin());
             continue;
