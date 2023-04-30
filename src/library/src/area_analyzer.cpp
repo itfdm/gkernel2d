@@ -119,8 +119,8 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
         while (current_event != events.end() && current_event->x == x_sweeping_line_new) {
             if (current_event->status == event_status::start) {
                 x_sweeping_line = x_sweeping_line_new;
-                auto result = active_segments.insert(current_event->segment);
-                active_segments_new.push_back(result.first);
+                auto insert_result = active_segments.insert(current_event->segment);
+                active_segments_new.push_back(insert_result.first);
             } else if (current_event->status == event_status::end) {
                 active_segments.erase(current_event->segment);
             } else {
