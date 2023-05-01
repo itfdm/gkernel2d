@@ -11,8 +11,15 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF) # use -std=c++... instead of -std=gnu++...
-if (LINUX AND CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
+if (LINUX)
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
+    endif()
+
+    string(TOLOWER ${CMAKE_BUILD_TYPE} _build_type)
+    if (_build_type MATCHES "(release)|(relwithdebinfo)")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer")
+    endif()
 endif()
 
 set(GKERNEL_COMMON_COMPILE_FLAGS "")
@@ -92,3 +99,6 @@ if (GKERNEL_PERF_TESTING)
 endif()
 
 add_subdirectory(docs_infra)
+
+add_executable(bench test.cpp)
+target_link_libraries(bench PRIVATE GKERNEL::gkernel TBB::tbb)

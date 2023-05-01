@@ -204,6 +204,7 @@ void test_complex() {
     //      check segments merging
     //====================================================================================================
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
+    gkernel::OutputSerializer::serializeSegmentsSet(merged_layers, "result.txt");
     SegmentsSet expected_merged_layers = { {
         {{2, 2}, {2, 10}},
         {{2, 10}, {8, 10}},
