@@ -71,7 +71,6 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         return result;
     }
 
-	std::set<Event> events;
     double x_sweeping_line = 0;
 
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
@@ -88,11 +87,13 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
     using tree_type = RBTree<const Segment*, decltype(compare_segments)>;
     tree_type active_segments(compare_segments);
 
+    std::set<Event> events;
+
 	for (std::size_t idx = 0; idx < segments.size(); ++idx) {
         Segment& segment = const_cast<Segment&>(segments[idx]);
         if (segment.start().x() != segment.end().x()) {
-            events.insert({ segment, std::min(segment.start().x(), segment.end().x()), event_status::start });
-            events.insert({ segment, std::max(segment.start().x(), segment.end().x()), event_status::end });
+            events.insert({ segment, segment.min().x(), event_status::start });
+            events.insert({ segment, segment.max().x(), event_status::end });
         }
         else {
             events.insert({ segment, segment.start().x(), event_status::vertical });
@@ -101,41 +102,26 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
 
     std::vector<const Segment*> temp_segments;
     temp_segments.reserve(segments.size());
-    double x_sweeping_line_prev_right = -1;
-    while (events.size() > 0) {
+    double prev_reorder_x_sweeping_line = -1;
+    while (events.begin() != events.end()) {
         auto event = *events.begin();
-        temp_segments.clear();
-        if (event.status == event_status::intersection_right && x_sweeping_line_prev_right != event.x) {
+        if (event.status == event_status::intersection_right && prev_reorder_x_sweeping_line != event.x) {
             auto event_it = events.begin();
-            while (event_it != events.end() && event_it->x == event.x && event_it->status == event_status::intersection_right) {
-                double y = get_sweeping_line_y(*(*event_it).segment, (*event_it).x);
-                auto lower_bound = Segment(Point{(*event_it).x - 2 * EPS, y - EPS}, Point{(*event_it).x, y - EPS});
-                auto upper_bound = Segment(Point{(*event_it).x - 2 * EPS, y + EPS}, Point{(*event_it).x, y + EPS});;
-                auto start_segment = active_segments.find_prev(&lower_bound).first;
-                auto end_segment = active_segments.find_next(&upper_bound).first;
-                if (end_segment != active_segments.end()) {
-                    ++end_segment;
+            temp_segments.clear();
+            while (event_it != events.end() && event_it->status == event_status::intersection_right && event_it->x == event.x) {
+                temp_segments.push_back(event_it->segment);
+                auto count = active_segments.erase(event_it->segment);
+                #if GKERNEL_DEBUG
+                if (count == 0) {
+                    throw_exception("error: not erased, but it should be");
                 }
-
-                while (start_segment != end_segment) {
-                    auto segment_to_remove = start_segment;
-                    ++start_segment;
-                    temp_segments.push_back(*segment_to_remove);
-                    auto count = active_segments.erase(*segment_to_remove);
-                    #if GKERNEL_DEBUG
-                    if (count == 0) {
-                        throw_exception("error: not erased, but it should be");
-                    }
-                    if (count > 1) {
-                        throw_exception("error: erased more than one");
-                    }
-                    #endif
+                if (count > 1) {
+                    throw_exception("error: erased more than one");
                 }
-
+                #endif
                 ++event_it;
             }
             x_sweeping_line = event.x;
-            x_sweeping_line_prev_right = x_sweeping_line;
             for (auto& segment : temp_segments) {
                 auto insert_result = active_segments.insert(segment);
                 #if GKERNEL_DEBUG
@@ -144,6 +130,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                 }
                 #endif
             }
+            prev_reorder_x_sweeping_line = event.x;
         } else {
             x_sweeping_line = event.x;
         }
@@ -191,12 +178,16 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             if (intersect(*event.segment, **prev_segment)) {
                 auto intersection = intersectSegments(*event.segment, **prev_segment);
                 result.emplace_back(intersection, event.segment->id, (*prev_segment)->id);
-                if ((intersection.x() >= event.x) && ((intersection.x() - event.x) > 5 * EPS || event.status != event_status::intersection_right)) {
-                    if (std::abs(event.segment->max().x() - intersection.x()) > EPS) {
-                        events.insert({*event.segment, intersection.x() + 3 * EPS, event_status::intersection_right});
+                if (intersection.x() >= event.x) {
+                    double offset = 0;
+                    if ((intersection.x() - event.x) > 3 * EPS || event.status != event_status::intersection_right) {
+                        offset = 3 * EPS;
                     }
-                    if (std::abs((*prev_segment)->max().x() - intersection.x()) > EPS) {
-                        events.insert({**prev_segment, intersection.x() + 3 * EPS, event_status::intersection_right});
+                    if (std::abs(event.segment->max().x() - intersection.x()) > offset) {
+                        events.insert({*event.segment, intersection.x() + offset, event_status::intersection_right});
+                    }
+                    if (std::abs((*prev_segment)->max().x() - intersection.x()) > offset) {
+                        events.insert({**prev_segment, intersection.x() + offset, event_status::intersection_right});
                     }
                 }
             }
@@ -208,12 +199,21 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             if (intersect(*event.segment, **next_segment)) {
                 auto intersection = intersectSegments(*event.segment, **next_segment);
                 result.emplace_back(intersection, event.segment->id, (*next_segment)->id);
-                if ((intersection.x() >= event.x) && ((intersection.x() - event.x) > 5 * EPS || event.status != event_status::intersection_right)) {
-                    if (std::abs(event.segment->max().x() - intersection.x()) > EPS) {
-                        events.insert({*event.segment, intersection.x() + 3 * EPS, event_status::intersection_right});
+                if (intersection.x() >= event.x) {
+                    double offset = 0;
+                    if ((intersection.x() - event.x) > 3 * EPS || event.status != event_status::intersection_right) {
+                        offset = 3 * EPS;
                     }
-                    if (std::abs((*next_segment)->max().x() - intersection.x()) > EPS) {
-                        events.insert({**next_segment, intersection.x() + 3 * EPS, event_status::intersection_right});
+                    if (std::abs(event.segment->max().x() - intersection.x()) > offset) {
+                        events.insert({*event.segment, intersection.x() + offset, event_status::intersection_right});
+                        if ((uintptr_t)event.segment != (uintptr_t)(*insert_result.first)) {
+                            std::cout << (uintptr_t)event.segment << std::endl;
+                            std::cout << (uintptr_t)(*insert_result.first) << std::endl;
+                            std::cout << "aaa" << std::endl;
+                        }
+                    }
+                    if (std::abs((*next_segment)->max().x() - intersection.x()) > offset) {
+                        events.insert({**next_segment, intersection.x() + offset, event_status::intersection_right});
                     }
                 }
             }
@@ -224,12 +224,16 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                 if (intersect(**prev_segment, **next_segment)) {
                     auto intersection = intersectSegments(**prev_segment, **next_segment);
                     result.emplace_back(intersection, (*prev_segment)->id, (*next_segment)->id);
-                    if ((intersection.x() >= event.x) && ((intersection.x() - event.x) > 5 * EPS || event.status != event_status::intersection_right)) {
-                        if (std::abs((*prev_segment)->max().x() - intersection.x()) > EPS) {
-                            events.insert({**prev_segment, intersection.x() + 3 * EPS, event_status::intersection_right});
+                    if (intersection.x() >= event.x) {
+                        double offset = 0;
+                        if ((intersection.x() - event.x) > 3 * EPS || event.status != event_status::intersection_right) {
+                            offset = 3 * EPS;
                         }
-                        if (std::abs((*next_segment)->max().x() - intersection.x()) > EPS) {
-                            events.insert({**next_segment, intersection.x() + 3 * EPS, event_status::intersection_right});
+                        if (std::abs((*prev_segment)->max().x() - intersection.x()) > offset) {
+                            events.insert({**prev_segment, intersection.x() + offset, event_status::intersection_right});
+                        }
+                        if (std::abs((*next_segment)->max().x() - intersection.x()) > offset) {
+                            events.insert({**next_segment, intersection.x() + offset, event_status::intersection_right});
                         }
                     }
                 }
