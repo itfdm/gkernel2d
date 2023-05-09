@@ -44,7 +44,9 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point) {
 }
 
 struct Segment {
-    Segment() : _begin_point(), _end_point(), _min_point(nullptr), _max_point(nullptr) {};
+    Segment() : _begin_point(), _end_point(), _min_point(nullptr), _max_point(nullptr) {
+        id = std::numeric_limits<gkernel::segment_id>::max();
+    }
     Segment(const Point& start, const Point& end) : _begin_point(start), _end_point(end) {
         if (_begin_point < _end_point) {
             _min_point = &_begin_point;
@@ -53,6 +55,7 @@ struct Segment {
             _min_point = &_end_point;
             _max_point = &_begin_point;
         }
+        id = std::numeric_limits<gkernel::segment_id>::max();
     }
 
     // copy constructor

@@ -137,8 +137,10 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         auto event_it = events.begin();
 
         if (event.status == event_status::vertical) {
-            auto lower_bound = Segment(Point{event.segment->min().x() - EPS, event.segment->min().y()}, Point{event.segment->min().x() + EPS, event.segment->min().y()});
-            auto upper_bound = Segment(Point{event.segment->min().x() - EPS, event.segment->max().y()}, Point{event.segment->min().x() + EPS, event.segment->max().y()});
+            auto lower_bound = Segment(Point{event.segment->min().x() - 10 * EPS, event.segment->min().y() - 10 * EPS},
+                                       Point{event.segment->min().x() + 10 * EPS, event.segment->min().y() - 10 * EPS});
+            auto upper_bound = Segment(Point{event.segment->min().x() - 10 * EPS, event.segment->max().y() + 10 * EPS},
+                                       Point{event.segment->min().x() + 10 * EPS, event.segment->max().y() + 10 * EPS});
             auto start_segment = active_segments.find_prev(&lower_bound).first;
             auto end_segment = active_segments.find_next(&upper_bound).first;
             if (end_segment != active_segments.end()) {
@@ -220,7 +222,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         }
 
         if (event.status == event_status::end) {
-            if (prev_segment != active_segments.begin() && next_segment != active_segments.end()) {
+            if (next_segment != active_segments.end()) {
                 if (intersect(**prev_segment, **next_segment)) {
                     auto intersection = intersectSegments(**prev_segment, **next_segment);
                     result.emplace_back(intersection, (*prev_segment)->id, (*next_segment)->id);
@@ -238,17 +240,15 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                     }
                 }
             }
-            if (event.status == event_status::end) {
-                auto count = active_segments.erase(event.segment);
-                #if GKERNEL_DEBUG
-                if (count == 0) {
-                    throw_exception("error: not erased, but it should be");
-                }
-                if (count > 1) {
-                    throw_exception("error: erased more than one");
-                }
-                #endif
+            auto count = active_segments.erase(event.segment);
+            #if GKERNEL_DEBUG
+            if (count == 0) {
+                throw_exception("error: not erased, but it should be");
             }
+            if (count > 1) {
+                throw_exception("error: erased more than one");
+            }
+            #endif
         }
         events.erase(event_it);
     }
