@@ -139,19 +139,18 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         if (event.status == event_status::vertical) {
             auto lower_bound = Segment(Point{event.segment->min().x() - 10 * EPS, event.segment->min().y() - 10 * EPS},
                                        Point{event.segment->min().x() + 10 * EPS, event.segment->min().y() - 10 * EPS});
-            auto upper_bound = Segment(Point{event.segment->min().x() - 10 * EPS, event.segment->max().y() + 10 * EPS},
-                                       Point{event.segment->min().x() + 10 * EPS, event.segment->max().y() + 10 * EPS});
-            auto start_segment = active_segments.find_prev(&lower_bound).first;
-            auto end_segment = active_segments.find_next(&upper_bound).first;
-            if (end_segment != active_segments.end()) {
-                ++end_segment;
-            }
-            while (start_segment != end_segment) {
-                if (intersect(*event.segment, **start_segment)) {
-                    auto intersection = intersectSegments(*event.segment, **start_segment);
-                    result.emplace_back(intersection, event.segment->id, (**start_segment).id);
+            auto current_segment = active_segments.find_prev(&lower_bound).first;
+            double current_y = get_sweeping_line_y(**current_segment, x_sweeping_line);
+            while (current_y <= event.segment->max().y()) {
+                if (intersect(*event.segment, **current_segment)) {
+                    auto intersection = intersectSegments(*event.segment, **current_segment);
+                    result.emplace_back(intersection, event.segment->id, (**current_segment).id);
                 }
-                ++start_segment;
+                ++current_segment;
+                if (current_segment == active_segments.end()) {
+                    break;
+                }
+                current_y = get_sweeping_line_y(**current_segment, x_sweeping_line);
             }
             events.erase(events.begin());
             continue;
