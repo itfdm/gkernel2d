@@ -74,11 +74,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
     double x_sweeping_line = 0;
 
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
-        double eps = 0;
-        if (first->max().x() == x_sweeping_line || second->max().x() == x_sweeping_line ||
-            (first->min().x() != x_sweeping_line && second->min().x() != x_sweeping_line)) {
-            eps = -EPS;
-        }
+        double eps = -EPS;
         double y1 = get_sweeping_line_y(*first, x_sweeping_line, eps);
         double y2 = get_sweeping_line_y(*second, x_sweeping_line, eps);
         return std::tie(y1, first->id) < std::tie(y2, second->id);
@@ -100,35 +96,38 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         }
 	}
 
-    std::vector<const Segment*> temp_segments;
-    temp_segments.reserve(segments.size());
+    std::vector<Segment*> temp_new_order;
+    std::vector<Segment**> temp_prev_order;
+    temp_new_order.reserve(segments.size());
+    temp_prev_order.reserve(segments.size());
     double prev_reorder_x_sweeping_line = -1;
     while (events.begin() != events.end()) {
         auto event = *events.begin();
         if (event.status == event_status::intersection_right && prev_reorder_x_sweeping_line != event.x) {
             auto event_it = events.begin();
-            temp_segments.clear();
+            temp_new_order.clear();
+            temp_prev_order.clear();
             while (event_it != events.end() && event_it->status == event_status::intersection_right && event_it->x == event.x) {
-                temp_segments.push_back(event_it->segment);
-                auto count = active_segments.erase(event_it->segment);
+                auto insert_result = active_segments.insert(event_it->segment);
                 #if GKERNEL_DEBUG
-                if (count == 0) {
-                    throw_exception("error: not erased, but it should be");
-                }
-                if (count > 1) {
-                    throw_exception("error: erased more than one");
+                if (insert_result.second) {
+                    throw_exception("error: insertion in a place where it is already exist");
                 }
                 #endif
+                Segment** segment_ptr = const_cast<Segment**>(&(*insert_result.first));
+                temp_new_order.push_back(const_cast<Segment*>(event_it->segment));
+                temp_prev_order.push_back(segment_ptr);
                 ++event_it;
             }
+            std::sort(temp_prev_order.begin(), temp_prev_order.end(), [&compare_segments](auto& first_segment, auto& second_segment){
+                return compare_segments(*first_segment, *second_segment);
+            });
             x_sweeping_line = event.x;
-            for (auto& segment : temp_segments) {
-                auto insert_result = active_segments.insert(segment);
-                #if GKERNEL_DEBUG
-                if (!insert_result.second) {
-                    throw_exception("error: not inserted, but it should be");
-                }
-                #endif
+            std::sort(temp_new_order.begin(), temp_new_order.end(), [&compare_segments](auto& first_segment, auto& second_segment){
+                return compare_segments(first_segment, second_segment);
+            });
+            for (std::size_t idx = 0; idx < temp_new_order.size(); ++idx) {
+                (*temp_prev_order[idx]) = temp_new_order[idx];
             }
             prev_reorder_x_sweeping_line = event.x;
         } else {
@@ -207,11 +206,6 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                     }
                     if (std::abs(event.segment->max().x() - intersection.x()) > offset) {
                         events.insert({*event.segment, intersection.x() + offset, event_status::intersection_right});
-                        if ((uintptr_t)event.segment != (uintptr_t)(*insert_result.first)) {
-                            std::cout << (uintptr_t)event.segment << std::endl;
-                            std::cout << (uintptr_t)(*insert_result.first) << std::endl;
-                            std::cout << "aaa" << std::endl;
-                        }
                     }
                     if (std::abs((*next_segment)->max().x() - intersection.x()) > offset) {
                         events.insert({**next_segment, intersection.x() + offset, event_status::intersection_right});
