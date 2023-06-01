@@ -6,6 +6,7 @@
 namespace gkernel {
 
 class Converter;
+class Intersection;
 
 class SegmentsSetCommon : public Labeling {
 protected:
@@ -68,6 +69,7 @@ protected:
 
     friend class CircuitsSet;
     friend class Converter;
+    friend class Intersection;
 };
 
 class SegmentsSet : public SegmentsSetCommon {
