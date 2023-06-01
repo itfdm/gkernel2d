@@ -373,8 +373,8 @@ void TestSegmentsSetIntersectionSix() {
 }
 
 DECLARE_TEST(TestSegmentsSetIntersectionFirst);
-// DECLARE_TEST(TestSegmentsSetIntersectionSecond);
-// DECLARE_TEST(TestSegmentsSetIntersectionThird);
-// DECLARE_TEST(TestSegmentsSetIntersectionFour);
-// DECLARE_TEST(TestSegmentsSetIntersectionFifth);
-// DECLARE_TEST(TestSegmentsSetIntersectionSix);
+DECLARE_TEST(TestSegmentsSetIntersectionSecond);
+DECLARE_TEST(TestSegmentsSetIntersectionThird);
+DECLARE_TEST(TestSegmentsSetIntersectionFour);
+DECLARE_TEST(TestSegmentsSetIntersectionFifth);
+DECLARE_TEST(TestSegmentsSetIntersectionSix);

@@ -64,8 +64,8 @@ protected:
 };
 
 static inline void throw_exception(std::string message) {
-    // std::cerr << message << std::endl;
-    // throw std::runtime_error(message);
+    std::cerr << message << std::endl;
+    throw std::runtime_error(message);
 }
 
 } // namespace gkernel

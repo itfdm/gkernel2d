@@ -101,9 +101,9 @@ public:
         _segment_indices(segment_indices) {}
     bool operator()(std::size_t lhs, std::size_t rhs) const {
         double eps = -EPS;
-        double y1 = get_sweeping_line_y(_segments[lhs], this->_x_sweeping_line, eps);
+        double y1 = get_sweeping_line_y(_segments[_segment_indices[lhs]], this->_x_sweeping_line, eps);
         double y2 = get_sweeping_line_y(_segments[_segment_indices[rhs]], this->_x_sweeping_line, eps);
-        auto first_idx = _segments[lhs].get_id();
+        auto first_idx = _segments[_segment_indices[lhs]].get_id();
         auto second_idx = _segments[_segment_indices[rhs]].get_id();
 
         return std::tie(y1, first_idx) < std::tie(y2, second_idx);
@@ -120,6 +120,8 @@ public:
     ActiveSegmentsTree(double& x_sweeping_line, const std::vector<Segment>& segments) : _segments(segments), _x_sweeping_line(x_sweeping_line), _comparator(x_sweeping_line, segments, _segment_indices) {
         for (std::size_t idx = 0; idx < segments.size(); ++idx) {
             _segment_indices.push_back(idx);
+            _reversed_segment_indices.push_back(idx);
+            segment_indices_bak.push_back(idx);
         }
         _tree = new tree_t(_comparator);
         old_segment_indices.reserve(_segment_indices.size());
@@ -165,14 +167,18 @@ public:
         new_segment_indices.clear();
 
         for (std::size_t idx = 0; idx < segments.size(); ++idx) {
-            old_segment_indices.push_back(_segment_indices[segments[idx]->get_id()]);
-            new_segment_indices.push_back(_segment_indices[segments[idx]->get_id()]);
+            old_segment_indices.push_back(_reversed_segment_indices[segments[idx]->get_id()]);
+            new_segment_indices.push_back(_reversed_segment_indices[segments[idx]->get_id()]);
         }
         std::sort(old_segment_indices.begin(), old_segment_indices.end(), _comparator);
         _x_sweeping_line = new_x_sweeping_line;
         std::sort(new_segment_indices.begin(), new_segment_indices.end(), _comparator);
         for (std::size_t idx = 0; idx < segments.size(); ++idx) {
-            _segment_indices[old_segment_indices[idx]] = new_segment_indices[idx];
+            _segment_indices[old_segment_indices[idx]] = segment_indices_bak[new_segment_indices[idx]];
+            _reversed_segment_indices[segment_indices_bak[new_segment_indices[idx]]] = old_segment_indices[idx];
+        }
+        for (std::size_t idx = 0; idx < segments.size(); ++idx) {
+            segment_indices_bak[old_segment_indices[idx]] = _segment_indices[old_segment_indices[idx]];
         }
     }
 
@@ -185,7 +191,7 @@ public:
     }
 
     auto insert(const Segment& item) {
-        auto insert_result = _tree->insert(item.get_id());
+        auto insert_result = _tree->insert(_reversed_segment_indices[item.get_id()]);
         return std::make_pair(ActiveSegmentsTreeIterator(_segments, _segment_indices, insert_result.first), insert_result.second);
     }
 
@@ -198,7 +204,7 @@ public:
     }
 
     std::size_t erase(const Segment& item) {
-        return _tree->erase(item.get_id());
+        return _tree->erase(_reversed_segment_indices[item.get_id()]);
     }
 
     void erase(ActiveSegmentsTreeIterator it) {
@@ -210,16 +216,17 @@ public:
     }
 
     ActiveSegmentsTreeIterator find(const Segment& item) {
-        return ActiveSegmentsTreeIterator(_segments, _segment_indices, _tree->find(item.get_id()));
+        return ActiveSegmentsTreeIterator(_segments, _segment_indices, _tree->find(_segment_indices[item.get_id()]));
     }
 
     std::pair<ActiveSegmentsTreeIterator, tree_t::state> find_next(const Segment& item) {
-        auto found = _tree->find_next(item.get_id());
+        auto found = _tree->find_next(_segment_indices[item.get_id()]);
         return std::make_pair(ActiveSegmentsTreeIterator(_segments, _segment_indices, found.first), found.second);
     }
 
     std::pair<ActiveSegmentsTreeIterator, tree_t::state> find_prev(const Segment& item) {
-        auto found = _tree->find_prev(item.get_id());
+        const_cast<std::vector<Segment>&>(_segments)[_segments.size() - 1] = item;
+        auto found = _tree->find_prev(_segments.size() - 1);
         return std::make_pair(ActiveSegmentsTreeIterator(_segments, _segment_indices, found.first), found.second);
     }
 
@@ -229,8 +236,10 @@ private:
     RBTree<std::size_t, ActiveSegmentsComparator>* _tree;
     ActiveSegmentsComparator _comparator;
     std::vector<std::size_t> _segment_indices;
+    std::vector<std::size_t> _reversed_segment_indices;
     std::vector<std::size_t> old_segment_indices;
     std::vector<std::size_t> new_segment_indices;
+    std::vector<std::size_t> segment_indices_bak;
 };
 
 }  // namespace gkernel

@@ -81,11 +81,12 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
     };
 
     using tree_type = RBTree<const Segment*, decltype(compare_segments)>;
+    const_cast<std::vector<Segment>&>(segments._segments).push_back(Segment({Point({-1, -1}), Point({-1, -1})}));
     ActiveSegmentsTree active_segments(x_sweeping_line, segments._segments);
 
     std::set<Event> events;
 
-	for (std::size_t idx = 0; idx < segments.size(); ++idx) {
+	for (std::size_t idx = 0; idx < segments.size() - 1; ++idx) {
         Segment& segment = const_cast<Segment&>(segments[idx]);
         if (segment.start().x() != segment.end().x()) {
             events.insert({ segment, segment.min().x(), event_status::start });
@@ -104,12 +105,12 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             auto event_it = events.begin();
             update_order.clear();
             while (event_it != events.end() && event_it->status == event_status::intersection_right && event_it->x == event.x) {
-                auto insert_result = active_segments.insert(*event_it->segment);
-                #if GKERNEL_DEBUG
-                if (insert_result.second) {
-                    throw_exception("error: insertion in a place where it is already exist");
-                }
-                #endif
+                // auto insert_result = active_segments.insert(*event_it->segment);
+                // #if GKERNEL_DEBUG
+                // if (insert_result.second) {
+                //     throw_exception("error: insertion in a place where it is already exist");
+                // }
+                // #endif
                 update_order.push_back(event_it->segment);
                 ++event_it;
             }
@@ -140,22 +141,20 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             continue;
         }
 
-        // #if GKERNEL_DEBUG
-        // decltype(active_segments.insert(*event.segment)) insert_result;
-        // if (event.status == event_status::start) {
-        //     insert_result = active_segments.insert(*event.segment);
-        //     if (!insert_result.second) {
-        //         throw_exception("error: not inserted, but it should be");
-        //     }
-        // } else {
-        //     insert_result = active_segments.insert(*event.segment);
-        //     if (insert_result.second) {
-        //         throw_exception("error: insertion in a place where it is already exist");
-        //     }
-        // }
-        // #else
+        #if GKERNEL_DEBUG
+        if (event.status == event_status::start) {
+            auto insert_result = active_segments.insert(*event.segment);
+            if (!insert_result.second) {
+                throw_exception("error: not inserted, but it should be");
+            }
+        } else {
+            auto insert_result = active_segments.insert(*event.segment);
+            if (insert_result.second) {
+                throw_exception("error: insertion in a place where it is already exist");
+            }
+        }
+        #endif
         auto insert_result = active_segments.insert(*event.segment);
-        // #endif
 
         auto prev_segment = insert_result.first;
         if (prev_segment != active_segments.begin()) {
@@ -230,7 +229,7 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         }
         events.erase(event_it);
     }
-
+    const_cast<std::vector<Segment>&>(segments._segments).pop_back();
     return result;
 }
 
