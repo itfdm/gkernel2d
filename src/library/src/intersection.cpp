@@ -23,6 +23,9 @@ inline int orientation(const Point& first, const Point& second, const Point& thi
 }
 
 inline bool intersect(const Segment& first, const Segment& second) {
+    if (first.start() == second.start() || first.start() == second.end() || first.end() == second.start() || first.end() == second.end()) {
+        return false;
+    }
     double o1 = orientation(first.start(), first.end(), second.start());
     double o2 = orientation(first.start(), first.end(), second.end());
     double o3 = orientation(second.start(), second.end(), first.start());
@@ -74,9 +77,12 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
     double x_sweeping_line = 0;
 
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
-        double eps = -EPS;
-        double y1 = get_sweeping_line_y(*first, x_sweeping_line, eps);
-        double y2 = get_sweeping_line_y(*second, x_sweeping_line, eps);
+        double local_eps = -EPS;
+        if (first->min().x() == x_sweeping_line || second->min().x() == x_sweeping_line) {
+            local_eps = EPS;
+        }
+        double y1 = get_sweeping_line_y(*first, x_sweeping_line, local_eps);
+        double y2 = get_sweeping_line_y(*second, x_sweeping_line, local_eps);
         return std::tie(y1, first->id) < std::tie(y2, second->id);
     };
 
@@ -108,6 +114,10 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             temp_new_order.clear();
             temp_prev_order.clear();
             while (event_it != events.end() && event_it->status == event_status::intersection_right && event_it->x == event.x) {
+                if (std::abs(event_it->segment->max().x() - event.x) < 5 * EPS) {
+                    ++event_it;
+                    continue;
+                }
                 auto insert_result = active_segments.insert(event_it->segment);
                 #if GKERNEL_DEBUG
                 if (insert_result.second) {
@@ -119,11 +129,11 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                 temp_prev_order.push_back(segment_ptr);
                 ++event_it;
             }
-            std::sort(temp_prev_order.begin(), temp_prev_order.end(), [&compare_segments](auto& first_segment, auto& second_segment){
+            std::sort(temp_prev_order.begin(), temp_prev_order.end(), [&compare_segments](auto& first_segment, auto& second_segment) {
                 return compare_segments(*first_segment, *second_segment);
             });
             x_sweeping_line = event.x;
-            std::sort(temp_new_order.begin(), temp_new_order.end(), [&compare_segments](auto& first_segment, auto& second_segment){
+            std::sort(temp_new_order.begin(), temp_new_order.end(), [&compare_segments](auto& first_segment, auto& second_segment) {
                 return compare_segments(first_segment, second_segment);
             });
             for (std::size_t idx = 0; idx < temp_new_order.size(); ++idx) {
@@ -139,6 +149,10 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             auto lower_bound = Segment(Point{event.segment->min().x() - 10 * EPS, event.segment->min().y() - 10 * EPS},
                                        Point{event.segment->min().x() + 10 * EPS, event.segment->min().y() - 10 * EPS});
             auto current_segment = active_segments.find_prev(&lower_bound).first;
+            if (current_segment == active_segments.end()) {
+                events.erase(events.begin());
+                continue;
+            }
             double current_y = get_sweeping_line_y(**current_segment, x_sweeping_line);
             while (current_y <= event.segment->max().y()) {
                 if (intersect(*event.segment, **current_segment)) {
