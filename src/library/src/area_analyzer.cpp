@@ -10,9 +10,9 @@ static constexpr label_data_type unchecked_segment = -2;
 static constexpr label_data_type unassigned = -1;
 
 enum event_status {
-    end,
     vertical,
-    start
+    start,
+    end
 };
 
 struct Event {
@@ -101,7 +101,7 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
         if (y1 != y2) {
             return y1 < y2;
         } else {
-            return first->id < second->id;
+            return first->id > second->id;
         }
     };
 
@@ -124,45 +124,27 @@ SegmentsLayer AreaAnalyzer::findSegmentsNeighbours(const SegmentsLayer& layer) {
             } else if (current_event->status == event_status::end) {
                 active_segments.erase(current_event->segment);
             } else {
-                result.set_label_value(find_neighbours_label_type::top, *current_event->segment, unassigned);
-                result.set_label_value(find_neighbours_label_type::bottom, *current_event->segment, unassigned);
-
-                auto next_id = -1;
-                auto prev_id = -1;
-                Segment next_segment;
-                Segment prev_segment;
-                auto active_iter = active_segments.end();
-                for (auto idx = active_iter; idx != active_segments.begin(); idx--) {
-                    --active_iter;
-                    if (!(current_event->segment->max().y() > (**active_iter).min().y() && current_event->segment->max().y() > (**active_iter).max().y()) &&
-                        ((current_event->segment->max().x() == (**active_iter).max().x() && current_event->segment->max().y() == (**active_iter).max().y()) ||
-                        (current_event->segment->max().x() == (**active_iter).min().x() && current_event->segment->max().y() == (**active_iter).min().y()))) {
-                       next_id = (**active_iter).id;
-                       next_segment = **active_iter;
+                auto lower_bound = Segment(Point{current_event->segment->min().x() - 10 * EPS, current_event->segment->min().y() + 10 * EPS},
+                                           Point{current_event->segment->min().x() + 10 * EPS, current_event->segment->min().y() + 10 * EPS});
+                auto upper_bound = Segment(Point{current_event->segment->max().x() - 10 * EPS, current_event->segment->max().y() - 10 * EPS},
+                                           Point{current_event->segment->max().x() + 10 * EPS, current_event->segment->max().y() - 10 * EPS});
+                auto prev_segment = active_segments.find_prev(&lower_bound);
+                auto next_segment = active_segments.find_next(&upper_bound);
+                if (prev_segment.first != active_segments.end()) {
+                    double prev_y = get_sweeping_line_y(**prev_segment.first, x_sweeping_line);
+                    if (prev_y <= current_event->segment->min().y()) {
+                        result.set_label_value(find_neighbours_label_type::bottom, *(current_event->segment), (*prev_segment.first)->id);
                     } else {
-                        if ((current_event->segment->min().x() == (**active_iter).min().x() && current_event->segment->min().y() == (**active_iter).min().y()) ||
-                             (current_event->segment->min().x() == (**active_iter).max().x() && current_event->segment->min().y() == (**active_iter).max().y())) {
-                            if (prev_id == -1) {
-                                prev_id = (**active_iter).id;
-                                prev_segment = **active_iter;
-                            }
-                            else {
-                                if (prev_segment.min().x() < (**active_iter).min().x() && current_event->segment->min().x() <= (**active_iter).min().x()) {
-                                    prev_id = (**active_iter).id;
-                                    prev_segment = **active_iter;
-                                    break;
-                                }
-                            }
-                        }
+                        result.set_label_value(find_neighbours_label_type::bottom, *(current_event->segment), unassigned);
                     }
                 }
-                if (next_id != -1) {
-                    result.set_label_value(find_neighbours_label_type::top, *current_event->segment, next_id);
-                }
-                if (prev_id != -1) {
-                    result.set_label_value(find_neighbours_label_type::bottom, *current_event->segment, prev_id);
+                if (next_segment.first != active_segments.end()) {
+                    result.set_label_value(find_neighbours_label_type::top, *(current_event->segment), (*next_segment.first)->id);
+                } else {
+                    result.set_label_value(find_neighbours_label_type::top, *(current_event->segment), unassigned);
                 }
             }
+
             ++current_event;
         }
 
@@ -203,17 +185,7 @@ SegmentsLayer AreaAnalyzer::markAreas(const SegmentsLayer& layer) {
 
 
     result.set_labels_types({ mark_areas_label_type::first_circuits_layer_top, mark_areas_label_type::second_circuits_layer_top,
-                                mark_areas_label_type::first_circuits_layer_bottom, mark_areas_label_type::second_circuits_layer_bottom });
-
-    std::vector<std::size_t> vertical_segments;
-    vertical_segments.reserve(temp_result.size());
-
-    for (std::size_t idx = 0; idx < result.size(); ++idx) {
-        if (layer[idx].min().x() == layer[idx].max().x()) {
-            vertical_segments.push_back(idx);
-            continue;
-        }
-    }
+                              mark_areas_label_type::first_circuits_layer_bottom, mark_areas_label_type::second_circuits_layer_bottom });
 
     auto label_values_id = layer.get_label_values(find_neighbours_label_type::circuits_layer_id);
     auto label_values_top = layer.get_label_values(find_neighbours_label_type::top);
@@ -252,43 +224,6 @@ SegmentsLayer AreaAnalyzer::markAreas(const SegmentsLayer& layer) {
             result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], second_circuits_layer_top);
             result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], first_circuits_layer_bottom);
             result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], second_circuits_layer_bottom);
-        }
-    });
-
-
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, vertical_segments.size()), [&](const auto &range) {
-        for (std::size_t vector_idx = range.begin(); vector_idx < range.end(); ++vector_idx) {
-            std::size_t idx = vertical_segments[vector_idx];
-            bool flag_inside = false;
-            auto top = layer.get_label_value(find_neighbours_label_type::top, layer[idx]);
-            if (top == -1) {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], 0);
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], 0);
-            } else if (layer[idx].max().x() >= layer[top].max().x()) {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[top]));
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[top]));
-                flag_inside = true;
-            } else {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_top, result[top]));
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_top, result[top]));
-            }
-
-            auto bottom = layer.get_label_value(find_neighbours_label_type::bottom, layer[idx]);
-            if (bottom == -1) {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], 0);
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], 0);
-            } else if (layer[idx].max().x() >= layer[bottom].max().x()) {
-                result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[bottom]));
-                result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[bottom]));
-            } else {
-                if (!flag_inside) {
-                    result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_top, result[bottom]));
-                    result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_top, result[bottom]));
-                } else {
-                    result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::first_circuits_layer_top, result[bottom]));
-                    result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[idx], result.get_label_value(mark_areas_label_type::second_circuits_layer_top, result[bottom]));
-                }
-            }
         }
     });
 
