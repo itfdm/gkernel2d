@@ -19,6 +19,9 @@ public:
         return result;
     }
 
+private:
+    static void internalFindSegmentsNeighbours(const SegmentsLayer& layer, SegmentsSet& result);
+public:
     static SegmentsLayer findSegmentsNeighbours(const SegmentsLayer& layer);
     static SegmentsLayer markAreas(const SegmentsLayer& layer);
 

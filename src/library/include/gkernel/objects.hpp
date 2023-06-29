@@ -31,8 +31,11 @@ struct Point {
             (this->_x == other._x && this->_y > other._y);
     }
 
-    data_type x() const { return _x; }
-    data_type y() const { return _y; }
+    const data_type& x() const { return _x; }
+    const data_type& y() const { return _y; }
+
+    data_type& x() { return _x; }
+    data_type& y() { return _y; }
 
 private:
     data_type _x, _y;
@@ -90,6 +93,18 @@ struct Segment {
 
     bool is_point() const {
         return _begin_point == _end_point;
+    }
+
+    void rotate() {
+        std::swap(_begin_point.x(), _begin_point.y());
+        std::swap(_end_point.x(), _end_point.y());
+        if (_begin_point < _end_point) {
+            _min_point = &_begin_point;
+            _max_point = &_end_point;
+        } else {
+            _min_point = &_end_point;
+            _max_point = &_begin_point;
+        }
     }
 
     bool operator==(const Segment& other) const {
