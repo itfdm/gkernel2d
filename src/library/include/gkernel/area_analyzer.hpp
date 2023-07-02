@@ -14,16 +14,16 @@ public:
     AreaAnalyzer() = delete;
 
     static SegmentsLayer findAreas(const SegmentsLayer& layer) {
-        SegmentsLayer neighbours = findSegmentsNeighbours(layer);
+        auto neighbours = findSegmentsNeighbours(layer);
         SegmentsLayer result = markAreas(neighbours);
         return result;
     }
 
 private:
-    static void internalFindSegmentsNeighbours(const SegmentsLayer& layer, SegmentsSet& result);
+    static void internalFindSegmentsNeighbours(const SegmentsLayer& layer, SegmentsSet& result, bool rotated);
 public:
-    static SegmentsLayer findSegmentsNeighbours(const SegmentsLayer& layer);
-    static SegmentsLayer markAreas(const SegmentsLayer& layer);
+    static std::pair<SegmentsSet, SegmentsSet> findSegmentsNeighbours(const SegmentsLayer& layer);
+    static SegmentsLayer markAreas(const std::pair<SegmentsSet, SegmentsSet>& neighbours);
 
     template<typename Callable>
     static SegmentsLayer markAreasAndFilter(const SegmentsLayer& layer, Callable callable) {

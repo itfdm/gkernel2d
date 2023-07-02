@@ -18,6 +18,9 @@ void check_result(const SegmentsSet& actual, const SegmentsSet& expected) {
     for (size_t idx = 0; idx < expected.size(); ++idx) {
         REQUIRE_EQ(actual[idx].min(), expected[idx].min());
         REQUIRE_EQ(actual[idx].max(), expected[idx].max());
+        std::cout << "idx: " << idx << std::endl;
+        std::cout << "actual: " << actual.get_label_value(0, actual[idx]) << " " << actual.get_label_value(1, actual[idx]) << " " << actual.get_label_value(2, actual[idx]) << " " << actual.get_label_value(3, actual[idx]) << std::endl;
+        std::cout << "expected: " << expected.get_label_value(0, expected[idx]) << " " << expected.get_label_value(1, expected[idx]) << " " << expected.get_label_value(2, expected[idx]) << " " << expected.get_label_value(3, expected[idx]) << std::endl;
         REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(1, actual[idx]), expected.get_label_value(1, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(2, actual[idx]), expected.get_label_value(2, expected[idx]));
@@ -143,8 +146,8 @@ void test_simple() {
     CircuitsLayer first_layer = {{ first_circuit, third_circuit }};
     CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
-    gkernel::OutputSerializer::serializeSegmentsSet(merged_layers, "result.txt");
     auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
+    gkernel::OutputSerializer::serializeSegmentsSet(segments_layer, "result.txt");
     for (std::size_t idx = 0; idx < segments_layer.size(); ++idx) {
         std::cout << segments_layer[idx] << std::endl;
     }
@@ -204,7 +207,6 @@ void test_complex() {
     //      check segments merging
     //====================================================================================================
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
-    gkernel::OutputSerializer::serializeSegmentsSet(merged_layers, "result.txt");
     SegmentsSet expected_merged_layers = {{
         {{2, 2}, {2, 10}},
         {{2, 10}, {8, 10}},
@@ -260,6 +262,7 @@ void test_complex() {
     //      check conversion to segments layer
     //=========================================================================================================
     SegmentsLayer layer = Converter::convertToSegmentsLayer(merged_layers);
+    gkernel::OutputSerializer::serializeSegmentsSet(layer, "result.txt");
     std::vector<Segment> segments_layer = {
         {{2, 2}, {2, 10}},
         {{2, 10}, {5, 10}},
@@ -334,14 +337,11 @@ void test_complex() {
     }
     SegmentsSet expected_marked_areas(segments_layer);
     expected_marked_areas.set_labels_types({ 0, 1, 2, 3 });
-    expected_marked_areas.set_label_values(0, { 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
-    expected_marked_areas.set_label_values(1, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1 });
-    expected_marked_areas.set_label_values(2, { 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
-    expected_marked_areas.set_label_values(3, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0 });
-    std::cout << std::endl << "expected:" << std::endl;
-    for (std::size_t idx = 0; idx < expected_marked_areas.size(); ++idx) {
-        std::cout << idx << ": " << "(" << expected_marked_areas[idx].start().x() << ", " << expected_marked_areas[idx].start().y() << ") (" << expected_marked_areas[idx].end().x() << ", " << expected_marked_areas[idx].end().y() << ") " << expected_marked_areas.get_label_value(0, expected_marked_areas[idx]) << " " << expected_marked_areas.get_label_value(1, expected_marked_areas[idx]) << " " << expected_marked_areas.get_label_value(2, expected_marked_areas[idx]) << " " << expected_marked_areas.get_label_value(3, expected_marked_areas[idx]) << std::endl;
-    }
+    expected_marked_areas.set_label_values(0, { 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
+    expected_marked_areas.set_label_values(1, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1 });
+    expected_marked_areas.set_label_values(2, { 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
+    expected_marked_areas.set_label_values(3, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0 });
+
     check_result(marked_areas, expected_marked_areas);
 
     //====================================================================================================
