@@ -257,13 +257,9 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
         bool is_vertical = layer[idx].is_vertical();
         if (is_vertical) {
             bypassNeighbours(label_values_top_rotated, top_history, circuit_layer_id, result, idx, direction::top);
-        } else {
-            bypassNeighbours(label_values_top, top_history, circuit_layer_id, result, idx, direction::top);
-        }
-
-        if (is_vertical) {
             bypassNeighbours(label_values_bottom_rotated, bottom_history, circuit_layer_id, result, idx, direction::bottom);
         } else {
+            bypassNeighbours(label_values_top, top_history, circuit_layer_id, result, idx, direction::top);
             bypassNeighbours(label_values_bottom, bottom_history, circuit_layer_id, result, idx, direction::bottom);
         }
 
