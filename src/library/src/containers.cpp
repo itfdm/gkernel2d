@@ -21,9 +21,11 @@ void SegmentsSetCommon::set_label_values(label_type label, const std::vector<lab
 }
 
 size_t SegmentsSetCommon::get_offset(label_type label) const {
+#if GKERNEL_DEBUG
     if (!has_label(label)) {
         throw std::runtime_error("Label not found.");
     }
+#endif
     size_t label_idx = std::distance(_label_types.begin(),
                                      std::find(_label_types.begin(), _label_types.end(), label));
     return label_idx * _segments.size();
