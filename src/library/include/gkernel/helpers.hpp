@@ -36,7 +36,7 @@ public:
 
     virtual label_data_type get_label_value(label_type label, const Segment& segment) const = 0;
 
-    virtual std::vector<label_data_type> get_label_values(label_type label) const = 0;
+    virtual std::vector<label_data_type>& get_label_values(label_type label) = 0;
 
     virtual void set_labels_types(const std::vector<label_type>& label_types) = 0;
 
@@ -46,7 +46,7 @@ public:
 
 protected:
     std::vector<label_type> _label_types;
-    std::vector<label_data_type> _labels_data; // store like (s1_l1, s2_l1 .. sn_l1, s1_l2 .. sn_l2, .., s1_lk .. sn_lk)
+    std::vector<std::vector<label_data_type>> _labels_data;
 };
 
 

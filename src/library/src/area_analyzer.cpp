@@ -199,12 +199,17 @@ void AreaAnalyzer::bypassNeighbours(std::vector<gkernel::label_data_type>& neigh
         bool first_circuits_layer_side = false;
         bool second_circuits_layer_side = false;
         for (auto idx_iter = history.rbegin() + 1; idx_iter != history.rend(); ++idx_iter) {
+            auto& segment = result[*idx_iter];
+            if (result.get_label_value(first_marker, segment) != unassigned) {
+                first_circuits_layer_side = result.get_label_value(first_marker, segment);
+                second_circuits_layer_side = result.get_label_value(second_marker, segment);
+                continue;
+            }
             if (segment_layer_ids[result[*(idx_iter - 1)].id] == 0) {
                 first_circuits_layer_side ^= true;
             } else {
                 second_circuits_layer_side ^= true;
             }
-            auto& segment = result[*idx_iter];
             if (segment.is_vertical() ==
                     start_is_vertical) {
                 result.set_label_value(first_marker, segment, first_circuits_layer_side);
