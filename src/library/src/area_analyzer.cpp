@@ -175,6 +175,45 @@ std::pair<SegmentsSet, SegmentsSet> AreaAnalyzer::findSegmentsNeighbours(const S
     return std::make_pair(result, result_rotated);
 }
 
+void AreaAnalyzer::bypassNeighbours(std::vector<gkernel::label_data_type>& neighbours, std::vector<std::size_t>& history, std::vector<gkernel::label_data_type>& segment_layer_ids,
+        SegmentsSet& result, gkernel::label_data_type start_idx, direction direction) {
+    label_data_type neighbour_id = neighbours[start_idx];
+    history.push_back(result[start_idx].id);
+
+    bool start_is_vertical = result[start_idx].is_vertical();
+    auto first_marker = direction == direction::top ? mark_areas_label_type::first_circuits_layer_top : mark_areas_label_type::first_circuits_layer_bottom;
+    auto second_marker = direction == direction::top ? mark_areas_label_type::second_circuits_layer_top : mark_areas_label_type::second_circuits_layer_bottom;
+
+    while (neighbour_id != unassigned && neighbour_id != unchecked_segment) {
+        history.push_back(neighbour_id);
+        neighbour_id = neighbours[neighbour_id];
+    }
+
+    if (result[history.back()].is_vertical() ==
+            start_is_vertical) {
+        result.set_label_value(first_marker, result[history.back()], false);
+        result.set_label_value(second_marker, result[history.back()], false);
+    }
+
+    if (history.size() > 1) {
+        bool first_circuits_layer_side = false;
+        bool second_circuits_layer_side = false;
+        for (auto idx_iter = history.rbegin() + 1; idx_iter != history.rend(); ++idx_iter) {
+            if (segment_layer_ids[result[*(idx_iter - 1)].id] == 0) {
+                first_circuits_layer_side ^= true;
+            } else {
+                second_circuits_layer_side ^= true;
+            }
+            auto& segment = result[*idx_iter];
+            if (segment.is_vertical() ==
+                    start_is_vertical) {
+                result.set_label_value(first_marker, segment, first_circuits_layer_side);
+                result.set_label_value(second_marker, segment, second_circuits_layer_side);
+            }
+        }
+    }
+}
+
 SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>& neighbours) {
     std::vector<Segment> temp_result;
     auto layer = neighbours.first;
@@ -189,7 +228,6 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
 
     SegmentsSet result(std::move(temp_result));
 
-
     result.set_labels_types({ mark_areas_label_type::first_circuits_layer_top, mark_areas_label_type::second_circuits_layer_top,
                               mark_areas_label_type::first_circuits_layer_bottom, mark_areas_label_type::second_circuits_layer_bottom });
 
@@ -198,7 +236,7 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
         result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[idx], unassigned);
     }
 
-    auto label_values_id = layer.get_label_values(find_neighbours_label_type::circuits_layer_id);
+    auto circuit_layer_id = layer.get_label_values(find_neighbours_label_type::circuits_layer_id);
     auto label_values_top = layer.get_label_values(find_neighbours_label_type::top);
     auto label_values_bottom = layer.get_label_values(find_neighbours_label_type::bottom);
 
@@ -218,84 +256,15 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
 
         bool is_vertical = layer[idx].is_vertical();
         if (is_vertical) {
-            label_data_type top = label_values_top_rotated[layer[idx].id];
-            top_history.push_back(idx);
-
-            while (top != unassigned && top != unchecked_segment) {
-                top_history.push_back(top);
-                top = label_values_top_rotated[layer[top].id];
-            }
+            bypassNeighbours(label_values_top_rotated, top_history, circuit_layer_id, result, idx, direction::top);
         } else {
-            label_data_type top = label_values_top[layer[idx].id];
-            top_history.push_back(idx);
-
-            while (top != unassigned && top != unchecked_segment) {
-                top_history.push_back(top);
-                top = label_values_top[layer[top].id];
-            }
+            bypassNeighbours(label_values_top, top_history, circuit_layer_id, result, idx, direction::top);
         }
 
-        if (layer[idx].min().x() == layer[idx].max().x()) {
-            label_data_type bottom = label_values_bottom_rotated[layer[idx].id];
-            bottom_history.push_back(idx);
-
-            while (bottom != unassigned && bottom != unchecked_segment) {
-                bottom_history.push_back(bottom);
-                bottom = label_values_bottom_rotated[layer[bottom].id];
-            }
+        if (is_vertical) {
+            bypassNeighbours(label_values_bottom_rotated, bottom_history, circuit_layer_id, result, idx, direction::bottom);
         } else {
-            label_data_type bottom = label_values_bottom[layer[idx].id];
-            bottom_history.push_back(idx);
-
-            while (bottom != unassigned && bottom != unchecked_segment) {
-                bottom_history.push_back(bottom);
-                bottom = label_values_bottom[layer[bottom].id];
-            }
-        }
-
-        if (result[top_history.back()].is_vertical() ==
-              is_vertical) {
-            result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[top_history.back()], false);
-            result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[top_history.back()], false);
-        }
-
-        if (top_history.size() > 1) {
-            bool first_circuits_layer_top = false;
-            bool second_circuits_layer_top = false;
-            for (auto top_idx_iter = top_history.rbegin() + 1; top_idx_iter != top_history.rend(); ++top_idx_iter) {
-                if (label_values_id[layer[*(top_idx_iter - 1)].id] == 0) {
-                    first_circuits_layer_top ^= true;
-                } else {
-                    second_circuits_layer_top ^= true;
-                }
-                if (result[*top_idx_iter].is_vertical() ==
-                      is_vertical) {
-                    result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[*top_idx_iter], first_circuits_layer_top);
-                    result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[*top_idx_iter], second_circuits_layer_top);
-                }
-            }
-        }
-
-        if (result[bottom_history.back()].is_vertical() ==
-              is_vertical) {
-            result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[bottom_history.back()], false);
-            result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[bottom_history.back()], false);
-        }
-        if (bottom_history.size() > 1) {
-            bool first_circuits_layer_bottom = false;
-            bool second_circuits_layer_bottom = false;
-            for (auto bottom_idx_iter = bottom_history.rbegin() + 1; bottom_idx_iter != bottom_history.rend(); ++bottom_idx_iter) {
-                if (label_values_id[layer[*(bottom_idx_iter - 1)].id] == 0) {
-                    first_circuits_layer_bottom ^= true;
-                } else {
-                    second_circuits_layer_bottom ^= true;
-                }
-                if (result[*bottom_idx_iter].is_vertical() ==
-                      is_vertical) {
-                    result.set_label_value(mark_areas_label_type::first_circuits_layer_bottom, result[*bottom_idx_iter], first_circuits_layer_bottom);
-                    result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[*bottom_idx_iter], second_circuits_layer_bottom);
-                }
-            }
+            bypassNeighbours(label_values_bottom, bottom_history, circuit_layer_id, result, idx, direction::bottom);
         }
 
         top_history.clear();
