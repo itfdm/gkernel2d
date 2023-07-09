@@ -18,9 +18,6 @@ void check_result(const SegmentsSet& actual, const SegmentsSet& expected) {
     for (size_t idx = 0; idx < expected.size(); ++idx) {
         REQUIRE_EQ(actual[idx].min(), expected[idx].min());
         REQUIRE_EQ(actual[idx].max(), expected[idx].max());
-        std::cout << "idx: " << idx << std::endl;
-        std::cout << "actual: " << actual.get_label_value(0, actual[idx]) << " " << actual.get_label_value(1, actual[idx]) << " " << actual.get_label_value(2, actual[idx]) << " " << actual.get_label_value(3, actual[idx]) << std::endl;
-        std::cout << "expected: " << expected.get_label_value(0, expected[idx]) << " " << expected.get_label_value(1, expected[idx]) << " " << expected.get_label_value(2, expected[idx]) << " " << expected.get_label_value(3, expected[idx]) << std::endl;
         REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(1, actual[idx]), expected.get_label_value(1, expected[idx]));
         REQUIRE_EQ(actual.get_label_value(2, actual[idx]), expected.get_label_value(2, expected[idx]));
@@ -148,9 +145,6 @@ void test_simple() {
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
     auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
     gkernel::OutputSerializer::serializeSegmentsSet(segments_layer, "result.txt");
-    for (std::size_t idx = 0; idx < segments_layer.size(); ++idx) {
-        std::cout << segments_layer[idx] << std::endl;
-    }
     test_areas(segments_layer);
     test_filter(segments_layer);
 }
@@ -332,9 +326,6 @@ void test_complex() {
     //      check areas marks
     //====================================================================================================
     auto marked_areas = AreaAnalyzer::findAreas(layer);
-    for (std::size_t idx = 0; idx < marked_areas.size(); ++idx) {
-        std::cout << idx << ": " << "(" << marked_areas[idx].start().x() << ", " << marked_areas[idx].start().y() << ") (" << marked_areas[idx].end().x() << ", " << marked_areas[idx].end().y() << ") " << marked_areas.get_label_value(0, marked_areas[idx]) << " " << marked_areas.get_label_value(1, marked_areas[idx]) << " " << marked_areas.get_label_value(2, marked_areas[idx]) << " " << marked_areas.get_label_value(3, marked_areas[idx]) << std::endl;
-    }
     SegmentsSet expected_marked_areas(segments_layer);
     expected_marked_areas.set_labels_types({ 0, 1, 2, 3 });
     expected_marked_areas.set_label_values(0, { 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });

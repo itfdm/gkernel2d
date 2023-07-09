@@ -103,8 +103,6 @@ void AreaAnalyzer::internalFindSegmentsNeighbours(const SegmentsLayer& layer, Se
             } else if (current_event->status == event_status::end) {
                 active_segments.erase(current_event->segment);
             } else {
-                std::cout << current_event->segment->id << std::endl;
-                std::cout << *(current_event->segment) << std::endl;
                 ++current_event;
                 continue;
             }
@@ -260,12 +258,11 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
             result.set_label_value(mark_areas_label_type::first_circuits_layer_top, result[top_history.back()], false);
             result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[top_history.back()], false);
         }
+
         if (top_history.size() > 1) {
             bool first_circuits_layer_top = false;
             bool second_circuits_layer_top = false;
-            std::cout << "top chain: ";
             for (auto top_idx_iter = top_history.rbegin() + 1; top_idx_iter != top_history.rend(); ++top_idx_iter) {
-                std::cout << layer[*(top_idx_iter - 1)].id << " <- ";
                 if (label_values_id[layer[*(top_idx_iter - 1)].id] == 0) {
                     first_circuits_layer_top ^= true;
                 } else {
@@ -277,10 +274,7 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
                     result.set_label_value(mark_areas_label_type::second_circuits_layer_top, result[*top_idx_iter], second_circuits_layer_top);
                 }
             }
-            std::cout << top_history[0];
         }
-
-        std::cout << std::endl;
 
         if ((result[bottom_history.back()].start().x() == result[bottom_history.back()].end().x()) ==
               is_vertical) {
@@ -290,9 +284,7 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
         if (bottom_history.size() > 1) {
             bool first_circuits_layer_bottom = false;
             bool second_circuits_layer_bottom = false;
-            std::cout << "bottom chain: ";
             for (auto bottom_idx_iter = bottom_history.rbegin() + 1; bottom_idx_iter != bottom_history.rend(); ++bottom_idx_iter) {
-                std::cout << layer[*(bottom_idx_iter - 1)].id << " <- ";
                 if (label_values_id[layer[*(bottom_idx_iter - 1)].id] == 0) {
                     first_circuits_layer_bottom ^= true;
                 } else {
@@ -304,9 +296,7 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
                     result.set_label_value(mark_areas_label_type::second_circuits_layer_bottom, result[*bottom_idx_iter], second_circuits_layer_bottom);
                 }
             }
-            std::cout << bottom_history[0];
         }
-        std::cout << std::endl;
 
         top_history.clear();
         bottom_history.clear();
