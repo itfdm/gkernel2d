@@ -4,7 +4,6 @@
 using namespace gkernel;
 
 enum TestLabels: label_type {
-    RESERVED,
     FIRST_LABEL,
     SECOND_LABEL,
     THIRD_LABEL
