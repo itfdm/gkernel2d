@@ -59,6 +59,7 @@ struct Segment {
             _max_point = &_begin_point;
         }
         id = std::numeric_limits<gkernel::segment_id>::max();
+        _is_vertical = _begin_point.x() == _end_point.x();
     }
 
     // copy constructor
@@ -71,6 +72,7 @@ struct Segment {
             _min_point = &_end_point;
             _max_point = &_begin_point;
         }
+        _is_vertical = other._is_vertical;
     }
 
     // assignment operator
@@ -88,6 +90,7 @@ struct Segment {
             _min_point = &_end_point;
             _max_point = &_begin_point;
         }
+        _is_vertical = other._is_vertical;
         return *this;
     }
 
@@ -105,6 +108,7 @@ struct Segment {
             _min_point = &_end_point;
             _max_point = &_begin_point;
         }
+        _is_vertical = _begin_point.x() == _end_point.x();
     }
 
     bool operator==(const Segment& other) const {
@@ -132,11 +136,16 @@ struct Segment {
         return id;
     }
 
+    bool is_vertical() const {
+        return _is_vertical;
+    }
+
 private:
     Point _begin_point, _end_point;
     Point* _min_point;
     Point* _max_point;
     segment_id id;
+    bool _is_vertical;
 
     friend class SegmentsSetCommon;
     friend class SegmentsSet;
