@@ -4,7 +4,6 @@
 using namespace gkernel;
 
 enum TestLabels: label_type {
-    RESERVED,
     FIRST_LABEL,
     SECOND_LABEL,
     THIRD_LABEL
@@ -77,14 +76,14 @@ void CircuitValidationTest() {
         {{2, 3}, {3, 4}},
         {{3, 4}, {0, 1}}
     };
-    REQUIRE_NOTHROW(Circuit(true_segments));
+    REQUIRE_NOTHROW(Circuit{true_segments});
 
     std::vector<Segment> false_segments = {
         {{0, 1}, {2, 3}},
         {{2, 3}, {3, 4}},
         {{3, 4}, {4, 5}}
     };
-    REQUIRE_THROWS(Circuit(false_segments));
+    REQUIRE_THROWS(Circuit{false_segments});
 }
 
 void CircuitsSetTest() {

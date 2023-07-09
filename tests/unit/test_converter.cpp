@@ -28,8 +28,8 @@ void simple_test() {
     };
     SegmentsSet segments_set(test_segments);
 
-    segments_set.set_labels_types({1});
-    segments_set.set_label_values(1, {1, 2, 3});
+    segments_set.set_labels_types({0});
+    segments_set.set_label_values(0, {1, 2, 3});
 
     std::vector<IntersectionPoint> intersections {
         {{1, 1}, 0, 1},
@@ -58,7 +58,7 @@ void simple_test() {
 
     REQUIRE(segments_set.get_label_types() == segments_layer.get_label_types());
     for (size_t i = 0; i < expected_segments.size(); ++i) {
-        REQUIRE_EQ(segments_layer.get_label_value(1, segments_layer[i]), expected_labels[i]);
+        REQUIRE_EQ(segments_layer.get_label_value(0, segments_layer[i]), expected_labels[i]);
     }
 }
 

@@ -2,58 +2,13 @@
 #include "gkernel/objects.hpp"
 #include "gkernel/containers.hpp"
 #include "gkernel/area_analyzer.hpp"
+#include "gkernel/serializer.hpp"
 
 using namespace gkernel;
 
 enum test_labels {
     circuits_layer_id = 0
 };
-
-void TestAreasSimple() {
-    std::vector<Segment> segments = {
-        {{0, 0}, {1, 1}},
-        {{0, 1}, {1, 2}},
-        {{0, 2}, {1, 3}},
-        {{0, 3}, {1, 4}}
-    };
-    SegmentsSet layer(segments);
-    layer.set_labels_types({ test_labels::circuits_layer_id });
-    for (std::size_t idx = 0; idx < layer.size(); ++idx) {
-        layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 0);
-    }
-
-    SegmentsLayer segments_layer_with_neighbours = AreaAnalyzer::findSegmentsNeighbours(layer);
-
-    for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx) {
-        std::cout << "Segment: " << segments_layer_with_neighbours[idx] << std::endl;
-        label_data_type top = segments_layer_with_neighbours.get_label_value(1, segments_layer_with_neighbours[idx]);
-        label_data_type bottom = segments_layer_with_neighbours.get_label_value(2, segments_layer_with_neighbours[idx]);
-        if (top >= 0) {
-            std::cout << "top: " << segments_layer_with_neighbours[top] << std::endl;
-        } else {
-            std::cout << "top neighbour not found" << std::endl;
-        }
-        if (bottom >= 0) {
-            std::cout << "bottom: " << segments_layer_with_neighbours[bottom] << std::endl;
-        } else {
-            std::cout << "bottom neighbour not found" << std::endl;
-        }
-    }
-
-    std::cout << std::endl << std::endl;
-
-    SegmentsLayer segments_layer_with_marked_areas = AreaAnalyzer::markAreas(segments_layer_with_neighbours);
-
-    for (std::size_t idx = 0; idx < segments_layer_with_marked_areas.size(); ++idx) {
-        std::cout << "Segment: " << segments_layer_with_marked_areas[idx] << std::endl;
-        std::cout << "Top area, first circuits layer: " << segments_layer_with_marked_areas.get_label_value(0, segments_layer_with_marked_areas[idx]) << std::endl;
-        std::cout << "Top area, second circuits layer: " << segments_layer_with_marked_areas.get_label_value(1, segments_layer_with_marked_areas[idx]) << std::endl;
-        std::cout << "Bottom area, first circuits layer: " << segments_layer_with_marked_areas.get_label_value(2, segments_layer_with_marked_areas[idx]) << std::endl;
-        std::cout << "Bottom area, second circuits layer: " << segments_layer_with_marked_areas.get_label_value(3, segments_layer_with_marked_areas[idx]) << std::endl;
-    }
-
-    std::cout << std::endl;
-}
 
 void TestAreasDefault() {
     std::vector<Segment> segments = {
@@ -85,21 +40,44 @@ void TestAreasDefault() {
         layer.set_label_value(test_labels::circuits_layer_id, layer[idx], 1);
     }
 
-    SegmentsLayer segments_layer_with_neighbours = AreaAnalyzer::findSegmentsNeighbours(layer);
+    auto segments_layer_with_neighbours = AreaAnalyzer::findSegmentsNeighbours(layer);
+    auto& horizontal = segments_layer_with_neighbours.first;
+    auto& vertical = segments_layer_with_neighbours.second;
 
-    for (std::size_t idx = 0; idx < segments_layer_with_neighbours.size(); ++idx) {
-        std::cout << "Segment: " << segments_layer_with_neighbours[idx] << std::endl;
-        label_data_type top = segments_layer_with_neighbours.get_label_value(1, segments_layer_with_neighbours[idx]);
-        label_data_type bottom = segments_layer_with_neighbours.get_label_value(2, segments_layer_with_neighbours[idx]);
-        if (top >= 0) {
-            std::cout << "top: " << segments_layer_with_neighbours[top] << std::endl;
+    for (std::size_t idx = 0; idx < horizontal.size(); ++idx) {
+        std::cout << "Segment: " << horizontal[idx] << std::endl;
+        label_data_type top{};
+        label_data_type bottom{};
+        if (horizontal[idx].is_vertical()) {
+            top = vertical.get_label_value(1, vertical[idx]);
+            bottom = vertical.get_label_value(2, vertical[idx]);
+
+            if (top >= 0) {
+                std::cout << "top: " << vertical[top] << std::endl;
+            } else {
+                std::cout << "top neighbour not found" << std::endl;
+            }
+
+            if (bottom >= 0) {
+                std::cout << "bottom: " << vertical[bottom] << std::endl;
+            } else {
+                std::cout << "bottom neighbour not found" << std::endl;
+            }
         } else {
-            std::cout << "top neighbour not found" << std::endl;
-        }
-        if (bottom >= 0) {
-            std::cout << "bottom: " << segments_layer_with_neighbours[bottom] << std::endl;
-        } else {
-            std::cout << "bottom neighbour not found" << std::endl;
+            top = horizontal.get_label_value(1, horizontal[idx]);
+            bottom = horizontal.get_label_value(2, horizontal[idx]);
+
+            if (top >= 0) {
+                std::cout << "top: " << horizontal[top] << std::endl;
+            } else {
+                std::cout << "top neighbour not found" << std::endl;
+            }
+
+            if (bottom >= 0) {
+                std::cout << "bottom: " << horizontal[bottom] << std::endl;
+            } else {
+                std::cout << "bottom neighbour not found" << std::endl;
+            }
         }
         std::cout << std::endl;
     }
@@ -128,12 +106,14 @@ void TestAreasVert() {
         {{2, 4}, {1, 4}}
     };
 
+
     SegmentsSet expected = input_segments;
+    OutputSerializer::serializeSegmentsSet(input_segments, "result.txt");
 
     expected.set_labels_types({0, 1, 2});
     expected.set_label_values(0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1});
-    expected.set_label_values(1, {17, 10, 3, -1, 12, -1, 5, 15, 16, 17, -1, 3, -1, -1, 5, -1, 15, 11, 10});
-    expected.set_label_values(2, {9, 17, 11, 11, 17, 14, 15, 16, 9, -1, 18, 17, 4, 4, 17, 16, -1, 9, -1});
+    expected.set_label_values(1, {-1, 10, -1, -1, 12, -1, 14, 1, 0, 17, -1, 3, -1, -1, 5, -1, 15, 11, 10});
+    expected.set_label_values(2, {8, 7, 11, 11, 17, 14, -1, 15, -1, -1, 18, 17, 4, 4, 17, 16, -1, 9, -1});
 
     SegmentsSet test_layer = input_segments;
     test_layer.set_labels_types({0, 1, 2});
@@ -141,12 +121,22 @@ void TestAreasVert() {
 
     auto actual = AreaAnalyzer::findSegmentsNeighbours(test_layer);
 
-    REQUIRE_EQ(actual.size(), expected.size());
+    REQUIRE((actual.first.size() == actual.second.size()));
+    REQUIRE((expected.size() == actual.second.size()));
+
+    auto& horizontal = actual.first;
+    auto& vertical = actual.second;
 
     for (std::size_t idx = 0; idx < expected.size(); ++idx) {
-        REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
-        REQUIRE_EQ(actual.get_label_value(1, actual[idx]), expected.get_label_value(1, expected[idx]));
-        REQUIRE_EQ(actual.get_label_value(2, actual[idx]), expected.get_label_value(2, expected[idx]));
+        if (expected[idx].is_vertical()) {
+            REQUIRE_EQ(vertical.get_label_value(0, vertical[idx]), expected.get_label_value(0, expected[idx]));
+            REQUIRE_EQ(vertical.get_label_value(1, vertical[idx]), expected.get_label_value(1, expected[idx]));
+            REQUIRE_EQ(vertical.get_label_value(2, vertical[idx]), expected.get_label_value(2, expected[idx]));
+        } else {
+            REQUIRE_EQ(horizontal.get_label_value(0, horizontal[idx]), expected.get_label_value(0, expected[idx]));
+            REQUIRE_EQ(horizontal.get_label_value(1, horizontal[idx]), expected.get_label_value(1, expected[idx]));
+            REQUIRE_EQ(horizontal.get_label_value(2, horizontal[idx]), expected.get_label_value(2, expected[idx]));
+        }
     }
 }
 
@@ -184,12 +174,19 @@ void TestAreasFirstPhase() {
 
     auto actual = AreaAnalyzer::findSegmentsNeighbours(test_layer);
 
-    REQUIRE_EQ(actual.size(), expected.size());
+    auto& horizontal = actual.first;
+    auto& vertical = actual.second;
 
     for (std::size_t idx = 0; idx < expected.size(); ++idx) {
-        REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
-        REQUIRE_EQ(actual.get_label_value(1, actual[idx]), expected.get_label_value(1, expected[idx]));
-        REQUIRE_EQ(actual.get_label_value(2, actual[idx]), expected.get_label_value(2, expected[idx]));
+        if (expected[idx].is_vertical()) {
+            REQUIRE_EQ(vertical.get_label_value(0, vertical[idx]), expected.get_label_value(0, expected[idx]));
+            REQUIRE_EQ(vertical.get_label_value(1, vertical[idx]), expected.get_label_value(1, expected[idx]));
+            REQUIRE_EQ(vertical.get_label_value(2, vertical[idx]), expected.get_label_value(2, expected[idx]));
+        } else {
+            REQUIRE_EQ(horizontal.get_label_value(0, horizontal[idx]), expected.get_label_value(0, expected[idx]));
+            REQUIRE_EQ(horizontal.get_label_value(1, horizontal[idx]), expected.get_label_value(1, expected[idx]));
+            REQUIRE_EQ(horizontal.get_label_value(2, horizontal[idx]), expected.get_label_value(2, expected[idx]));
+        }
     }
 }
 
@@ -336,11 +333,8 @@ void TestAreasSecond() {
     check_result(actual, expected);
 }
 
-// DECLARE_TEST(TestAreasSimple);
 DECLARE_TEST(TestAreasVert);
 DECLARE_TEST(TestAreasFirstPhase);
 DECLARE_TEST(TestAreasSecondPhase);
 DECLARE_TEST(TestAreasFirst);
 DECLARE_TEST(TestAreasSecond);
-
-

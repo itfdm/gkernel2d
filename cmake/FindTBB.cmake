@@ -2,7 +2,7 @@ include(FetchContent)
 
 FetchContent_Declare(TBB
     GIT_REPOSITORY https://github.com/oneapi-src/onetbb.git
-    GIT_TAG master)
+    GIT_TAG v2021.7.0)
 
 if (NOT TBB_POPULATED)
     if (MSVC)

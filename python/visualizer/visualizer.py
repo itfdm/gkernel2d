@@ -25,6 +25,7 @@ def main():
     x_coords, y_coords = parse_segments_set(args.input)
     for idx in range(0, len(x_coords), 2):
         plt.plot([x_coords[idx], x_coords[idx + 1]], [y_coords[idx], y_coords[idx + 1]])
+        plt.text((x_coords[idx] + x_coords[idx + 1]) / 2, (y_coords[idx] + y_coords[idx + 1]) / 2, str(idx // 2))
     plt.show()
 
 if __name__ == '__main__':

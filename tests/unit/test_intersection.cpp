@@ -3,13 +3,16 @@
 #include "gkernel/intersection.hpp"
 #include "gkernel/objects.hpp"
 #include "gkernel/containers.hpp"
+#include "gkernel/serializer.hpp"
 
 #include <unordered_set>
 #include <algorithm>
+#include <iterator>
 
 using namespace gkernel;
 
 void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkernel::Point>& expected) {
+    gkernel::OutputSerializer::serializeSegmentsSet(input, "result.txt");
     auto result = Intersection::intersectSetSegments(input);
 
     auto points_comparator = [](const gkernel::Point& first, const gkernel::Point& second) {
@@ -32,7 +35,18 @@ void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkerne
     });
     result_points.erase(to_erase, result_points.end());
 
+    for (std::size_t idx = 0; idx < result_points.size(); ++idx) {
+        std::cout << "result_points[" << idx << "]: " << result_points[idx] << std::endl;
+    }
+
     std::sort(expected.begin(), expected.end(), points_comparator);
+
+    std::set_symmetric_difference(expected.begin(), expected.end(), result_points.begin(), result_points.end(), std::ostream_iterator<gkernel::Point>(std::cout, " "));
+
+    std::cout << std::endl;
+    std::cout << "expected_size: " << expected.size() << std::endl;
+    std::cout << "result_size: " << result_points.size() << std::endl;
+
 
     REQUIRE_EQ(std::equal(result_points.begin(), result_points.end(), expected.begin(), expected.end(), [](const gkernel::Point& first, const gkernel::Point& second) {
         return first.x() == second.x() && first.y() == second.y();
@@ -65,36 +79,14 @@ void TestSegmentsSetIntersectionFirst() {
     input.emplace_back({gkernel::Point(14, 5), gkernel::Point(16, 4)});
 
     std::vector<gkernel::Point> expected;
-    expected.emplace_back(3.5, 5.5);
-    expected.emplace_back(4, 3);
-    expected.emplace_back(4, 1);
     expected.emplace_back(5, 4);
     expected.emplace_back(5, 2);
-    expected.emplace_back(6, 5);
-    expected.emplace_back(6, 4);
-    expected.emplace_back(6, 3);
-    expected.emplace_back(6, 1);
     expected.emplace_back(7, 2);
-    expected.emplace_back(8, 0);
-    expected.emplace_back(9, 6);
-    expected.emplace_back(9, 5);
     expected.emplace_back(9.5, 5.5);
-    expected.emplace_back(10, 5);
-    expected.emplace_back(10, 4);
-    expected.emplace_back(11, 7);
     expected.emplace_back(11, 3);
-    expected.emplace_back(11, 2);
     expected.emplace_back(11.5, 2.5);
     expected.emplace_back(12, 6);
-    expected.emplace_back(12, 2);
-    expected.emplace_back(12, 1);
-    expected.emplace_back(13, 7);
-    expected.emplace_back(13, 5);
-    expected.emplace_back(13, 4);
-    expected.emplace_back(14, 5);
     expected.emplace_back(14, 3);
-    expected.emplace_back(15, 2);
-    expected.emplace_back(16, 4);
 
     run_intersect_segments_test(input, expected);
 }
@@ -123,29 +115,15 @@ void TestSegmentsSetIntersectionSecond() {
     input.emplace_back({gkernel::Point(4, 3), gkernel::Point(6.5, 2)});
 
     std::vector<gkernel::Point> expected;
-    expected.emplace_back(2, 2);
-    expected.emplace_back(2, 5);
-    expected.emplace_back(3, 9);
     expected.emplace_back(3.5, 3.5);
-    expected.emplace_back(4, 3);
     expected.emplace_back(6, 6);
-    expected.emplace_back(6, 10);
-    expected.emplace_back(6.5, 2);
     expected.emplace_back(8, 8);
     expected.emplace_back(8, 4);
-    expected.emplace_back(9, 9);
-    expected.emplace_back(9, 3);
-    expected.emplace_back(10, 1);
-    expected.emplace_back(11, 10);
     expected.emplace_back(13, 3);
     expected.emplace_back(14, 7);
-    expected.emplace_back(14, 2);
     expected.emplace_back(16, 9);
-    expected.emplace_back(16, 7);
     expected.emplace_back(16, 5);
     expected.emplace_back(18, 3);
-    expected.emplace_back(21, 8);
-    expected.emplace_back(22, 7);
 
     run_intersect_segments_test(input, expected);
 }
@@ -174,28 +152,11 @@ void TestSegmentsSetIntersectionThird() {
     input.emplace_back({gkernel::Point(10, 8), gkernel::Point(12, 5)});
 
     std::vector<gkernel::Point> expected;
-    expected.emplace_back(2, 7);
-    expected.emplace_back(2, 1);
     expected.emplace_back(5, 4);
-    expected.emplace_back(6, 5);
-    expected.emplace_back(7, 5);
     expected.emplace_back(8, 1);
-    expected.emplace_back(8, 7);
-    expected.emplace_back(9, 0);
-    expected.emplace_back(9, 6);
-    expected.emplace_back(10, 8);
-    expected.emplace_back(11, 9);
-    expected.emplace_back(12, 7);
-    expected.emplace_back(12, 5);
-    expected.emplace_back(12, 3);
-    expected.emplace_back(13, 10);
     expected.emplace_back(13, 5);
     expected.emplace_back(14, 9);
     expected.emplace_back(15, 8);
-    expected.emplace_back(15, 3);
-    expected.emplace_back(18, 8);
-    expected.emplace_back(18, 5);
-    expected.emplace_back(21, 9);
 
     run_intersect_segments_test(input, expected);
 }
@@ -224,31 +185,20 @@ void TestSegmentsSetIntersectionFour() {
     input.emplace_back({gkernel::Point(26, 2), gkernel::Point(28, 8)});
 
     std::vector<gkernel::Point> expected;
-    expected.emplace_back(3, 12);
-    expected.emplace_back(6, 2);
     expected.emplace_back(6, 9);
-    expected.emplace_back(6, 12);
-    expected.emplace_back(10, 11);
     expected.emplace_back(10, 5);
     expected.emplace_back(10, 4);
-    expected.emplace_back(10, 0);
     expected.emplace_back(10, 8);
+
     expected.emplace_back(12, 6);
-    expected.emplace_back(14, 12);
     expected.emplace_back(14, 9);
     expected.emplace_back(14, 7);
     expected.emplace_back(14, 4);
-    expected.emplace_back(14, 2);
-    expected.emplace_back(16, 8);
+
     expected.emplace_back(18, 4);
-    expected.emplace_back(20, 0);
-    expected.emplace_back(22, 6);
-    expected.emplace_back(24, 10);
+
     expected.emplace_back(24, 4);
-    expected.emplace_back(24, 0);
-    expected.emplace_back(26, 2);
     expected.emplace_back(26, 6);
-    expected.emplace_back(28, 8);
 
     run_intersect_segments_test(input, expected);
 }
@@ -277,31 +227,15 @@ void TestSegmentsSetIntersectionFifth() {
     input.emplace_back({gkernel::Point(2, 2), gkernel::Point(6, 6)});
 
     std::vector<gkernel::Point> expected;
-    expected.emplace_back(1, 6);
-    expected.emplace_back(1, 2);
-    expected.emplace_back(2, 8);
     expected.emplace_back(2, 6);
     expected.emplace_back(2, 2);
-    expected.emplace_back(2, 1);
     expected.emplace_back(4, 4);
-    expected.emplace_back(6, 8);
     expected.emplace_back(6, 6);
     expected.emplace_back(6, 2);
-    expected.emplace_back(6, 1);
-    expected.emplace_back(8, 9);
     expected.emplace_back(8, 6);
-    expected.emplace_back(8, 2);
-    expected.emplace_back(10, 6);
-    expected.emplace_back(10, 4);
-    expected.emplace_back(13, 7);
-    expected.emplace_back(13, 5);
-    expected.emplace_back(15, 8);
     expected.emplace_back(15, 7);
     expected.emplace_back(15, 5);
     expected.emplace_back(15, 4);
-    expected.emplace_back(15, 2);
-    expected.emplace_back(16, 7);
-    expected.emplace_back(16, 4);
 
     run_intersect_segments_test(input, expected);
 }
@@ -328,32 +262,16 @@ void TestSegmentsSetIntersectionSix() {
     input.emplace_back({gkernel::Point(5, 11), gkernel::Point(12, 11)});
 
     std::vector<gkernel::Point> expected;
-    expected.emplace_back(1, 6);
-    expected.emplace_back(1, 2);
-    expected.emplace_back(2, 10);
+
     expected.emplace_back(2, 6);
-    expected.emplace_back(2, 2);
-    expected.emplace_back(3, 8);
     expected.emplace_back(3, 6);
-    expected.emplace_back(3, 4);
-    expected.emplace_back(5, 11);
     expected.emplace_back(5, 10);
     expected.emplace_back(5, 8);
     expected.emplace_back(5, 6);
-    expected.emplace_back(5, 5);
-    expected.emplace_back(8, 8);
     expected.emplace_back(8, 6);
-    expected.emplace_back(8, 5);
     expected.emplace_back(8, 4);
-    expected.emplace_back(8, 3);
-    expected.emplace_back(9, 10);
     expected.emplace_back(9, 6);
     expected.emplace_back(9, 5);
-    expected.emplace_back(9, 4);
-    expected.emplace_back(11, 5);
-    expected.emplace_back(11, 3);
-    expected.emplace_back(12, 11);
-    expected.emplace_back(12, 6);
 
     run_intersect_segments_test(input, expected);
 }

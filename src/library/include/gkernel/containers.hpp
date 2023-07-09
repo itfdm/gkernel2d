@@ -30,16 +30,11 @@ public:
     }
 
     label_data_type get_label_value(label_type label, const Segment& segment) const override {
-        return _labels_data[get_offset(label) + segment.id];
+        return _labels_data[label][segment.id];
     }
 
-    std::vector<label_data_type> get_label_values(label_type label) const override {
-        std::vector<label_data_type> label_values(_segments.size());
-        auto offset = get_offset(label);
-        std::copy(_labels_data.begin() + offset,
-                  _labels_data.begin() + offset + _segments.size(),
-                  label_values.begin());
-        return label_values;
+    std::vector<label_data_type>& get_label_values(label_type label) override {
+        return _labels_data[label];
     }
 
     void set_labels_types(const std::vector<label_type>& label_types) override;
@@ -47,7 +42,7 @@ public:
     void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override;
 
     void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {
-        _labels_data[get_offset(label) + segment.id] = label_value;
+        _labels_data[label][segment.id] = label_value;
     }
 
     const Segment& operator[](size_t idx) const {
@@ -115,7 +110,7 @@ private:
 class Circuit : public SegmentsSetCommon, public Validator {
 public:
     Circuit() : SegmentsSetCommon() {}
-    Circuit(const Circuit& circuit) : SegmentsSetCommon(circuit._segments) {}
+    Circuit(const Circuit& circuit) : SegmentsSetCommon(circuit._segments), Validator() {}
     Circuit(const std::vector<Segment>& segments, bool validation = true) : SegmentsSetCommon(segments), Validator(validation) {
         if (_validation) {
             validate();
@@ -132,7 +127,7 @@ private:
     }
 };
 
-class CircuitsSet : public Labeling {
+class CircuitsSet {
 public:
     CircuitsSet() : _segments({}), _indices({}) {}
     CircuitsSet(const CircuitsSet& circuits) : _segments(circuits._segments.begin(), circuits._segments.end()),
@@ -145,21 +140,12 @@ public:
         }
     }
 
-    label_data_type get_label_value(label_type label, const Segment& segment) const override { return 0; /*TODO*/};
-    std::vector<label_data_type> get_label_values(label_type label) const override { return {}; /*TODO*/};
-    void set_labels_types(const std::vector<label_type>& label_types) override {/*TODO*/};
-    void set_label_values(label_type label, const std::vector<label_data_type>& label_data) override {/*TODO*/};
-    void set_label_value(label_type label, const Segment& segment, label_data_type label_value) override {/*TODO*/};
-
     Circuit get_circuit(size_t idx) const {
         std::vector<Segment> segments(_segments.begin() + _indices[idx], _segments.begin() + _indices[idx + 1]);
         return Circuit(segments, false);
     }
 
     void emplace_back(const Circuit& circuit) {
-        if (!_label_types.empty()) {
-            throw std::runtime_error("Unable to add elements after labels initialization.");
-        }
         _segments.insert(_segments.end(), circuit._segments.begin(), circuit._segments.end());
         _indices.emplace_back(_segments.size());
     }

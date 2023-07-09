@@ -14,13 +14,22 @@ public:
     AreaAnalyzer() = delete;
 
     static SegmentsLayer findAreas(const SegmentsLayer& layer) {
-        SegmentsLayer neighbours = findSegmentsNeighbours(layer);
+        auto neighbours = findSegmentsNeighbours(layer);
         SegmentsLayer result = markAreas(neighbours);
         return result;
     }
+    enum direction {
+        top = 0,
+        bottom = 1
+    };
 
-    static SegmentsLayer findSegmentsNeighbours(const SegmentsLayer& layer);
-    static SegmentsLayer markAreas(const SegmentsLayer& layer);
+private:
+    static void internalFindSegmentsNeighbours(const SegmentsLayer& layer, SegmentsSet& result, bool rotated);
+    static void bypassNeighbours(std::vector<gkernel::label_data_type>& neighbours, std::vector<std::size_t>& history, std::vector<gkernel::label_data_type>& segment_layer_ids,
+        SegmentsSet& result, gkernel::label_data_type start_idx, direction direction);
+public:
+    static std::pair<SegmentsSet, SegmentsSet> findSegmentsNeighbours(const SegmentsLayer& layer);
+    static SegmentsLayer markAreas(const std::pair<SegmentsSet, SegmentsSet>& neighbours);
 
     template<typename Callable>
     static SegmentsLayer markAreasAndFilter(const SegmentsLayer& layer, Callable callable) {

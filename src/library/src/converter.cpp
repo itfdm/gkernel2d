@@ -176,11 +176,9 @@ SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segment
 
     result.set_labels_types(label_types);
 
-    for (auto& labels_value : labels_values) {
-        for (size_t label_id = 0; label_id < label_types.size(); ++label_id) {
-            labels_values[label_id].resize(final_size);
-            result.set_label_values(label_types[label_id], labels_values[label_id]);
-        }
+    for (size_t label_id = 0; label_id < label_types.size(); ++label_id) {
+        labels_values[label_id].resize(final_size);
+        result.set_label_values(label_types[label_id], labels_values[label_id]);
     }
 
     return static_cast<SegmentsLayer>(result);

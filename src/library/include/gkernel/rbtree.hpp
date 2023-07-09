@@ -45,8 +45,8 @@ public:
         return *(_internal_tree.begin());
     }
 
-    void erase(const T& item) {
-        _internal_tree.erase(item);
+    std::size_t erase(const T& item) {
+        return _internal_tree.erase(item);
     }
 
     void erase(iterator it) {

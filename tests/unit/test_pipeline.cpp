@@ -89,10 +89,10 @@ void test_areas(const SegmentsLayer& segments_layer) {
 
 void test_filter(const SegmentsLayer& segments_layer) {
     SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(segments_layer, [](const SegmentsLayer& segments, const Segment& segment) {
-        return segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
-                !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1) ||
-               !(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
-                segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1;
+        return (segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1 &&
+                !(segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1)) ||
+               (!(segments.get_label_value(0, segment) == 1 && segments.get_label_value(1, segment) == 1) &&
+                segments.get_label_value(2, segment) == 1 && segments.get_label_value(3, segment) == 1);
     });
 
     SegmentsLayer expected = {{
@@ -144,58 +144,56 @@ void test_simple() {
     CircuitsLayer second_layer = {{ second_circuit, fourth_circuit }};
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
     auto segments_layer = Converter::convertToSegmentsLayer(merged_layers);
-    for (std::size_t idx = 0; idx < segments_layer.size(); ++idx) {
-        std::cout << segments_layer[idx] << std::endl;
-    }
+    gkernel::OutputSerializer::serializeSegmentsSet(segments_layer, "result.txt");
     test_areas(segments_layer);
     test_filter(segments_layer);
 }
 
 void test_complex() {
-    Circuit circuit_1 = { {
+    Circuit circuit_1 = {{
         {{2, 2}, {2, 10}},
         {{2, 10}, {8, 10}},
         {{8, 10}, {8, 2}},
         {{8, 2}, {2, 2}},
-    } };
+    }};
 
-    Circuit circuit_2 = { {
-    {{10, 6}, {12, 9}},
-    {{12, 9}, {11, 6}},
-    {{11, 6}, {10, 6}}
-} };
+    Circuit circuit_2 = {{
+        {{10, 6}, {12, 9}},
+        {{12, 9}, {11, 6}},
+        {{11, 6}, {10, 6}}
+    }};
 
-    Circuit circuit_3 = { {
+    Circuit circuit_3 = {{
         {{9, 9}, {12, 12}},
         {{12, 12}, {17, 9}},
         {{17, 9}, {9, 9}}
-    } };
+    }};
 
-    Circuit circuit_4 = { {
+    Circuit circuit_4 = {{
         {{9, 1}, {9, 5}},
         {{9, 5}, {15, 5}},
         {{15, 5}, {9, 1}}
-    } };
+    }};
 
-    Circuit circuit_5 = { {
+    Circuit circuit_5 = {{
         {{4, 3}, {12, 9}},
         {{12, 9}, {12, 3}},
         {{12, 3}, {4, 3}}
-    } };
+    }};
 
-    Circuit circuit_6 = { {
+    Circuit circuit_6 = {{
         {{5, 8}, {5, 12}},
         {{5, 12}, {10, 12}},
         {{10, 12}, {10, 8}},
         {{10, 8}, {5, 8}}
-    } };
+    }};
 
-    Circuit circuit_7 = { {
-    {{3, 4}, {3, 8}},
-    {{3, 8}, {5, 8}},
-    {{5, 8}, {6, 6}},
-    {{6, 6}, {3, 4}}
-} };
+    Circuit circuit_7 = {{
+        {{3, 4}, {3, 8}},
+        {{3, 8}, {5, 8}},
+        {{5, 8}, {6, 6}},
+        {{6, 6}, {3, 4}}
+    }};
 
     CircuitsLayer first_layer = { {circuit_1, circuit_2, circuit_3, circuit_4} };
     CircuitsLayer second_layer = { {circuit_5, circuit_6, circuit_7} };
@@ -203,7 +201,7 @@ void test_complex() {
     //      check segments merging
     //====================================================================================================
     auto merged_layers = Converter::mergeCircuitsLayers(first_layer, second_layer);
-    SegmentsSet expected_merged_layers = { {
+    SegmentsSet expected_merged_layers = {{
         {{2, 2}, {2, 10}},
         {{2, 10}, {8, 10}},
         {{8, 10}, {8, 2}},
@@ -234,7 +232,7 @@ void test_complex() {
         {{3, 8}, {5, 8}},
         {{5, 8}, {6, 6}},
         {{6, 6}, {3, 4}},
-    } };
+    }};
 
     expected_merged_layers.set_labels_types({ 0 });
 
@@ -258,6 +256,7 @@ void test_complex() {
     //      check conversion to segments layer
     //=========================================================================================================
     SegmentsLayer layer = Converter::convertToSegmentsLayer(merged_layers);
+    gkernel::OutputSerializer::serializeSegmentsSet(layer, "result.txt");
     std::vector<Segment> segments_layer = {
         {{2, 2}, {2, 10}},
         {{2, 10}, {5, 10}},
@@ -275,9 +274,9 @@ void test_complex() {
         {{9, 9}, {10, 10}},
         {{10, 10}, {12, 12}},
         {{12, 12}, {17, 9}},
+        {{17, 9}, {12, 9}},
         {{10, 9}, {9, 9}},
         {{12, 9}, {10, 9}},
-        {{17, 9}, {12, 9}},
 
         {{9, 1}, {9, 3}},
         {{9, 3}, {9, 5}},
@@ -327,15 +326,13 @@ void test_complex() {
     //      check areas marks
     //====================================================================================================
     auto marked_areas = AreaAnalyzer::findAreas(layer);
-    for (std::size_t idx = 0; idx < marked_areas.size(); ++idx) {
-        std::cout << "(" << marked_areas[idx].start().x() << ", " << marked_areas[idx].start().y() << ") (" << marked_areas[idx].end().x() << ", " << marked_areas[idx].end().y() << ") " << marked_areas.get_label_value(0, marked_areas[idx]) << " " << marked_areas.get_label_value(1, marked_areas[idx]) << " " << marked_areas.get_label_value(2, marked_areas[idx]) << " " << marked_areas.get_label_value(3, marked_areas[idx]) << std::endl;
-    }
     SegmentsSet expected_marked_areas(segments_layer);
     expected_marked_areas.set_labels_types({ 0, 1, 2, 3 });
-    expected_marked_areas.set_label_values(0, { 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
-    expected_marked_areas.set_label_values(1, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1 });
-    expected_marked_areas.set_label_values(2, { 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
-    expected_marked_areas.set_label_values(3, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0 });
+    expected_marked_areas.set_label_values(0, { 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
+    expected_marked_areas.set_label_values(1, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1 });
+    expected_marked_areas.set_label_values(2, { 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1 });
+    expected_marked_areas.set_label_values(3, { 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0 });
+
     check_result(marked_areas, expected_marked_areas);
 
     //====================================================================================================
@@ -343,10 +340,10 @@ void test_complex() {
     //      areas intersection
     //====================================================================================================
     SegmentsLayer filtered = AreaAnalyzer::markAreasAndFilter(layer, [](const SegmentsSet& seg_set, const Segment& segment) {
-        return seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1 &&
-            !(seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1) ||
-            !(seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1) &&
-            seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1;
+        return (seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1 &&
+            !(seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1)) ||
+            (!(seg_set.get_label_value(0, segment) == 1 && seg_set.get_label_value(1, segment) == 1) &&
+            seg_set.get_label_value(2, segment) == 1 && seg_set.get_label_value(3, segment) == 1);
     });
 
     SegmentsSet expected_filtered = {{
