@@ -185,13 +185,13 @@ void AreaAnalyzer::bypassNeighbours(std::vector<gkernel::label_data_type>& neigh
     auto second_marker = direction == direction::top ? mark_areas_label_type::second_circuits_layer_top : mark_areas_label_type::second_circuits_layer_bottom;
 
     bool is_break = false;
-    while (neighbour_id != unassigned && neighbour_id != unchecked_segment) {
+    while (neighbour_id != unassigned) {
         history.push_back(neighbour_id);
-        neighbour_id = neighbours[neighbour_id];
-        if (result[history.back()].is_vertical() == start_is_vertical && result.get_label_value(first_marker, result[history.back()]) != unassigned) {
+        if (result[neighbour_id].is_vertical() == start_is_vertical && result.get_label_value(first_marker, result[neighbour_id]) != unassigned) {
             is_break = true;
             break;
         }
+        neighbour_id = neighbours[neighbour_id];
     }
 
     if (!is_break && (result[history.back()].is_vertical() ==
