@@ -10,7 +10,7 @@ class Converter {
     Converter() = delete;
 
     static SegmentsLayer _convertToSegmentsLayer(const SegmentsSet& orig_segments,
-                                                 const std::vector<IntersectionPoint>& intersections);
+                                                 const std::vector<IntersectionSegment>& intersections);
 
 public:
     static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& segments);
@@ -25,7 +25,7 @@ public:
 
 private:
     static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& orig_segments,
-                                                const std::vector<IntersectionPoint>& intersections) {
+                                                const std::vector<IntersectionSegment>& intersections) {
         return _convertToSegmentsLayer(orig_segments, intersections);
     }
 };

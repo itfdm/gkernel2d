@@ -59,9 +59,7 @@ void AreaAnalyzer::internalFindSegmentsNeighbours(const SegmentsLayer& layer, Se
         return lhs.x < rhs.x;
     });
 
-
     double x_sweeping_line = 0;
-
     auto compare_segments = [&x_sweeping_line](const Segment* first, const Segment* second) -> bool {
         double y1;
         double y2;
@@ -85,13 +83,12 @@ void AreaAnalyzer::internalFindSegmentsNeighbours(const SegmentsLayer& layer, Se
     };
 
     using tree_type = RBTree<const Segment*, decltype(compare_segments)>;
+
     tree_type active_segments(compare_segments);
-
-    auto current_event = events.begin();
-
-    std::vector<tree_type::iterator> active_segments_new;
+    std::vector<const Segment*> active_segments_new;
     active_segments_new.reserve(events.size());
 
+    auto current_event = events.begin();
     while (current_event != events.end()) {
         double x_sweeping_line_new = current_event->x;
 
@@ -99,7 +96,7 @@ void AreaAnalyzer::internalFindSegmentsNeighbours(const SegmentsLayer& layer, Se
             if (current_event->status == event_status::start) {
                 x_sweeping_line = x_sweeping_line_new;
                 auto insert_result = active_segments.insert(current_event->segment);
-                active_segments_new.push_back(insert_result.first);
+                active_segments_new.push_back(current_event->segment);
             } else if (current_event->status == event_status::end) {
                 active_segments.erase(current_event->segment);
             } else {
@@ -111,26 +108,27 @@ void AreaAnalyzer::internalFindSegmentsNeighbours(const SegmentsLayer& layer, Se
         }
 
         for (auto current_segment : active_segments_new) {
-            result.set_label_value(find_neighbours_label_type::top, **current_segment, unassigned);
-            result.set_label_value(find_neighbours_label_type::bottom, **current_segment, unassigned);
+            auto current_segment_iter = active_segments.find(current_segment);
+            result.set_label_value(find_neighbours_label_type::top, **current_segment_iter, unassigned);
+            result.set_label_value(find_neighbours_label_type::bottom, **current_segment_iter, unassigned);
 
-            auto next_segment = current_segment;
+            auto next_segment = current_segment_iter;
             ++next_segment;
             if (next_segment != active_segments.end()) {
                 if (!rotated) {
-                    result.set_label_value(find_neighbours_label_type::top, **current_segment, (**next_segment).id);
+                    result.set_label_value(find_neighbours_label_type::top, **current_segment_iter, (**next_segment).id);
                 } else {
-                    result.set_label_value(find_neighbours_label_type::bottom, **current_segment, (**next_segment).id);
+                    result.set_label_value(find_neighbours_label_type::bottom, **current_segment_iter, (**next_segment).id);
                 }
             }
 
-            auto prev_segment = current_segment;
+            auto prev_segment = current_segment_iter;
             if (prev_segment != active_segments.begin()) {
                 --prev_segment;
                 if (!rotated) {
-                    result.set_label_value(find_neighbours_label_type::bottom, **current_segment, (**prev_segment).id);
+                    result.set_label_value(find_neighbours_label_type::bottom, **current_segment_iter, (**prev_segment).id);
                 } else {
-                    result.set_label_value(find_neighbours_label_type::top, **current_segment, (**prev_segment).id);
+                    result.set_label_value(find_neighbours_label_type::top, **current_segment_iter, (**prev_segment).id);
                 }
             }
         }
@@ -211,7 +209,10 @@ void AreaAnalyzer::bypassNeighbours(std::vector<gkernel::label_data_type>& neigh
             auto& segment = result[*idx_iter];
             if (segment_layer_ids[result[*(idx_iter - 1)].id] == 0) {
                 first_circuits_layer_side ^= true;
+            } else if (segment_layer_ids[result[*(idx_iter - 1)].id] == 1) {
+                second_circuits_layer_side ^= true;
             } else {
+                first_circuits_layer_side ^= true;
                 second_circuits_layer_side ^= true;
             }
             if (segment.is_vertical() ==
