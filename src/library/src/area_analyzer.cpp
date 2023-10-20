@@ -157,6 +157,10 @@ std::pair<SegmentsSet, SegmentsSet> AreaAnalyzer::findSegmentsNeighbours(const S
     result.set_label_values(find_neighbours_label_type::top, default_labels_values);
     result.set_label_values(find_neighbours_label_type::bottom, default_labels_values);
 
+    for (std::size_t idx = 0; idx < layer.size(); ++idx) {
+        result[idx].id = layer[idx].id;
+    }
+
     AreaAnalyzer::internalFindSegmentsNeighbours(layer, result);
 
     // rotate
@@ -166,6 +170,10 @@ std::pair<SegmentsSet, SegmentsSet> AreaAnalyzer::findSegmentsNeighbours(const S
 
     for (std::size_t idx = 0; idx < result.size(); ++idx) {
         result_rotated[idx].rotate();
+    }
+
+    for (std::size_t idx = 0; idx < layer.size(); ++idx) {
+        result_rotated[idx].id = layer[idx].id;
     }
 
     AreaAnalyzer::internalFindSegmentsNeighbours(layer, result_rotated, true);
@@ -237,6 +245,10 @@ SegmentsLayer AreaAnalyzer::markAreas(const std::pair<SegmentsSet, SegmentsSet>&
     }
 
     SegmentsSet result(std::move(temp_result));
+
+    for (std::size_t idx = 0; idx < layer.size(); ++idx) {
+        result[idx].id = layer[idx].id;
+    }
 
     result.set_labels_types({ mark_areas_label_type::first_circuits_layer_top, mark_areas_label_type::second_circuits_layer_top,
                               mark_areas_label_type::first_circuits_layer_bottom, mark_areas_label_type::second_circuits_layer_bottom });
