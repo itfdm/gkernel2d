@@ -2,6 +2,7 @@
 #define __GKERNEL_HPP_CONTAINERS
 
 #include "objects.hpp"
+#include <unordered_map>
 
 namespace gkernel {
 
@@ -48,15 +49,28 @@ public:
     const Segment& operator[](size_t idx) const {
         return _segments[idx];
     }
+
     Segment& operator[](size_t idx) {
         return _segments[idx];
     }
+
     size_t size() const {
         return _segments.size();
     }
 
+    void map_ids() {
+        _index_mapping.resize(_segments.size());
+        for (std::size_t idx = 0; idx < _segments.size(); ++idx) {
+            _index_mapping[_segments[idx].id] = idx;
+        }
+    }
+
+    Segment& get_by_id(gkernel::segment_id id) {
+        return _segments[_index_mapping[id]];
+    }
 private:
     size_t get_offset(label_type label) const;
+    std::vector<std::size_t> _index_mapping;
 
 protected:
     std::vector<Segment> _segments;
