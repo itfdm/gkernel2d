@@ -12,7 +12,7 @@
 using namespace gkernel;
 
 void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkernel::Point>& expected) {
-    gkernel::OutputSerializer::serializeSegmentsSet(input, "result.txt");
+    gkernel::OutputSerializer::serializeSegmentsSet(input, "input.txt");
     auto result = Intersection::intersectSetSegments(input);
 
     auto points_comparator = [](const gkernel::Point& first, const gkernel::Point& second) {
@@ -26,7 +26,12 @@ void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkerne
     std::vector<gkernel::Point> result_points;
 
     for (auto& point : result) {
-        result_points.emplace_back(point.point());
+        auto first_point = point.first_point();
+        result_points.emplace_back(first_point);
+        auto second_point = point.second_point();
+        if (!point.is_point()) {
+            result_points.emplace_back(second_point);
+        }
     }
 
     std::sort(result_points.begin(), result_points.end(), points_comparator);
@@ -47,6 +52,8 @@ void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkerne
     std::cout << "expected_size: " << expected.size() << std::endl;
     std::cout << "result_size: " << result_points.size() << std::endl;
 
+    OutputSerializer::serializeSegmentsSet(input, "input.txt");
+
 
     REQUIRE_EQ(std::equal(result_points.begin(), result_points.end(), expected.begin(), expected.end(), [](const gkernel::Point& first, const gkernel::Point& second) {
         return first.x() == second.x() && first.y() == second.y();
@@ -55,6 +62,7 @@ void run_intersect_segments_test(gkernel::SegmentsSet& input, std::vector<gkerne
 
 void TestSegmentsSetIntersectionFirst() {
     gkernel::SegmentsSet input;
+    input.emplace_back({gkernel::Point(3.5, 5.5), gkernel::Point(4.5, 4.5)});
     input.emplace_back({gkernel::Point(9, 6), gkernel::Point(10, 5)});
     input.emplace_back({gkernel::Point(6, 1), gkernel::Point(10, 5)});
     input.emplace_back({gkernel::Point(3.5, 5.5), gkernel::Point(4, 1)});
@@ -79,6 +87,8 @@ void TestSegmentsSetIntersectionFirst() {
     input.emplace_back({gkernel::Point(14, 5), gkernel::Point(16, 4)});
 
     std::vector<gkernel::Point> expected;
+    expected.emplace_back(3.5, 5.5);
+    expected.emplace_back(4.5, 4.5);
     expected.emplace_back(5, 4);
     expected.emplace_back(5, 2);
     expected.emplace_back(7, 2);

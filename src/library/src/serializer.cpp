@@ -13,10 +13,20 @@ void OutputSerializer::serializeSegmentsSet(const SegmentsSet& segments_set, con
         throw std::runtime_error(error_message);
     }
 
+    std::vector<Segment> segments_to_save;
+    segments_to_save.reserve(segments_set.size());
     for (std::size_t idx = 0; idx < segments_set.size(); ++idx) {
-        const auto& segment = segments_set[idx];
+        segments_to_save.push_back(segments_set[idx]);
+    }
+
+    std::sort(segments_to_save.begin(), segments_to_save.end(), [](Segment& lhs, Segment& rhs) {
+        return lhs.get_id() < rhs.get_id();
+    });
+
+    for (std::size_t idx = 0; idx < segments_to_save.size(); ++idx) {
+        const auto& segment = segments_to_save[idx];
         file << segment.start().x() << " " << segment.start().y() << " " << segment.end().x() << " " << segment.end().y();
-        if (idx != segments_set.size() - 1) {
+        if (idx != segments_to_save.size() - 1) {
             file << " ";
         }
     }

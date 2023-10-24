@@ -3,39 +3,73 @@
 
 namespace gkernel {
 
-
-// old implementation, detects overlapping segments
-// inline int get_area(const Point& a, const Point& b, const Point& c) {
-//     data_type area = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
-//     return area == 0 ? 0 : area > 0 ? 1 : -1;
-// }
-
-// inline bool intersect(const Segment& first, const Segment& second) {
-//     return get_area(first.start(), first.end(), second.start()) * get_area(first.start(), first.end(), second.end()) <= 0 &&
-//            get_area(second.start(), second.end(), first.start()) * get_area(second.start(), second.end(), first.end()) <= 0;
-// }
-
-inline int orientation(const Point& first, const Point& second, const Point& third) {
-    double val = (second.y() - first.y()) * (third.x() - second.x()) -
-              (second.x() - first.x()) * (third.y() - second.y());
-    if (val == 0) return 0;
-    return (val > 0)? 1: 2;
+inline double find_k(const Segment& segment) {
+    return (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
 }
 
-inline bool intersect(const Segment& first, const Segment& second) {
-    if (first.start() == second.start() || first.start() == second.end() || first.end() == second.start() || first.end() == second.end()) {
-        return false;
-    }
-    double o1 = orientation(first.start(), first.end(), second.start());
-    double o2 = orientation(first.start(), first.end(), second.end());
-    double o3 = orientation(second.start(), second.end(), first.start());
-    double o4 = orientation(second.start(), second.end(), first.end());
-    if (o1 != o2 && o3 != o4) {
-        return true;
+inline double find_m(double k, const Segment& segment) {
+    return segment.min().y() - k * segment.min().x();
+}
+
+inline bool on_one_line(const Segment& first, const Segment& second) {
+    double k_first = find_k(first);
+    double k_second = find_k(second);
+    double m_first = find_m(k_first, first);
+    double m_second = find_m(k_second, second);
+
+    if (std::abs(k_first - k_second) < EPS) {
+        return std::abs(m_first - m_second) < EPS;
     }
 
     return false;
 }
+
+// old implementation, detects overlapping segments
+inline int get_area(const Point& a, const Point& b, const Point& c) {
+    data_type area = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
+    return area == 0 ? 0 : area > 0 ? 1 : -1;
+}
+
+inline Intersection::segments_relation intersect_or_overlap(const Segment& first, const Segment& second) {
+    bool is_on_one_line = on_one_line(first, second);
+
+    if (is_on_one_line) {
+        if (second.min().x() <= first.min().x() && first.min().x() < second.max().x()) {
+            return Intersection::segments_relation::overlap;
+        }
+        if (first.min().x() <= second.min().x() && second.min().x() < first.max().x()) {
+            return Intersection::segments_relation::overlap;
+        }
+        return Intersection::segments_relation::none;
+    }
+
+    if (first.start() == second.start() || first.start() == second.end() || first.end() == second.start() || first.end() == second.end()) {
+        return Intersection::segments_relation::none;
+    }
+
+    bool is_intersect = get_area(first.start(), first.end(), second.start()) * get_area(first.start(), first.end(), second.end()) <= 0 &&
+                    get_area(second.start(), second.end(), first.start()) * get_area(second.start(), second.end(), first.end()) <= 0;
+
+    return is_intersect ? Intersection::segments_relation::intersect : Intersection::segments_relation::none;
+}
+
+// inline int orientation(const Point& first, const Point& second, const Point& third) {
+//     double val = (second.y() - first.y()) * (third.x() - second.x()) -
+//               (second.x() - first.x()) * (third.y() - second.y());
+//     if (val == 0) return 0;
+//     return (val > 0)? 1: 2;
+// }
+
+// inline bool intersect_or_overlap(const Segment& first, const Segment& second) {
+//     if (first.start() == second.start() || first.start() == second.end() || first.end() == second.start() || first.end() == second.end()) {
+//         return false;
+//     }
+//     double o1 = orientation(first.start(), first.end(), second.start());
+//     double o2 = orientation(first.start(), first.end(), second.end());
+//     double o3 = orientation(second.start(), second.end(), first.start());
+//     double o4 = orientation(second.start(), second.end(), first.end());
+//     return o1 != o2 && o3 != o4;
+// }
 
 // intersect two segments
 Point Intersection::intersectSegments(const Segment& first, const Segment& second) {
@@ -67,8 +101,26 @@ Point Intersection::intersectSegments(const Segment& first, const Segment& secon
     return Point();
 }
 
-std::vector<IntersectionPoint> Intersection::intersectSetSegments(const SegmentsSet& segments) {
-    std::vector<IntersectionPoint> result;
+std::pair<Point, Point> Intersection::overlapSegments(const Segment& first, const Segment& second) {
+    Point first_overlap_point;
+    Point second_overlap_point;
+    if (second.min().x() <= first.min().x() && first.min().x() <= second.max().x()) {
+        first_overlap_point = first.min();
+    }
+    if (second.min().x() <= first.max().x() && first.max().x() <= second.max().x()) {
+        second_overlap_point = first.max();
+    }
+    if (first.min().x() <= second.min().x() && second.min().x() <= first.max().x()) {
+        first_overlap_point = second.min();
+    }
+    if (first.min().x() <= second.max().x() && second.max().x() <= first.max().x()) {
+        second_overlap_point = second.max();
+    }
+    return std::make_pair(first_overlap_point, second_overlap_point);
+}
+
+std::vector<IntersectionSegment> Intersection::intersectSetSegments(const SegmentsSet& segments) {
+    std::vector<IntersectionSegment> result;
 
     if (segments.size() == 0) {
         return result;
@@ -155,7 +207,8 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
             }
             double current_y = get_sweeping_line_y(**current_segment, x_sweeping_line);
             while (current_y <= event.segment->max().y()) {
-                if (intersect(*event.segment, **current_segment)) {
+                auto seg_rel_status = intersect_or_overlap(*event.segment, **current_segment);
+                if (seg_rel_status == Intersection::segments_relation::intersect) {
                     auto intersection = intersectSegments(*event.segment, **current_segment);
                     result.emplace_back(intersection, event.segment->id, (**current_segment).id);
                 }
@@ -189,7 +242,8 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
         auto prev_segment = insert_result.first;
         if (prev_segment != active_segments.begin()) {
             --prev_segment;
-            if (intersect(*event.segment, **prev_segment)) {
+            auto seg_rel_status = intersect_or_overlap(*event.segment, **prev_segment);
+            if (seg_rel_status == Intersection::segments_relation::intersect) {
                 auto intersection = intersectSegments(*event.segment, **prev_segment);
                 result.emplace_back(intersection, event.segment->id, (*prev_segment)->id);
                 if (intersection.x() >= event.x) {
@@ -205,12 +259,17 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                     }
                 }
             }
+            if (seg_rel_status == Intersection::segments_relation::overlap) {
+                auto overlap = overlapSegments(*event.segment, **prev_segment);
+                result.emplace_back(overlap.first, overlap.second, event.segment->id, (*prev_segment)->id);
+            }
         }
 
         auto next_segment = insert_result.first;
         ++next_segment;
         if (next_segment != active_segments.end()) {
-            if (intersect(*event.segment, **next_segment)) {
+            auto seg_rel_status = intersect_or_overlap(*event.segment, **next_segment);
+            if (seg_rel_status == Intersection::segments_relation::intersect) {
                 auto intersection = intersectSegments(*event.segment, **next_segment);
                 result.emplace_back(intersection, event.segment->id, (*next_segment)->id);
                 if (intersection.x() >= event.x) {
@@ -226,11 +285,16 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                     }
                 }
             }
+            if (seg_rel_status == Intersection::segments_relation::overlap) {
+                auto overlap = overlapSegments(*event.segment, **next_segment);
+                result.emplace_back(overlap.first, overlap.second, event.segment->id, (*next_segment)->id);
+            }
         }
 
         if (event.status == event_status::end) {
             if (next_segment != active_segments.end()) {
-                if (intersect(**prev_segment, **next_segment)) {
+                auto seg_rel_status = intersect_or_overlap(**prev_segment, **next_segment);
+                if (seg_rel_status == Intersection::segments_relation::intersect) {
                     auto intersection = intersectSegments(**prev_segment, **next_segment);
                     result.emplace_back(intersection, (*prev_segment)->id, (*next_segment)->id);
                     if (intersection.x() >= event.x) {
@@ -245,6 +309,10 @@ std::vector<IntersectionPoint> Intersection::intersectSetSegments(const Segments
                             events.insert({**next_segment, intersection.x() + offset, event_status::intersection_right});
                         }
                     }
+                }
+                if (seg_rel_status == Intersection::segments_relation::overlap) {
+                    auto overlap = overlapSegments(**prev_segment, **next_segment);
+                    result.emplace_back(overlap.first, overlap.second, (*prev_segment)->id, (*next_segment)->id);
                 }
             }
             auto count = active_segments.erase(event.segment);
