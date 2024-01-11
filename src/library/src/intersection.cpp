@@ -4,7 +4,7 @@
 namespace gkernel {
 
 inline double find_k(const Segment& segment) {
-    return (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
+    return (segment.max().y() - segment.min().y()) / (segment.max().x() - segment.min().x());
 }
 
 inline double find_m(double k, const Segment& segment) {
@@ -52,12 +52,12 @@ inline Intersection::segments_relation intersect_or_overlap(const Segment& first
         return Intersection::segments_relation::none;
     }
 
-    if (first.start() == second.start() || first.start() == second.end() || first.end() == second.start() || first.end() == second.end()) {
+    if (first.min() == second.min() || first.min() == second.max() || first.max() == second.min() || first.max() == second.max()) {
         return Intersection::segments_relation::none;
     }
 
-    bool is_intersect = get_area(first.start(), first.end(), second.start()) * get_area(first.start(), first.end(), second.end()) <= 0 &&
-                    get_area(second.start(), second.end(), first.start()) * get_area(second.start(), second.end(), first.end()) <= 0;
+    bool is_intersect = get_area(first.min(), first.max(), second.min()) * get_area(first.min(), first.max(), second.max()) <= 0 &&
+                    get_area(second.min(), second.max(), first.min()) * get_area(second.min(), second.max(), first.max()) <= 0;
 
     return is_intersect ? Intersection::segments_relation::intersect : Intersection::segments_relation::none;
 }
@@ -70,41 +70,41 @@ inline Intersection::segments_relation intersect_or_overlap(const Segment& first
 // }
 
 // inline bool intersect_or_overlap(const Segment& first, const Segment& second) {
-//     if (first.start() == second.start() || first.start() == second.end() || first.end() == second.start() || first.end() == second.end()) {
+//     if (first.min() == second.min() || first.min() == second.end() || first.end() == second.min() || first.end() == second.end()) {
 //         return false;
 //     }
-//     double o1 = orientation(first.start(), first.end(), second.start());
-//     double o2 = orientation(first.start(), first.end(), second.end());
-//     double o3 = orientation(second.start(), second.end(), first.start());
-//     double o4 = orientation(second.start(), second.end(), first.end());
+//     double o1 = orientation(first.min(), first.end(), second.min());
+//     double o2 = orientation(first.min(), first.end(), second.end());
+//     double o3 = orientation(second.min(), second.end(), first.min());
+//     double o4 = orientation(second.min(), second.end(), first.end());
 //     return o1 != o2 && o3 != o4;
 // }
 
 // intersect two segments
 Point Intersection::intersectSegments(const Segment& first, const Segment& second) {
-    data_type a1 = first.end().y() - first.start().y();
-    data_type b1 = first.start().x() - first.end().x();
-    data_type c1 = first.start().y() * first.end().x() -
-                            first.start().x() * first.end().y();
+    data_type a1 = first.max().y() - first.min().y();
+    data_type b1 = first.min().x() - first.max().x();
+    data_type c1 = first.min().y() * first.max().x() -
+                            first.min().x() * first.max().y();
 
-    data_type a2 = second.end().y() - second.start().y();
-    data_type b2 = second.start().x() - second.end().x();
-    data_type c2 = second.start().y() * second.end().x() -
-                            second.start().x() * second.end().y();
+    data_type a2 = second.max().y() - second.min().y();
+    data_type b2 = second.min().x() - second.max().x();
+    data_type c2 = second.min().y() * second.max().x() -
+                            second.min().x() * second.max().y();
     if ((a1 * b2 - a2 * b1) != 0) {
         data_type x = (b1 * c2 - b2 * c1) / (a1 * b2 - a2 * b1);
         data_type y = (a2 * c1 - a1 * c2) / (a1 * b2 - a2 * b1);
         return Point({x, y});
     }
     else {
-        if (first.start() == second.start())
-            return Point({first.start().x(), first.start().y()});
-        else if (first.end() == second.end())
-            return Point({first.end().x(), first.end().y()});
-        else if (first.start() == second.end())
-            return Point({first.start().x(), first.start().y()});
-        else if (first.end() == second.start())
-            return Point({first.end().x(), first.end().y()});
+        if (first.min() == second.min())
+            return Point({first.min().x(), first.min().y()});
+        else if (first.max() == second.max())
+            return Point({first.max().x(), first.max().y()});
+        else if (first.min() == second.max())
+            return Point({first.min().x(), first.min().y()});
+        else if (first.max() == second.min())
+            return Point({first.max().x(), first.max().y()});
     }
     throw_exception("Segments do not intersect");
     return Point();
@@ -172,7 +172,7 @@ std::vector<IntersectionSegment> Intersection::intersectSetSegments(const Segmen
 
 	for (std::size_t idx = 0; idx < segments.size(); ++idx) {
         Segment& segment = const_cast<Segment&>(segments[idx]);
-        if (segment.start().x() != segment.end().x()) {
+        if (!segment.is_vertical()) {
             events.insert({ segment, segment.min().x(), event_status::start });
             events.insert({ segment, segment.max().x(), event_status::end });
         }
@@ -238,9 +238,6 @@ std::vector<IntersectionSegment> Intersection::intersectSetSegments(const Segmen
                 if (seg_rel_status == Intersection::segments_relation::intersect) {
                     auto intersection = intersectSegments(*event.segment, **current_segment);
                     result.emplace_back(intersection, event.segment->id, (**current_segment).id);
-                } else if (seg_rel_status == Intersection::segments_relation::overlap) {
-                    auto overlap = overlapSegmentsVertical(*event.segment, **current_segment);
-                    result.emplace_back(overlap.first, overlap.second, event.segment->id, (*current_segment)->id);
                 }
                 ++current_segment;
                 if (current_segment == active_segments.end()) {

@@ -8,7 +8,7 @@
 
 namespace gkernel {
 
-constexpr static double EPS = 1e-9;
+constexpr static double EPS = 1e-5;
 
 static inline double get_sweeping_line_y(const Segment& segment, double x, double eps = 0) {
     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
@@ -74,10 +74,10 @@ public:
     static std::vector<IntersectionSegment> intersectSetSegments(const SegmentsSet& segments);
 private:
     enum event_status {
-        intersection_right = 4,
+        intersection_right = 0,
+        start = 1,
+        vertical = 2,
         end = 3,
-        start = 2,
-        vertical = 1
     };
 
     struct Event {
@@ -85,9 +85,9 @@ private:
 
         bool operator<(const Event& other) const {
             if (std::abs(x - other.x) > EPS) return x < other.x;
-            if (status == event_status::vertical && other.status == event_status::end) return true;
-            if (status == event_status::end && other.status == event_status::vertical) return false;
-            if (status != other.status) return static_cast<int8_t>(status) > static_cast<int8_t>(other.status);
+            // if (status == event_status::vertical && other.status == event_status::end) return true;
+            // if (status == event_status::end && other.status == event_status::vertical) return false;
+            if (status != other.status) return static_cast<int8_t>(status) < static_cast<int8_t>(other.status);
             return this->segment->id < other.segment->id;
         }
         const Segment* segment;
