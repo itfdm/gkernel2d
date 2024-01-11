@@ -1,9 +1,6 @@
 #include "gkernel/area_analyzer.hpp"
 #include "gkernel/rbtree.hpp"
 
-#include <tbb/parallel_for.h>
-#include <tbb/blocked_range.h>
-
 namespace gkernel {
 
 static constexpr label_data_type unchecked_segment = -2;

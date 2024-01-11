@@ -375,11 +375,11 @@ void test_hard() {
 #define DECLARE_TEST(TestName) TEST_CASE(#TestName) { TestName(); }
 
 // DECLARE_TEST(simple_test)
-// DECLARE_TEST(test_no_intersections)
-// DECLARE_TEST(test_simple_intersections)
-// DECLARE_TEST(test_intersections_in_end_points)
+DECLARE_TEST(test_no_intersections)
+DECLARE_TEST(test_simple_intersections)
+DECLARE_TEST(test_intersections_in_end_points)
 DECLARE_TEST(test_overlapping) // overlapping segments are not supported
-// DECLARE_TEST(test_full_overlapping) // overlapping segments are not supported
-// DECLARE_TEST(test_star)
-// DECLARE_TEST(test_orthogonal)
-// DECLARE_TEST(test_hard)
+DECLARE_TEST(test_full_overlapping) // overlapping segments are not supported
+DECLARE_TEST(test_star)
+DECLARE_TEST(test_orthogonal)
+DECLARE_TEST(test_hard)

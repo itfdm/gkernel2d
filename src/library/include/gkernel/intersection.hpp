@@ -70,6 +70,7 @@ public:
     Intersection() = delete;
     static Point intersectSegments(const Segment& first, const Segment& second);
     static std::pair<Point, Point> overlapSegments(const Segment& first, const Segment& second);
+    static std::pair<Point, Point> overlapSegmentsVertical(const Segment& first, const Segment& second);
     static std::vector<IntersectionSegment> intersectSetSegments(const SegmentsSet& segments);
 private:
     enum event_status {

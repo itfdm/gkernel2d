@@ -34,11 +34,20 @@ inline Intersection::segments_relation intersect_or_overlap(const Segment& first
     bool is_on_one_line = on_one_line(first, second);
 
     if (is_on_one_line) {
-        if (second.min().x() <= first.min().x() && first.min().x() < second.max().x()) {
-            return Intersection::segments_relation::overlap;
-        }
-        if (first.min().x() <= second.min().x() && second.min().x() < first.max().x()) {
-            return Intersection::segments_relation::overlap;
+        if (first.is_vertical() && second.is_vertical()) {
+            if (second.min().y() <= first.min().y() && first.min().y() < second.max().y()) {
+                return Intersection::segments_relation::overlap;
+            }
+            if (first.min().y() <= second.min().y() && second.min().y() < first.max().y()) {
+                return Intersection::segments_relation::overlap;
+            }
+        } else {
+            if (second.min().x() <= first.min().x() && first.min().x() < second.max().x()) {
+                return Intersection::segments_relation::overlap;
+            }
+            if (first.min().x() <= second.min().x() && second.min().x() < first.max().x()) {
+                return Intersection::segments_relation::overlap;
+            }
         }
         return Intersection::segments_relation::none;
     }
@@ -114,6 +123,24 @@ std::pair<Point, Point> Intersection::overlapSegments(const Segment& first, cons
         first_overlap_point = second.min();
     }
     if (first.min().x() <= second.max().x() && second.max().x() <= first.max().x()) {
+        second_overlap_point = second.max();
+    }
+    return std::make_pair(first_overlap_point, second_overlap_point);
+}
+
+std::pair<Point, Point> Intersection::overlapSegmentsVertical(const Segment& first, const Segment& second) {
+    Point first_overlap_point;
+    Point second_overlap_point;
+    if (second.min().y() <= first.min().y() && first.min().y() <= second.max().y()) {
+        first_overlap_point = first.min();
+    }
+    if (second.min().y() <= first.max().y() && first.max().y() <= second.max().y()) {
+        second_overlap_point = first.max();
+    }
+    if (first.min().y() <= second.min().y() && second.min().y() <= first.max().y()) {
+        first_overlap_point = second.min();
+    }
+    if (first.min().y() <= second.max().y() && second.max().y() <= first.max().y()) {
         second_overlap_point = second.max();
     }
     return std::make_pair(first_overlap_point, second_overlap_point);
@@ -211,6 +238,9 @@ std::vector<IntersectionSegment> Intersection::intersectSetSegments(const Segmen
                 if (seg_rel_status == Intersection::segments_relation::intersect) {
                     auto intersection = intersectSegments(*event.segment, **current_segment);
                     result.emplace_back(intersection, event.segment->id, (**current_segment).id);
+                } else if (seg_rel_status == Intersection::segments_relation::overlap) {
+                    auto overlap = overlapSegmentsVertical(*event.segment, **current_segment);
+                    result.emplace_back(overlap.first, overlap.second, event.segment->id, (*current_segment)->id);
                 }
                 ++current_segment;
                 if (current_segment == active_segments.end()) {

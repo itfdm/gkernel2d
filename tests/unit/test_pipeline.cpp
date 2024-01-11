@@ -13,19 +13,10 @@
 using namespace gkernel;
 
 void check_result(const SegmentsSet& actual, const SegmentsSet& expected) {
-    // REQUIRE_EQ(actual.size(), expected.size());
-
-    for (std::size_t idx = 0; idx < actual.size(); ++idx) {
-        std::cout << actual[idx] << std::endl;
-    }
-
-    std::cout << "EXPECTED:" << std::endl;
-
-    for (std::size_t idx = 0; idx < expected.size(); ++idx) {
-        std::cout << expected[idx] << std::endl;
-    }
+    REQUIRE_EQ(actual.size(), expected.size());
 
     for (size_t idx = 0; idx < expected.size(); ++idx) {
+        std::cout << actual[idx] << ": " << actual.get_label_value(0, actual[idx]) << " " << actual.get_label_value(1, actual[idx]) << " " << actual.get_label_value(2, actual[idx]) << " " << actual.get_label_value(3, actual[idx]) << std::endl;
         REQUIRE_EQ(actual[idx].min(), expected[idx].min());
         REQUIRE_EQ(actual[idx].max(), expected[idx].max());
         REQUIRE_EQ(actual.get_label_value(0, actual[idx]), expected.get_label_value(0, expected[idx]));
@@ -55,43 +46,41 @@ void check_intersection(const SegmentsSet& actual, const SegmentsSet& expected) 
 
 void test_areas(const SegmentsLayer& segments_layer) {
     SegmentsSet expected = {{
-        {{8, 13}, {16, 13}},
-        {{10, 10}, {14, 12}},
-        {{14, 12}, {16, 13}},
-        {{8, 13}, {10, 10}},
         {{4, 3}, {5, 5}},
-        {{5, 5}, {5.5, 6}},
-        {{5.5, 6}, {7, 9}},
-        {{7, 9}, {9.5, 9}},
-        {{9.5, 9}, {12, 9}},
-        {{12, 9}, {13.5, 6}},
-        {{13.5, 6}, {14, 5}},
-        {{14, 5}, {15, 3}},
         {{4, 3}, {10, 3}},
-        {{10, 3}, {15, 3}},
-        {{8, 6}, {9.5, 9}},
-        {{9.5, 9}, {10, 10}},
-        {{10, 10}, {11, 12}},
-        {{11, 12}, {14, 12}},
-        {{14, 12}, {16, 12}},
-        {{8, 6}, {12, 9}},
-        {{12, 9}, {16, 12}},
-        {{2.5, 6}, {5.5, 6}},
+        {{5, 5}, {5.5, 6}},
+        {{5, 5}, {10, 3}},
+        {{5.5, 6}, {7, 9}},
         {{5.5, 6}, {8, 6}},
+        {{7, 9}, {9.5, 9}},
+        {{8, 6}, {9.5, 9}},
+        {{8, 6}, {12, 9}},
         {{8, 6}, {13.5, 6}},
-        {{13.5, 6}, {16, 6}},
+        {{8, 13}, {10, 10}},
+        {{8, 13}, {16, 13}},
+        {{9.5, 9}, {10, 10}},
+        {{9.5, 9}, {12, 9}},
         {{10, 3}, {14, 5}},
+        {{10, 3}, {15, 3}},
+        {{10, 10}, {11, 12}},
+        {{10, 10}, {14, 12}},
+        {{11, 12}, {14, 12}},
+        {{12, 9}, {13.5, 6}},
+        {{12, 9}, {16, 12}},
+        {{13.5, 6}, {14, 5}},
+        {{13.5, 6}, {16, 6}},
+        {{14, 5}, {15, 3}},
         {{14, 5}, {16, 6}},
-        {{2.5, 6}, {5, 5}},
-        {{5, 5}, {10, 3}}
+        {{14, 12}, {16, 12}},
+        {{14, 12}, {16, 13}}
     }};
 
     expected.set_labels_types({ 0, 1, 2, 3 });
 
-    expected.set_label_values(0, { 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1 });
-    expected.set_label_values(1, { 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1 });
-    expected.set_label_values(2, { 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1 });
-    expected.set_label_values(3, { 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 });
+    expected.set_label_values(0, { 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1 });
+    expected.set_label_values(1, { 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0 });
+    expected.set_label_values(2, { 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0 });
+    expected.set_label_values(3, { 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0 });
 
     auto marked_areas = AreaAnalyzer::findAreas(segments_layer);
     check_result(marked_areas, expected);
@@ -119,6 +108,10 @@ void test_filter(const SegmentsLayer& segments_layer) {
         {{10, 3}, {14, 5}},
         {{5, 5}, {10, 3}}
     }};
+
+    for (std::size_t idx = 0; idx < filtered.size(); ++idx) {
+        std::cout << filtered[idx] << std::endl;
+    }
 
     for (size_t idx = 0; idx < filtered.size(); ++idx) {
         REQUIRE_EQ(filtered[idx], expected[idx]);

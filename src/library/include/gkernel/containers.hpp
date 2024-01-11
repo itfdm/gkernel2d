@@ -91,6 +91,11 @@ public:
         _segments.emplace_back(segment);
         _segments.back().id = _segments.size() - 1;
     }
+    void emplace_back(const std::vector<Segment>& segments) {
+        for (auto&& seg : segments) {
+            emplace_back(seg);
+        }
+    }
 };
 
 class VertexChain : public SegmentsSet, public Validator {

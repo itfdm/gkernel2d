@@ -184,7 +184,12 @@ SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segment
 
     // incorrect ordering of the labels after sort
 
+    // TODO: rework labels reordering, this is temporary solution. Works only for 0 label
     std::vector<std::pair<gkernel::Segment, gkernel::label_data_type>> pairs;
+    if (result._labels_data.size() == 0) {
+        result.set_labels_types({0});
+        std::fill(result._labels_data.begin()->begin(), result._labels_data.begin()->end(), 0);
+    }
     for (std::size_t idx = 0; idx < result._segments.size(); ++idx) {
         pairs.emplace_back(result._segments[idx], result._labels_data[0][idx]);
     }
