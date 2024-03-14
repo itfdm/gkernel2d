@@ -108,12 +108,6 @@ SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segment
 
             splitSegments(divided_segments, segment_ids, segments, intersection_point);
         } else {
-            // Initial version
-            // if (segments[0] == segments[1]) {
-            //     divided_segments[segment_ids[0]] = {};
-            //     continue;
-            // }
-
             if (segments[0] == intersection || segments[1] == intersection) {
                 size_t external_segment_idx = segments[0] == intersection ? 1 : 0;
                 Point intersection_point_min = intersection.min();
@@ -185,13 +179,13 @@ SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segment
     // incorrect ordering of the labels after sort
 
     // TODO: rework labels reordering, this is temporary solution. Works only for 0 label
-    std::vector<std::pair<gkernel::Segment, gkernel::label_data_type>> pairs;
     if (result._labels_data.size() == 0) {
-        result.set_labels_types({0});
-        std::fill(result._labels_data.begin()->begin(), result._labels_data.begin()->end(), 0);
+        return static_cast<SegmentsLayer>(result);
     }
+
+    std::vector<std::pair<gkernel::Segment, std::size_t>> pairs;
     for (std::size_t idx = 0; idx < result._segments.size(); ++idx) {
-        pairs.emplace_back(result._segments[idx], result._labels_data[0][idx]);
+        pairs.emplace_back(result._segments[idx], idx);
     }
 
     std::sort(pairs.begin(), pairs.end(), [](auto& lhs, auto& rhs) {
@@ -210,28 +204,37 @@ SegmentsLayer Converter::_convertToSegmentsLayer(const SegmentsSet& orig_segment
         return lhs.first.get_id() < rhs.first.get_id();
     });
 
+    auto old_labels_data = result._labels_data;
+
     for (std::size_t idx = 0; idx < pairs.size(); ++idx) {
         result._segments[idx] = pairs[idx].first;
-        result._labels_data[0][result._segments[idx].id] = pairs[idx].second;
+        for (std::size_t label_id = 0; label_id < result._labels_data.size(); ++label_id) {
+            result._labels_data[label_id][idx] = old_labels_data[label_id][pairs[idx].second];
+        }
     }
 
+    std::vector<std::size_t> to_remove;
     if (label_types.size() > 0) {
         for (std::size_t idx = 0; idx < result.size() - 1; ++idx) {
             if (result[idx] == result[idx + 1]) {
-                result.set_label_value(0, result[idx], 2);
-                result.set_label_value(0, result[idx + 1], 2);
+                result._labels_data[0][idx] = 2;
+                to_remove.push_back(idx + 1);
             }
         }
     }
 
-    auto iter = std::unique(result._segments.begin(), result._segments.end());
-    result._segments.erase(iter, result._segments.end());
-    // for (std::size_t idx = 0; idx < result._segments.size(); ++idx) {
-    //     result._segments[idx].id = idx;
-    // }
+    for (int64_t idx = to_remove.size() - 1; idx >= 0; --idx) {
+        std::size_t idx_to_remove = to_remove[idx];
+        result._segments[idx_to_remove] = result._segments.back();
+        result._segments.pop_back();
+        for (std::size_t idx2 = 0; idx2 < result._labels_data.size(); ++idx2) {
+            result._labels_data[idx2][idx_to_remove] = result._labels_data[idx2].back();
+            result._labels_data[idx2].pop_back();
+        }
+    }
 
-    for (auto& data : result._labels_data) {
-        data.resize(result._segments.size());
+    for (std::size_t idx = 0; idx < result._segments.size(); ++idx) {
+        result._segments[idx].id = idx;
     }
 
     return static_cast<SegmentsLayer>(result);

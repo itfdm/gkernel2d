@@ -14,7 +14,7 @@ class Converter {
 
 public:
     template<typename Callable>
-    static SegmentsSet convertToSegmentsSet(const SegmentsSet& segments, Callable filter) {
+    static SegmentsSet convertToSegmentsLayer(const SegmentsSet& segments, Callable filter) {
         SegmentsLayer converted_layer = convertToSegmentsLayer(segments);
         std::vector<Segment> result_segments;
         result_segments.reserve(converted_layer.size());
