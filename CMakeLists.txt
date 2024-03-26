@@ -88,4 +88,4 @@ if (GKERNEL_PERF_TESTING)
     add_subdirectory(tests/perf)
 endif()
 
-add_subdirectory(docs_infra)
+add_subdirectory(docs)
