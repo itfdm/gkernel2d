@@ -8,7 +8,7 @@
 
 namespace gkernel {
 
-constexpr static double EPS = 1e-9;
+constexpr static double EPS = 1e-5;
 
 static inline double get_sweeping_line_y(const Segment& segment, double x, double eps = 0) {
     double k = (segment.end().y() - segment.start().y()) / (segment.end().x() - segment.start().x());
@@ -16,41 +16,68 @@ static inline double get_sweeping_line_y(const Segment& segment, double x, doubl
     return k * (x + eps) + m;
 }
 
-struct IntersectionPoint {
-    IntersectionPoint(const Point& point, segment_id first_segment_id, segment_id second_segment_id) :
-        _point(point),
+struct IntersectionSegment {
+    IntersectionSegment(const Point& first_point, segment_id first_segment_id, segment_id second_segment_id) :
+        _is_point(true),
+        _first_point(first_point),
+        _second_point(first_point),
         _first_segment_id(first_segment_id),
         _second_segment_id(second_segment_id) {}
 
-    const Point& point() const {
-        return _point;
+    IntersectionSegment(const Point& first_point, const Point& second_point, segment_id first_segment_id, segment_id second_segment_id) :
+        _is_point(false),
+        _first_point(first_point),
+        _second_point(second_point),
+        _first_segment_id(first_segment_id),
+        _second_segment_id(second_segment_id) {}
+
+    const Point& first_point() const {
+        return _first_point;
     }
 
-    segment_id first() const {
+    const Point& second_point() const {
+        return _second_point;
+    }
+
+    segment_id first_id() const {
         return _first_segment_id;
     }
 
-    segment_id second() const {
+    segment_id second_id() const {
         return _second_segment_id;
     }
 
+    bool is_point() const {
+        return _is_point;
+    }
+
 private:
-    Point _point;
+    bool _is_point = false;
+    Point _first_point;
+    Point _second_point;
     segment_id _first_segment_id;
     segment_id _second_segment_id;
 };
 
 class Intersection {
 public:
+    enum segments_relation {
+        none = 0,
+        intersect = 1,
+        overlap = 2
+    };
+
     Intersection() = delete;
     static Point intersectSegments(const Segment& first, const Segment& second);
-    static std::vector<IntersectionPoint> intersectSetSegments(const SegmentsSet& segments);
+    static std::pair<Point, Point> overlapSegments(const Segment& first, const Segment& second);
+    static std::pair<Point, Point> overlapSegmentsVertical(const Segment& first, const Segment& second);
+    static std::vector<IntersectionSegment> intersectSetSegments(const SegmentsSet& segments);
 private:
     enum event_status {
-        intersection_right = 4,
+        intersection_right = 0,
+        start = 1,
+        vertical = 2,
         end = 3,
-        start = 2,
-        vertical = 1
     };
 
     struct Event {
@@ -58,9 +85,9 @@ private:
 
         bool operator<(const Event& other) const {
             if (std::abs(x - other.x) > EPS) return x < other.x;
-            if (status == event_status::vertical && other.status == event_status::end) return true;
-            if (status == event_status::end && other.status == event_status::vertical) return false;
-            if (status != other.status) return static_cast<int8_t>(status) > static_cast<int8_t>(other.status);
+            // if (status == event_status::vertical && other.status == event_status::end) return true;
+            // if (status == event_status::end && other.status == event_status::vertical) return false;
+            if (status != other.status) return static_cast<int8_t>(status) < static_cast<int8_t>(other.status);
             return this->segment->id < other.segment->id;
         }
         const Segment* segment;

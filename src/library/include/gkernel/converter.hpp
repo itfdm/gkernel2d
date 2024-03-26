@@ -10,9 +10,23 @@ class Converter {
     Converter() = delete;
 
     static SegmentsLayer _convertToSegmentsLayer(const SegmentsSet& orig_segments,
-                                                 const std::vector<IntersectionPoint>& intersections);
+                                                 const std::vector<IntersectionSegment>& intersections);
 
 public:
+    template<typename Callable>
+    static SegmentsSet convertToSegmentsLayer(const SegmentsSet& segments, Callable filter) {
+        SegmentsLayer converted_layer = convertToSegmentsLayer(segments);
+        std::vector<Segment> result_segments;
+        result_segments.reserve(converted_layer.size());
+        for (std::size_t idx = 0; idx < converted_layer.size(); ++idx) {
+            auto& segment = converted_layer[idx];
+            if (filter(converted_layer, segment)) {
+                result_segments.push_back(segment);
+            }
+        }
+
+        return result_segments;
+    }
     static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& segments);
     static SegmentsLayer convertToSegmentsLayer(const CircuitsSet& circuits);
 
@@ -25,7 +39,7 @@ public:
 
 private:
     static SegmentsLayer convertToSegmentsLayer(const SegmentsSet& orig_segments,
-                                                const std::vector<IntersectionPoint>& intersections) {
+                                                const std::vector<IntersectionSegment>& intersections) {
         return _convertToSegmentsLayer(orig_segments, intersections);
     }
 };

@@ -52,6 +52,6 @@ int main() {
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "TIME: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
     std::cout << "segments_layer size: " << segments_layer.size() << std::endl;
-    // std::cout << "filtered_size: " << filtered.size() << std::endl;
+    std::cout << "filtered_size: " << filtered.size() << std::endl;
     // OutputSerializer::serializeSegmentsSet(filtered, "./output.txt");
 }
